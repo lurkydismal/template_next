@@ -1,0 +1,12 @@
+/**
+ * globals.css
+ *
+ * This file imports Tailwind CSS for global utility-first styling across the application.
+ * 
+ * Notes:
+ * - All Tailwind utility classes (colors, spacing, typography, flex/grid, etc.) 
+ *   become available globally.
+ * - Can be extended with custom styles, components, or theme overrides if needed.
+ * - Ensure Tailwind is properly configured via `tailwind.config.js` for customizations.
+ */
+@import "tailwindcss";

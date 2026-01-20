@@ -1,0 +1,5 @@
+MinIO after running for the first time:
+mc alias set local http://localhost:9000 ACCESS_KEY SECRET_KEY
+# Optional
+mc version enable local/BUCKEET
+mc anonymous set public local/BUCKET

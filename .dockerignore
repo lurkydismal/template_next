@@ -1,0 +1,15 @@
+**/node_modules
+**/npm-debug.log
+**/yarn-error.log
+**/dist
+**/out
+**/.build
+**/coverage
+**/.DS_Store
+**/.git
+**/.gitignore
+**/.env
+**/.vscode
+**/.next
+**/next-env.d.ts
+**/pnpm-*

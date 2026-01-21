@@ -1,7 +1,5 @@
 import z from "zod";
-import {
-    table,
-} from "@/db/schema";
+import { table } from "@/db/schema";
 
 export const TABLES = {
     table: table,

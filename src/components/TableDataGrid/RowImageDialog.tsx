@@ -49,7 +49,8 @@ export default function RowImageDialog({
             return uploadAction(formData);
         },
         {
-            ok: false, error: "",
+            ok: false,
+            error: "",
         },
     );
 
@@ -157,9 +158,7 @@ export default function RowImageDialog({
                             }}
                         >
                             <Typography variant="h6" gutterBottom>
-                                {failed
-                                    ? "Image not found"
-                                    : "Not an image"}
+                                {failed ? "Image not found" : "Not an image"}
                             </Typography>
                             <Typography color="text.secondary" sx={{ mb: 2 }}>
                                 {failed

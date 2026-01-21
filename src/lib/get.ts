@@ -10,7 +10,7 @@ type Return =
     | { ok: true; data: Readonly<GridRowsProp> }
     | { ok: false; error: string };
 
-// TODO: Validate what returns 
+// TODO: Validate what returns
 export async function getRows(rawTarget: DbTarget): Promise<Return> {
     try {
         const table = parseRawTarget(rawTarget);

@@ -1,0 +1,128 @@
+{
+  "version": "8",
+  "dialect": "postgres",
+  "id": "abf4049b-4be9-4de2-8c7a-50d449d6ee27",
+  "prevIds": [
+    "671e3799-99b9-4748-8770-1e83964d4f5a"
+  ],
+  "ddl": [
+    {
+      "isRlsEnabled": false,
+      "name": "table",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "serial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "table"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "content",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "table"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "table"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "table"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        {
+          "value": "created_at",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "table_created_at_index",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "table"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        {
+          "value": "updated_at",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "table_updated_at_index",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "table"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "table_pkey",
+      "schema": "public",
+      "table": "table",
+      "entityType": "pks"
+    },
+    {
+      "value": "length(trim(\"content\")) > 0",
+      "name": "content_not_blank",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "table"
+    }
+  ],
+  "renames": []
+}

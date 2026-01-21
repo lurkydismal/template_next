@@ -1,0 +1,1 @@
+ALTER TABLE "table" ADD CONSTRAINT "content_not_blank" CHECK (length(trim("content")) > 0);

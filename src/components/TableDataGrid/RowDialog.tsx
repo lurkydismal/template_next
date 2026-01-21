@@ -1,7 +1,5 @@
 import { formatDate } from "@/utils/dayjs";
-import {
-    Image as ImageIcon,
-} from "@mui/icons-material";
+import { Image as ImageIcon } from "@mui/icons-material";
 import {
     Chip,
     Dialog,
@@ -153,7 +151,7 @@ function RowDialogContent({
 
         // construct FormData from your current state values
         const fd = new FormData(formRef.current ?? undefined);
-        fd.append('target', 'table')
+        fd.append("target", "table");
 
         // call server action directly
         await updateAction(fd);
@@ -210,7 +208,7 @@ function RowDialogContent({
                             Created
                         </Typography>
                         <Typography variant="subtitle2" display="block">
-                            {formatDate(row.created_at)}
+                            {formatDate(row.created_at, true)}
                         </Typography>
                     </Grid>
 
@@ -219,7 +217,7 @@ function RowDialogContent({
                             Updated
                         </Typography>
                         <Typography variant="subtitle2" display="block">
-                            {formatDate(row.updated_at)}
+                            {formatDate(row.updated_at, true)}
                         </Typography>
                     </Grid>
 
@@ -228,7 +226,7 @@ function RowDialogContent({
                             Author
                         </Typography>
                         <Typography variant="subtitle2" display="block">
-                            {formatDate(row.created_at)}
+                            {"Author"}
                         </Typography>
                     </Grid>
 
@@ -237,7 +235,7 @@ function RowDialogContent({
                             Last editor
                         </Typography>
                         <Typography variant="subtitle2" display="block">
-                            {formatDate(row.updated_at)}
+                            {"Last Editor"}
                         </Typography>
                     </Grid>
                 </Grid>

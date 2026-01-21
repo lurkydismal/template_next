@@ -128,3 +128,10 @@ const log: CommonLogger = isBrowser
     : (serverLogger as unknown as CommonLogger);
 
 export default log;
+
+// TODO: Document
+export function logVar<T extends Record<string, any>>(obj: T) {
+    for (const key in obj) {
+        log.trace(`${key}:`, obj[key], `(type: ${typeof obj[key]})`);
+    }
+}

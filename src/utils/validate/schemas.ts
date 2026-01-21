@@ -118,10 +118,7 @@ export const fileSchema = z
         size: z.number().max(maxImageSize, "File is too large"),
         type: z
             .string()
-            .refine(
-                (t) => t.startsWith("image/"),
-                "File is not an image",
-            ),
+            .refine((t) => t.startsWith("image/"), "File is not an image"),
     })
     .superRefine(async (data, ctx) => {
         if (typeof data.arrayBuffer !== "function") {

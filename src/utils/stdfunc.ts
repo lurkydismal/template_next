@@ -84,6 +84,15 @@ export function toCamelCase(header: string): string {
     );
 }
 
+// TODO: Document
+// Type guard for Record<string, any>
+function isRecord(input: unknown): input is Record<string, any> {
+    if (typeof input !== "object" || input === null) return false;
+
+    const proto = Object.getPrototypeOf(input);
+    return proto === Object.prototype || proto === null;
+}
+
 /**
  * Extract a value from FormData or return the raw input.
  *
@@ -97,13 +106,19 @@ export function toCamelCase(header: string): string {
  * @returns The extracted value or undefined
  */
 export function extractFromFormData<T = unknown>(
-    input: unknown,
+    input: FormData | Record<string, any> | unknown,
     key: string,
 ): T | undefined {
     if (input instanceof FormData) {
         const value = input.get(key);
 
         return value === null ? undefined : (value as T);
+    }
+
+    if (isRecord(input)) {
+        if (!key) return undefined;
+
+        return input[key] as T | undefined;
     }
 
     return input as T | undefined;

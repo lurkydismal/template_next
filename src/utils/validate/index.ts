@@ -135,9 +135,9 @@ export function validateContent(input?: unknown | FormData) {
 export async function validateRow(
     input:
         | {
-            id?: unknown;
-            content?: unknown;
-        }
+              id?: unknown;
+              content?: unknown;
+          }
         | FormData,
 ) {
     const id = (() => {

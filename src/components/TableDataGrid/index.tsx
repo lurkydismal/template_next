@@ -18,7 +18,7 @@ export default function TableDataGrid() {
 
     useEffect(() => {
         const fd = new FormData();
-        fd.append('target', 'table')
+        fd.append("target", "table");
 
         getRowsAction(fd).then((result) => {
             if (result.ok) {
@@ -41,14 +41,14 @@ export default function TableDataGrid() {
             if (!currentRows) return;
 
             const fd = new FormData();
-            fd.append('target', 'table')
+            fd.append("target", "table");
             fd.append("content", "-");
 
             // call server action directly
             await createAction(fd);
 
             const fd1 = new FormData();
-            fd1.append('target', 'table')
+            fd1.append("target", "table");
 
             const result = await getRowsAction(fd1);
 

@@ -48,7 +48,10 @@ export async function save(
         return { ok: true };
     } catch (err) {
         log.error(opts.isUpdate ? "Update error:" : "Create error:", err);
-        return { ok: false, error: opts.isUpdate ? "Update error" : "Create error" };
+        return {
+            ok: false,
+            error: opts.isUpdate ? "Update error" : "Create error",
+        };
     }
 }
 

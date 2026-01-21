@@ -3,7 +3,7 @@
  * - `true` forces verbose logging regardless of environment.
  * - `false` disables trace-level logging unless explicitly set elsewhere.
  */
-export const needTrace = false;
+export const needTrace = true;
 
 /**
  * Flag indicating if the current environment is development.
@@ -52,7 +52,7 @@ export const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "/api";
  * Name of the application.
  * - Used in logging, UI, or headers.
  */
-export const appName = "unschmn";
+export const appName = "template_next";
 
 /**
  * Version of the application.

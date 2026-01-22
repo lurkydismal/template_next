@@ -131,7 +131,7 @@ export default log;
 
 // TODO: Document
 export function logVar<T extends Record<string, any>>(obj: T) {
-    for (const key in obj) {
-        log.trace(`${key}:`, obj[key], `(type: ${typeof obj[key]})`);
+    for (const [key, value] of Object.entries(obj)) {
+        log.trace(`${key}:`, value, `(type: ${typeof value})`);
     }
 }

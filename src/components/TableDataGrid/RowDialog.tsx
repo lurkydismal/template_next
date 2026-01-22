@@ -22,7 +22,6 @@ import {
 import RowImageDialog from "./RowImageDialog";
 import log from "@/utils/stdlog";
 import { TableRow, TableRowInsert } from "@/db/schema";
-import { updateAction } from "@/lib/update";
 import { GridApi } from "@mui/x-data-grid";
 
 type FieldType = "text" | "multiline" | "image";
@@ -36,18 +35,18 @@ type Field<T = unknown> = {
 };
 
 function RowDialogContent({
+    apiRef,
     row,
     registerSubmit,
-    apiRef,
+    updateRowAction,
 }: {
+    apiRef: RefObject<GridApi | null>;
     row: Readonly<TableRow>;
     registerSubmit: (fn: (() => Promise<void>) | null) => void;
-    apiRef: RefObject<GridApi | null>;
+    updateRowAction: any;
 }) {
     const [content, setContent] = useState<string | null>(row.content ?? null);
-    const [src, setSrc] = useState<string | null>(
-        row.id ? String(row.id) : null,
-    );
+    const [src, setSrc] = useState<string | null>(String(row.id));
     const [open, setOpen] = useState(false);
 
     type FieldTypeMap = {
@@ -63,7 +62,7 @@ function RowDialogContent({
     const fields: FieldUnion[] = [
         {
             title: "Content",
-            type: "text",
+            type: "multiline",
             value: content,
             setValue: setContent,
             name: "content",
@@ -111,7 +110,6 @@ function RowDialogContent({
                 );
 
             case "text":
-            default:
                 return (
                     <TextField
                         name={field.name}
@@ -123,10 +121,34 @@ function RowDialogContent({
                         }}
                     />
                 );
+
+            default:
+                throw new Error("REACHED DEFAULT TODO WRITE");
         }
     };
 
     const formRef = useRef<HTMLFormElement | null>(null);
+
+    // Update row
+    const _updateRow = useCallback(async (fd: FormData) => {
+        try {
+            const status: boolean = await updateRowAction(fd);
+
+            if (status) {
+                // update DataGrid row locally (apiRef from parent)
+                apiRef?.current?.updateRows?.([
+                    {
+                        id: row.id,
+                        content,
+                        // if you store updated_at locally, set it too:
+                        updated_at: new Date(),
+                    },
+                ]);
+            }
+        } catch (err) {
+            log.error(err);
+        }
+    }, [updateRowAction, row, content, apiRef]);
 
     const submit = useCallback(async () => {
         type Values = {
@@ -142,7 +164,7 @@ function RowDialogContent({
         };
 
         const values: Values = {
-            content: content,
+            content,
         };
 
         if (!isRowChanged(row, values)) {
@@ -151,21 +173,9 @@ function RowDialogContent({
 
         // construct FormData from your current state values
         const fd = new FormData(formRef.current ?? undefined);
-        fd.append("target", "table");
 
-        // call server action directly
-        await updateAction(fd);
-
-        // update DataGrid row locally (apiRef from parent)
-        apiRef?.current?.updateRows?.([
-            {
-                id: row.id,
-                content: content,
-                // if you store updated_at locally, set it too:
-                updated_at: new Date(),
-            },
-        ]);
-    }, [row, content, apiRef]);
+        _updateRow(fd);
+    }, [_updateRow, row, content]);
 
     useEffect(() => {
         registerSubmit(submit);
@@ -178,7 +188,7 @@ function RowDialogContent({
                 ref={formRef}
                 onSubmit={(e) => {
                     e.preventDefault();
-                    void submit();
+                    submit();
                 }}
             >
                 <Grid container spacing={2}>
@@ -253,16 +263,18 @@ function RowDialogContent({
 
 export default function RowDialog({
     apiRef,
-    selectedRow,
     dialogOpen,
     handleClose,
+    selectedRow,
     setSelectedRow,
+    updateRowAction,
 }: {
     apiRef: RefObject<GridApi | null>;
-    selectedRow: TableRow | null;
     dialogOpen: boolean;
     handleClose: () => void;
+    selectedRow: TableRow | null;
     setSelectedRow: Dispatch<SetStateAction<TableRow | null>>;
+    updateRowAction: any;
 }) {
     // store async submit function registered from the child
     const submitFnRef = useRef<(() => Promise<void>) | null>(null);
@@ -304,10 +316,11 @@ export default function RowDialog({
             <DialogContent sx={{}}>
                 {selectedRow && (
                     <RowDialogContent
+                        apiRef={apiRef}
                         row={selectedRow}
                         registerSubmit={registerSubmit}
-                        apiRef={apiRef}
-                    ></RowDialogContent>
+                        updateRowAction={updateRowAction}
+                    />
                 )}
             </DialogContent>
         </Dialog>

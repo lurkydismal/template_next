@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * DataGrid column configuration for displaying act records.
+ * DataGrid column configuration for displaying table row records.
  *
  * This file defines and normalizes column metadata used by MUI X DataGrid,
  * including alignment, sizing defaults, date parsing, and value formatting.

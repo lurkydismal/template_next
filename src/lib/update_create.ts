@@ -31,18 +31,18 @@ export async function save(
             content: input.content,
         });
 
-        const act = await buildInsert({
+        const row = await buildInsert({
             content: parsed.content,
         });
 
         if (opts.isUpdate) {
             await db
                 .update(table)
-                .set(act)
+                .set(row)
                 .where(eq(table.id, parsed.id!))
                 .execute();
         } else {
-            await db.insert(table).values(act).execute();
+            await db.insert(table).values(row).execute();
         }
 
         return { ok: true };

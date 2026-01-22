@@ -103,7 +103,7 @@ export default function RowImageDialog({
             log.info("Sanitized filename:", sanitized);
 
             const fd = new FormData();
-            fd.append("filename", `${id}-act`);
+            fd.append("filename", `${id}`);
             fd.append("image", file);
 
             startTransition(() => {

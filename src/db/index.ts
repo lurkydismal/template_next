@@ -9,14 +9,13 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { DefaultLogger, LogWriter } from "drizzle-orm/logger";
-import { browserLogger } from "@/utils/stdlog";
+import log from "@/utils/stdlog";
 
 // Custom implementation of Drizzle's LogWriter interface
 // All log messages from Drizzle will be routed through this writer
 class MyLogWriter implements LogWriter {
     write(message: string) {
-        // FIX: server-side but is not working with server-side logger
-        browserLogger.info(message);
+        log.info(message);
     }
 }
 

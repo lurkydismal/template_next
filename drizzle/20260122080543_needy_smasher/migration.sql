@@ -1,0 +1,2 @@
+ALTER TABLE "table" ALTER COLUMN "updated_at" SET DATA TYPE timestamp(0) with time zone USING "updated_at"::timestamp(0) with time zone;--> statement-breakpoint
+ALTER TABLE "table" ALTER COLUMN "created_at" SET DATA TYPE timestamp(0) with time zone USING "created_at"::timestamp(0) with time zone;

@@ -8,12 +8,13 @@ const nextConfig: NextConfig = {
 
     experimental: {
         cssChunking: true,
+        browserDebugInfoInTerminal: true,
         viewTransition: true,
     },
 
     images: {
         // Enable only if CPU does not support popcnt
-        // unoptimized: true,
+        unoptimized: true,
     },
 
     reactCompiler: true,

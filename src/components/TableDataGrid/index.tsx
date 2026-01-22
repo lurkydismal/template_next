@@ -3,60 +3,60 @@
 import CustomizedDataGrid from "@/components/CustomizedDataGrid";
 import columns from "@/data/table/columns";
 import { GridRowParams, GridRowsProp, useGridApiRef } from "@mui/x-data-grid";
-import { useEffect, useState } from "react";
-import { TableRow } from "@/db/schema";
+import { useCallback, useEffect, useState } from "react";
 import RowDialog from "./RowDialog";
-import { createAction } from "@/lib/create";
-import { getRowsAction } from "@/lib/get";
+import log from "@/utils/stdlog";
 
-export default function TableDataGrid() {
+export default function TableDataGrid<Row, EmptyRow>({
+    emptyRow,
+    getRowsAction,
+    createRowAction,
+    updateRowAction,
+}: {
+    emptyRow: EmptyRow;
+    getRowsAction: any;
+    createRowAction: any;
+    updateRowAction: any;
+}) {
     const apiRef = useGridApiRef();
     const [currentRows, setCurrentRows] =
         useState<Readonly<GridRowsProp> | null>(null);
-    const [selectedRow, setSelectedRow] = useState<TableRow | null>(null);
+    const [selectedRow, setSelectedRow] = useState<Row | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
 
+    // Getting rows
+    const _getRows = useCallback(async () => {
+        try {
+            setCurrentRows(await getRowsAction());
+        } catch (err) {
+            log.error(err);
+        }
+    }, [getRowsAction]);
+
     useEffect(() => {
-        const fd = new FormData();
-        fd.append("target", "table");
+        _getRows();
+    }, [_getRows]);
 
-        getRowsAction(fd).then((result) => {
-            if (result.ok) {
-                setCurrentRows(result.data);
-            } else {
-                throw new Error("TEST ERROR2");
-            }
-        });
-    }, []);
-
-    const handleRowClick = (params: GridRowParams) => {
-        setSelectedRow(params.row as TableRow);
-        setDialogOpen(true);
-    };
-
-    const handleClose = () => setDialogOpen(false);
+    // Creating row
+    const _createRow = useCallback(async (content: string) => {
+        try {
+            await createRowAction(content);
+        } catch (err) {
+            log.error(err);
+        }
+    }, [createRowAction]);
 
     useEffect(() => {
         const submit = async () => {
             if (!currentRows) return;
 
-            const fd = new FormData();
-            fd.append("target", "table");
-            fd.append("content", "-");
-
-            // call server action directly
-            await createAction(fd);
-
-            const fd1 = new FormData();
-            fd1.append("target", "table");
-
-            const result = await getRowsAction(fd1);
-
-            if (result.ok) {
-                setCurrentRows(result.data);
-            } else {
-                throw new Error("TEST ERROR");
+            try {
+                await _createRow(emptyRow.content);
+            } catch (err) {
+                log.error(err);
             }
+
+            await _getRows();
         };
 
         const onKeyDown = (e: KeyboardEvent) => {
@@ -86,7 +86,14 @@ export default function TableDataGrid() {
 
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
-    }, [currentRows, apiRef]);
+    }, [_getRows, _createRow, currentRows, apiRef]);
+
+    const handleRowClick = (params: GridRowParams) => {
+        setSelectedRow(params.row as Row);
+        setDialogOpen(true);
+    };
+
+    const handleClose = () => setDialogOpen(false);
 
     return (
         <>
@@ -104,10 +111,11 @@ export default function TableDataGrid() {
 
             <RowDialog
                 apiRef={apiRef}
-                selectedRow={selectedRow}
                 dialogOpen={dialogOpen}
                 handleClose={handleClose}
+                selectedRow={selectedRow}
                 setSelectedRow={setSelectedRow}
+                updateRowAction={updateRowAction}
             />
         </>
     );

@@ -1,5 +1,6 @@
 "use client";
 
+import { SnackbarProvider } from "@/components/SnackbarProvider";
 /**
  * RootLayout Component
  *
@@ -49,7 +50,9 @@ export default function RootLayout({
                         </Box>
                     }
                 >
-                    {children}
+                    <SnackbarProvider>
+                        {children}
+                    </SnackbarProvider>
                 </Suspense>
             </Box>
         </AppTheme>

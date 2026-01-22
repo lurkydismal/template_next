@@ -8,7 +8,9 @@ import { updateAction } from "@/lib/update";
 export default async function Page() {
     const table = "table";
 
-    interface EmptyRow { content: string };
+    interface EmptyRow {
+        content: string;
+    }
 
     const emptyRow: EmptyRow = {
         content: "-",

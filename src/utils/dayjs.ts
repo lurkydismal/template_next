@@ -38,7 +38,10 @@ dayjs.extend(customParseFormat);
  * @param date - A string, Date, or Dayjs instance
  * @returns The formatted date string in local time
  */
-export function formatDate(date: string | Date | Dayjs, needTime: boolean = false) {
+export function formatDate(
+    date: string | Date | Dayjs,
+    needTime: boolean = false,
+) {
     const parsed = validateDate(date);
 
     return parsed.local().format(needTime ? dateTimeFormat : dateFormat);

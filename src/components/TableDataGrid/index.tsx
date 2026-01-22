@@ -38,13 +38,16 @@ export default function TableDataGrid<Row, EmptyRow>({
     }, [_getRows]);
 
     // Creating row
-    const _createRow = useCallback(async (content: string) => {
-        try {
-            await createRowAction(content);
-        } catch (err) {
-            log.error(err);
-        }
-    }, [createRowAction]);
+    const _createRow = useCallback(
+        async (content: string) => {
+            try {
+                await createRowAction(content);
+            } catch (err) {
+                log.error(err);
+            }
+        },
+        [createRowAction],
+    );
 
     useEffect(() => {
         const submit = async () => {

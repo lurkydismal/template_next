@@ -9,10 +9,7 @@ export const template_table = {
 };
 
 export const table = pgTable("table", template_table, (t) => [
-    check(
-        "content_not_blank",
-        sql`length(trim(${t.content})) > 0`
-    ),
+    check("content_not_blank", sql`length(trim(${t.content})) > 0`),
 
     uniqueIndex().on(t.created_at),
     uniqueIndex().on(t.updated_at),

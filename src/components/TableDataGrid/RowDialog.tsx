@@ -130,25 +130,28 @@ function RowDialogContent({
     const formRef = useRef<HTMLFormElement | null>(null);
 
     // Update row
-    const _updateRow = useCallback(async (fd: FormData) => {
-        try {
-            const status: boolean = await updateRowAction(fd);
+    const _updateRow = useCallback(
+        async (fd: FormData) => {
+            try {
+                const status: boolean = await updateRowAction(fd);
 
-            if (status) {
-                // update DataGrid row locally (apiRef from parent)
-                apiRef?.current?.updateRows?.([
-                    {
-                        id: row.id,
-                        content,
-                        // if you store updated_at locally, set it too:
-                        updated_at: new Date(),
-                    },
-                ]);
+                if (status) {
+                    // update DataGrid row locally (apiRef from parent)
+                    apiRef?.current?.updateRows?.([
+                        {
+                            id: row.id,
+                            content,
+                            // if you store updated_at locally, set it too:
+                            updated_at: new Date(),
+                        },
+                    ]);
+                }
+            } catch (err) {
+                log.error(err);
             }
-        } catch (err) {
-            log.error(err);
-        }
-    }, [updateRowAction, row, content, apiRef]);
+        },
+        [updateRowAction, row, content, apiRef],
+    );
 
     const submit = useCallback(async () => {
         type Values = {

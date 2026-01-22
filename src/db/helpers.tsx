@@ -21,6 +21,10 @@ import { timestamp } from "drizzle-orm/pg-core";
  * });
  */
 export const timestamps = {
-    updated_at: timestamp({ precision: 0, withTimezone: true }).defaultNow().notNull(),
-    created_at: timestamp({ precision: 0, withTimezone: true }).defaultNow().notNull(),
+    updated_at: timestamp({ precision: 0, withTimezone: true })
+        .defaultNow()
+        .notNull(),
+    created_at: timestamp({ precision: 0, withTimezone: true })
+        .defaultNow()
+        .notNull(),
 };

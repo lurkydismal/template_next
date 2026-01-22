@@ -4,8 +4,20 @@ import { Alert, Snackbar } from "@mui/material";
 import { createContext, useContext, useState } from "react";
 
 const SnackbarContext = createContext<{
-    showError: (msg: string) => void;
+    showError: (err: unknown) => void;
 } | null>(null);
+
+function errorToMessage(err: unknown): string {
+    if (err instanceof Error) {
+        return err.message || "Operation failed";
+    }
+
+    if (typeof err === "string") {
+        return err;
+    }
+
+    return "Operation failed";
+}
 
 export function useSnackbar() {
     const ctx = useContext(SnackbarContext);
@@ -23,8 +35,8 @@ export function SnackbarProvider({
     const [open, setOpen] = useState(false);
     const [msg, setMsg] = useState("");
 
-    const showError = (msg: string) => {
-        setMsg(msg);
+    const showError = (err: unknown) => {
+        setMsg(errorToMessage(err));
         setOpen(true);
     };
 

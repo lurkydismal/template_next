@@ -2,7 +2,7 @@ import TableDataGrid from "@/components/TableDataGrid";
 import { TableRow } from "@/db/schema";
 import { getRows } from "@/lib/get";
 import { create } from "@/lib/create";
-import log, { logVar } from "@/utils/stdlog";
+import log from "@/utils/stdlog";
 import { updateAction } from "@/lib/update";
 
 export default async function Page() {
@@ -25,7 +25,9 @@ export default async function Page() {
             return result.data;
         } else {
             // handle/report error if needed
-            log.error("Failed to get rows in action", result.error);
+            const message = `Failed to get rows in action: ${result.error}`;
+            log.error(message);
+            throw new Error(message);
         }
     };
 
@@ -36,7 +38,9 @@ export default async function Page() {
 
         if (!result.ok) {
             // handle/report error if needed
-            log.error("Failed to create row in action", result.error);
+            const message = `Failed to create row in action: ${result.error}`;
+            log.error(message);
+            throw new Error(message);
         }
     };
 
@@ -49,7 +53,9 @@ export default async function Page() {
 
         if (!result.ok) {
             // handle/report error if needed
-            log.error("Failed to update row in action", result.error);
+            const message = `Failed to update row in action: ${result.error}`;
+            log.error(message);
+            throw new Error(message);
         }
 
         return result.ok;

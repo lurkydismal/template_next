@@ -6,6 +6,7 @@ import { GridRowParams, GridRowsProp, useGridApiRef } from "@mui/x-data-grid";
 import { useCallback, useEffect, useState } from "react";
 import RowDialog from "./RowDialog";
 import log from "@/utils/stdlog";
+import { useSnackbar } from "@/components/SnackbarProvider";
 
 export default function TableDataGrid<Row, EmptyRow>({
     emptyRow,
@@ -18,6 +19,7 @@ export default function TableDataGrid<Row, EmptyRow>({
     createRowAction: any;
     updateRowAction: any;
 }) {
+    const { showError } = useSnackbar();
     const apiRef = useGridApiRef();
     const [currentRows, setCurrentRows] =
         useState<Readonly<GridRowsProp> | null>(null);
@@ -29,7 +31,7 @@ export default function TableDataGrid<Row, EmptyRow>({
         try {
             setCurrentRows(await getRowsAction());
         } catch (err) {
-            log.error(err);
+            showError(err);
         }
     }, [getRowsAction]);
 
@@ -56,7 +58,7 @@ export default function TableDataGrid<Row, EmptyRow>({
             try {
                 await _createRow(emptyRow.content);
             } catch (err) {
-                log.error(err);
+                showError(err);
             }
 
             await _getRows();

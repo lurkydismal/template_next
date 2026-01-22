@@ -23,6 +23,7 @@ import RowImageDialog from "./RowImageDialog";
 import log from "@/utils/stdlog";
 import { TableRow, TableRowInsert } from "@/db/schema";
 import { GridApi } from "@mui/x-data-grid";
+import { useSnackbar } from "@/components/SnackbarProvider";
 
 type FieldType = "text" | "multiline" | "image";
 type Field<T = unknown> = {
@@ -45,6 +46,7 @@ function RowDialogContent({
     registerSubmit: (fn: (() => Promise<void>) | null) => void;
     updateRowAction: any;
 }) {
+    const { showError } = useSnackbar();
     const [content, setContent] = useState<string | null>(row.content ?? null);
     const [src, setSrc] = useState<string | null>(String(row.id));
     const [open, setOpen] = useState(false);
@@ -147,7 +149,7 @@ function RowDialogContent({
                     ]);
                 }
             } catch (err) {
-                log.error(err);
+                showError(err);
             }
         },
         [updateRowAction, row, content, apiRef],

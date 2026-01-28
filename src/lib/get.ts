@@ -5,10 +5,7 @@ import log from "@/utils/stdlog";
 import { desc } from "drizzle-orm";
 import { GridRowsProp } from "@mui/x-data-grid";
 import { DbTarget, parseRawTarget } from "@/lib/types";
-
-type Return =
-    | { ok: true; data: Readonly<GridRowsProp> }
-    | { ok: false; error: string };
+import { ActionResult } from "@/lib/types";
 
 // TODO: Validate what returns
 export async function getRows(rawTarget: DbTarget): Promise<Return> {

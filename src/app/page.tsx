@@ -1,5 +1,8 @@
+"use client";
+
 import { Button } from "@/components/RootPageButton";
 import buttons from "@/data/RootPageButtons";
+import { useHtmlDataDark } from "@/utils/stdhook";
 
 /**
  * Root Page Component
@@ -17,6 +20,7 @@ import buttons from "@/data/RootPageButtons";
  *     - 3 columns on medium/large screens
  */
 export default function Page() {
+    // const isDark = useHtmlDataDark();
     const isDark = true;
 
     const containerBg = isDark

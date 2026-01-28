@@ -9,6 +9,8 @@ import {
     QuickFilterClear,
     QuickFilterControl,
     QuickFilterTrigger,
+    GridToolbarProps,
+    ToolbarPropsOverrides,
 } from "@mui/x-data-grid";
 import {
     InputAdornment,
@@ -166,11 +168,15 @@ function CustomQuickFilter() {
     );
 }
 
+type CustomToolbarProps =
+    GridToolbarProps &
+    ToolbarPropsOverrides & {
+        extraButtons?: React.ReactNode;
+    };
+
 export default function CustomToolbar({
     extraButtons,
-}: Readonly<{
-    extraButtons?: React.ReactNode;
-}>) {
+}: CustomToolbarProps) {
     return (
         <Toolbar>
             {extraButtons}

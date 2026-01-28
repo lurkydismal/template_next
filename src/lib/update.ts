@@ -1,14 +1,14 @@
 "use server";
 
+import { TableRowInsert } from "@/db/schema";
 import { ActionResult, DbTarget } from "@/lib/types";
 import { parseForm, save } from "@/lib/update_create";
 
 export async function update(
     rawTarget: DbTarget,
-    id: number,
-    content: string,
+    row: TableRowInsert,
 ): Promise<ActionResult> {
-    return save(rawTarget, { id, content }, { isUpdate: true });
+    return save(rawTarget, row, { isUpdate: true });
 }
 
 export async function updateAction(formData: FormData) {

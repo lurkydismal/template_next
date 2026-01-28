@@ -4,22 +4,22 @@ import CustomDataGrid from "@/components/CustomDataGrid";
 import columns from "@/data/table/columns";
 import { useCallback, useEffect, useState } from "react";
 import RowDialog from "./RowDialog";
-import log from "@/utils/stdlog";
 import { useSnackbar } from "@/components/SnackbarProvider";
 import CustomToolbar from "./Toolbar";
 import { useGridApiRef, GridRowsProp, GridRowParams } from "@mui/x-data-grid";
+import { TableRowInsert } from "@/db/schema";
 
 export default function TableDataGrid<Row, EmptyRow>({
     emptyRow,
-    getRows,
-    createRow,
-    updateRow,
+    getRowsAction,
+    createRowAction,
+    updateRowAction,
     extraButtons,
 }: Readonly<{
     emptyRow: EmptyRow;
-    getRows: any;
-    createRow: any;
-    updateRow: any;
+    getRowsAction: any;
+    createRowAction: any;
+    updateRowAction: any;
     extraButtons?: React.ReactNode;
 }>) {
     const { showError } = useSnackbar();
@@ -32,11 +32,11 @@ export default function TableDataGrid<Row, EmptyRow>({
     // Getting rows
     const _getRows = useCallback(async () => {
         try {
-            setCurrentRows(await getRows());
+            setCurrentRows(await getRowsAction());
         } catch (err) {
             showError(err);
         }
-    }, [getRows]);
+    }, [getRowsAction]);
 
     useEffect(() => {
         _getRows();
@@ -44,14 +44,14 @@ export default function TableDataGrid<Row, EmptyRow>({
 
     // Creating row
     const _createRow = useCallback(
-        async (content: string) => {
+        async (row: TableRowInsert) => {
             try {
-                await createRow(content);
+                await createRowAction(row);
             } catch (err) {
                 showError(err);
             }
         },
-        [createRow],
+        [createRowAction],
     );
 
     useEffect(() => {
@@ -59,7 +59,8 @@ export default function TableDataGrid<Row, EmptyRow>({
             if (!currentRows) return;
 
             try {
-                await _createRow(emptyRow);
+                // FIX: Improve
+                await _createRow(emptyRow as unknown as TableRowInsert);
             } catch (err) {
                 showError(err);
             }
@@ -129,7 +130,7 @@ export default function TableDataGrid<Row, EmptyRow>({
                 handleClose={handleClose}
                 selectedRow={selectedRow}
                 setSelectedRow={setSelectedRow}
-                updateRow={updateRow}
+                updateRowAction={updateRowAction}
             />
         </>
     );

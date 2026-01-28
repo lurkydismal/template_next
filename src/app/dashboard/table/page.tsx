@@ -1,8 +1,6 @@
-"use client";
-
 import { Tooltip } from "@mui/material";
 import TableDataGrid from "@/components/TableDataGrid";
-import { TableRow } from "@/db/schema";
+import { TableRow, TableRowInsert } from "@/db/schema";
 import { create } from "@/lib/create";
 import { getRows } from "@/lib/get";
 import { update } from "@/lib/update";
@@ -15,6 +13,7 @@ import uuid from "@/utils/uuid";
 import { ToolbarButton } from "@mui/x-data-grid";
 import CustomDivider from "@/components/CustomDivider";
 import { useSnackbar } from "@/components/SnackbarProvider";
+import { DbTarget } from "@/lib/types";
 
 interface EmptyRow {
     content: string;
@@ -22,10 +21,10 @@ interface EmptyRow {
 
 function ExtraToolbarButtons({
     emptyRow,
-    createRow,
+    createRowAction,
 }: Readonly<{
     emptyRow: EmptyRow;
-    createRow: any;
+    createRowAction: any;
 }>) {
     const { showMessage, showSuccess, showError, showWarning, showInfo } =
         useSnackbar();
@@ -50,7 +49,7 @@ function ExtraToolbarButtons({
                 <ToolbarButton
                     onClick={async () => {
                         try {
-                            await createRow(emptyRow);
+                            await createRowAction(emptyRow);
                         } catch (err) {
                             showError(err);
                         }
@@ -66,12 +65,16 @@ function ExtraToolbarButtons({
 }
 
 export default function Page() {
+    const table: DbTarget = "table";
+
     const emptyRow: EmptyRow = {
         content: "-",
     };
 
-    const _getRows = async () => {
-        const result = await getRows();
+    const _getRowsAction = async () => {
+        "use server";
+
+        const result = await getRows(table);
 
         if (result.ok) {
             return result.data;
@@ -82,8 +85,10 @@ export default function Page() {
         }
     };
 
-    const createRow = async ({ content }: { content: string }) => {
-        const result = await create(content);
+    const createRowAction = async (row: TableRowInsert) => {
+        "use server";
+
+        const result = await create(table, row);
 
         if (!result.ok) {
             const message = `Failed to create row in action: ${result.error}`;
@@ -92,14 +97,10 @@ export default function Page() {
         }
     };
 
-    const updateRow = async ({
-        id,
-        content,
-    }: {
-        id: number;
-        content: string;
-    }) => {
-        const result = await update(id, content);
+    const updateRowAction = async (row: TableRowInsert) => {
+        "use server";
+
+        const result = await update(table, row);
 
         if (!result.ok) {
             const message = `Failed to update row in action: ${result.error}`;
@@ -113,13 +114,13 @@ export default function Page() {
     return (
         <TableDataGrid<TableRow, EmptyRow>
             emptyRow={emptyRow}
-            getRows={_getRows}
-            createRow={createRow}
-            updateRow={updateRow}
+            getRowsAction={_getRowsAction}
+            createRowAction={createRowAction}
+            updateRowAction={updateRowAction}
             extraButtons={
                 <ExtraToolbarButtons
                     emptyRow={emptyRow}
-                    createRow={createRow}
+                    createRowAction={createRowAction}
                 />
             }
         />

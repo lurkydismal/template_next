@@ -2,7 +2,7 @@ import db from "@/db";
 import { TableRowInsert } from "@/db/schema";
 import { ActionResult, DbTarget, parseRawTarget } from "@/lib/types";
 import log from "@/utils/stdlog";
-import { validateRow } from "@/utils/validate";
+import { rowSchema } from "@/utils/validate/schemas";
 import { eq } from "drizzle-orm";
 
 type Input = {
@@ -26,7 +26,7 @@ export async function save(
     try {
         const table = parseRawTarget(rawTarget);
 
-        const parsed = await validateRow({
+        const parsed = await rowSchema.parseAsync({
             id: input.id,
             content: input.content,
         });

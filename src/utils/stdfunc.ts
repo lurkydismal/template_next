@@ -86,7 +86,7 @@ export function toCamelCase(header: string): string {
 
 // TODO: Document
 // Type guard for Record<string, any>
-function isRecord(input: unknown): input is Record<string, any> {
+export function isRecord(input: unknown): input is Record<string, any> {
     if (typeof input !== "object" || input === null) return false;
 
     const proto = Object.getPrototypeOf(input);
@@ -132,5 +132,22 @@ export function extractFromFormData<T = unknown>(
  * @returns Promise that resolves after the delay
  */
 export function delay(milliseconds: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, milliseconds));
+    const ms = Number(milliseconds);
+
+    // Validate delay to avoid unbounded timers from untrusted input
+    if (!Number.isFinite(ms) || ms < 0) {
+        throw new Error(`Invalid delay value: ${milliseconds}`);
+    }
+
+    // Enforce an upper bound to prevent resource exhaustion
+    const MAX_DELAY_MS = 60_000; // 1 minute
+    if (ms > MAX_DELAY_MS) {
+        throw new Error(
+            `Delay value ${milliseconds} exceeds maximum allowed of ${MAX_DELAY_MS} ms`,
+        );
+    }
+
+    const safeMs = Math.floor(ms);
+
+    return new Promise((resolve) => setTimeout(resolve, safeMs));
 }

@@ -13,7 +13,7 @@ import utc from "dayjs/plugin/utc";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import timezone from "dayjs/plugin/timezone";
 import { dateFormat, dateTimeFormat } from "@/utils/stdvar";
-import { validateDate } from "@/utils/validate";
+import { dateInputSchema } from "@/utils/validate/schemas";
 
 /**
  * Enable UTC handling for Day.js.
@@ -42,7 +42,7 @@ export function formatDate(
     date: string | Date | Dayjs,
     needTime: boolean = false,
 ) {
-    const parsed = validateDate(date);
+    const parsed = dateInputSchema.parse(date);
 
     return parsed.local().format(needTime ? dateTimeFormat : dateFormat);
 }

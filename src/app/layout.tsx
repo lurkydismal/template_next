@@ -25,6 +25,7 @@ import { Geist_Mono } from "next/font/google";
 import "./globals.css";
 import log from "@/utils/stdlog";
 import { isDev, appName, appVersion } from "@/utils/stdvar";
+import MuiLayout from "@/components/MuiLayout";
 
 // Configure Geist Mono font with CSS variable for global usage
 const font = Geist_Mono({
@@ -67,7 +68,7 @@ export default function RootLayout({
                 <InitColorSchemeScript attribute="data" />
 
                 <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-                    {children}
+                    <MuiLayout>{children}</MuiLayout>
                 </AppRouterCacheProvider>
             </body>
         </html>

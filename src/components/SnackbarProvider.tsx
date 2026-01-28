@@ -1,10 +1,28 @@
 "use client";
 
-import { Alert, Snackbar } from "@mui/material";
-import { createContext, useContext, useState } from "react";
+import {
+    NotificationsNone as DefaultIcon,
+    CheckCircleOutlined as SuccessIcon,
+    ErrorOutlineOutlined as ErrorIcon,
+    WarningAmber as WarningIcon,
+    LightbulbOutlined as InfoIcon,
+    Close as CloseIcon,
+} from "@mui/icons-material";
+import { IconButton } from "@mui/material";
+import {
+    SnackbarProvider,
+    VariantType,
+    enqueueSnackbar,
+    closeSnackbar,
+} from "notistack";
+import { createContext, useContext } from "react";
 
 const SnackbarContext = createContext<{
+    showMessage: (message: string) => void;
+    showSuccess: (message: string) => void;
     showError: (err: unknown) => void;
+    showWarning: (warn: unknown) => void;
+    showInfo: (message: string) => void;
 } | null>(null);
 
 function errorToMessage(err: unknown): string {
@@ -27,41 +45,67 @@ export function useSnackbar() {
     return ctx;
 }
 
-export function SnackbarProvider({
+export default function CustomSnackbarProvider({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    const [open, setOpen] = useState(false);
-    const [msg, setMsg] = useState("");
-
-    const showError = (err: unknown) => {
-        setMsg(errorToMessage(err));
-        setOpen(true);
+    const _showMessage = (err: unknown, variant?: VariantType) => {
+        enqueueSnackbar(errorToMessage(err), { variant });
     };
 
-    const handleClose = (
-        _event?: React.SyntheticEvent | Event,
-        reason?: string,
-    ) => {
-        if (reason === "clickaway") return;
-        setOpen(false);
+    const showMessage = (message: string) => {
+        _showMessage(message, "default");
+    };
+
+    const showSuccess = (message: string) => {
+        _showMessage(message, "success");
+    };
+
+    const showError = (err: unknown) => {
+        _showMessage(err, "error");
+    };
+
+    const showWarning = (warn: unknown) => {
+        _showMessage(warn, "warning");
+    };
+
+    const showInfo = (message: string) => {
+        _showMessage(message, "info");
     };
 
     return (
-        <SnackbarContext.Provider value={{ showError }}>
+        <SnackbarContext.Provider
+            value={{
+                showMessage,
+                showSuccess,
+                showError,
+                showWarning,
+                showInfo,
+            }}
+        >
             {children}
-            <Snackbar
-                key={msg}
-                open={open}
-                autoHideDuration={4000}
-                onClose={handleClose}
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            >
-                <Alert severity="error" variant="filled">
-                    {msg}
-                </Alert>
-            </Snackbar>
+
+            <SnackbarProvider
+                maxSnack={5}
+                iconVariant={{
+                    default: <DefaultIcon sx={{ mr: 1.5 }} />,
+                    success: <SuccessIcon sx={{ mr: 1.5 }} />,
+                    error: <ErrorIcon sx={{ mr: 1.5 }} />,
+                    warning: <WarningIcon sx={{ mr: 1.5 }} />,
+                    info: <InfoIcon sx={{ mr: 1.5 }} />,
+                }}
+                preventDuplicate
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "right",
+                }}
+                action={(snackbarId) => (
+                    <IconButton onClick={() => closeSnackbar(snackbarId)}>
+                        <CloseIcon />
+                    </IconButton>
+                )}
+            />
         </SnackbarContext.Provider>
     );
 }

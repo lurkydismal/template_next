@@ -12,7 +12,7 @@ type TasksGridProps = Omit<DataGridProps, "rows" | "columns"> & {
     rows: Readonly<GridRowsProp>;
 };
 
-export default function CustomizedDataGrid({
+export default function CustomDataGrid({
     columns,
     rows,
     ...props

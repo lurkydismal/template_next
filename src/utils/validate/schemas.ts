@@ -172,5 +172,6 @@ export const contentSchema = z.string();
 
 // TODO: Document
 export const rowSchema = z.object({
+    id: idSchema.optional(),
     content: contentSchema,
 });

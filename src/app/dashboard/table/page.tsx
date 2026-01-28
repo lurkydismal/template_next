@@ -3,7 +3,7 @@ import TableDataGrid from "@/components/TableDataGrid";
 import { TableRow, TableRowInsert } from "@/db/schema";
 import { create } from "@/lib/create";
 import { getRows } from "@/lib/get";
-import { update, updateAction } from "@/lib/update";
+import { updateAction } from "@/lib/update";
 import log from "@/utils/stdlog";
 import {
     Queue as MockShowIcon,
@@ -15,15 +15,11 @@ import CustomDivider from "@/components/CustomDivider";
 import { useSnackbar } from "@/components/SnackbarProvider";
 import { DbTarget } from "@/lib/types";
 
-interface EmptyRow {
-    content: string;
-}
-
 function ExtraToolbarButtons({
     emptyRow,
     createRowAction,
 }: Readonly<{
-    emptyRow: EmptyRow;
+    emptyRow: TableRowInsert;
     createRowAction: any;
 }>) {
     const { showMessage, showSuccess, showError, showWarning, showInfo } =
@@ -67,7 +63,7 @@ function ExtraToolbarButtons({
 export default function Page() {
     const table: DbTarget = "table";
 
-    const emptyRow: EmptyRow = {
+    const emptyRow: TableRowInsert = {
         content: "-",
     };
 
@@ -114,7 +110,7 @@ export default function Page() {
     };
 
     return (
-        <TableDataGrid<TableRow, EmptyRow>
+        <TableDataGrid<TableRow, TableRowInsert>
             emptyRow={emptyRow}
             getRowsAction={_getRowsAction}
             createRowAction={createRowAction}

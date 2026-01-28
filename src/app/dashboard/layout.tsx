@@ -50,9 +50,7 @@ export default function RootLayout({
                         </Box>
                     }
                 >
-                    <SnackbarProvider>
-                        {children}
-                    </SnackbarProvider>
+                    <SnackbarProvider>{children}</SnackbarProvider>
                 </Suspense>
             </Box>
         </AppTheme>

@@ -168,15 +168,12 @@ function CustomQuickFilter() {
     );
 }
 
-type CustomToolbarProps =
-    GridToolbarProps &
+type CustomToolbarProps = GridToolbarProps &
     ToolbarPropsOverrides & {
         extraButtons?: React.ReactNode;
     };
 
-export default function CustomToolbar({
-    extraButtons,
-}: CustomToolbarProps) {
+export default function CustomToolbar({ extraButtons }: CustomToolbarProps) {
     return (
         <Toolbar>
             {extraButtons}

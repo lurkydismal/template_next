@@ -7,16 +7,15 @@ import RowDialog from "./RowDialog";
 import { useSnackbar } from "@/components/SnackbarProvider";
 import CustomToolbar from "./Toolbar";
 import { useGridApiRef, GridRowsProp, GridRowParams } from "@mui/x-data-grid";
-import { TableRowInsert } from "@/db/schema";
 
-export default function TableDataGrid<Row, EmptyRow>({
+export default function TableDataGrid<Row, RowInsert>({
     emptyRow,
     getRowsAction,
     createRowAction,
     updateRowAction,
     extraButtons,
 }: Readonly<{
-    emptyRow: EmptyRow;
+    emptyRow: RowInsert;
     getRowsAction: any;
     createRowAction: any;
     updateRowAction: any;
@@ -44,7 +43,7 @@ export default function TableDataGrid<Row, EmptyRow>({
 
     // Creating row
     const _createRow = useCallback(
-        async (row: TableRowInsert) => {
+        async (row: RowInsert) => {
             try {
                 await createRowAction(row);
             } catch (err) {
@@ -60,7 +59,7 @@ export default function TableDataGrid<Row, EmptyRow>({
 
             try {
                 // FIX: Improve
-                await _createRow(emptyRow as unknown as TableRowInsert);
+                await _createRow(emptyRow);
             } catch (err) {
                 showError(err);
             }
@@ -124,7 +123,7 @@ export default function TableDataGrid<Row, EmptyRow>({
                 }}
             />
 
-            <RowDialog
+            <RowDialog<Row, RowInsert>
                 apiRef={apiRef}
                 dialogOpen={dialogOpen}
                 handleClose={handleClose}

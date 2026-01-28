@@ -21,7 +21,6 @@ import {
 } from "react";
 import RowImageDialog from "./RowImageDialog";
 import log from "@/utils/stdlog";
-import { TableRow, TableRowInsert } from "@/db/schema";
 import { GridApi } from "@mui/x-data-grid";
 import { useSnackbar } from "@/components/SnackbarProvider";
 
@@ -35,14 +34,14 @@ type Field<T = unknown> = {
     size?: number;
 };
 
-function RowDialogContent({
+function RowDialogContent<Row, RowInsert>({
     apiRef,
     row,
     registerSubmit,
     updateRowAction,
 }: {
     apiRef: RefObject<GridApi | null>;
-    row: Readonly<TableRow>;
+    row: Row;
     registerSubmit: (fn: (() => Promise<void>) | null) => void;
     updateRowAction: any;
 }) {
@@ -162,7 +161,7 @@ function RowDialogContent({
 
         const norm = (s: string | null | undefined) => (s ?? "").trim();
 
-        const isRowChanged = (row: TableRowInsert, values: Values) => {
+        const isRowChanged = (row: RowInsert, values: Values) => {
             if (norm(row.content) !== norm(values.content)) return true;
 
             return false;
@@ -266,7 +265,7 @@ function RowDialogContent({
     );
 }
 
-export default function RowDialog({
+export default function RowDialog<Row, RowInsert>({
     apiRef,
     dialogOpen,
     handleClose,
@@ -277,8 +276,8 @@ export default function RowDialog({
     apiRef: RefObject<GridApi | null>;
     dialogOpen: boolean;
     handleClose: () => void;
-    selectedRow: TableRow | null;
-    setSelectedRow: Dispatch<SetStateAction<TableRow | null>>;
+    selectedRow: Row | null;
+    setSelectedRow: Dispatch<SetStateAction<Row | null>>;
     updateRowAction: any;
 }) {
     // store async submit function registered from the child
@@ -320,7 +319,7 @@ export default function RowDialog({
         >
             <DialogContent sx={{}}>
                 {selectedRow && (
-                    <RowDialogContent
+                    <RowDialogContent<Row, RowInsert>
                         apiRef={apiRef}
                         row={selectedRow}
                         registerSubmit={registerSubmit}

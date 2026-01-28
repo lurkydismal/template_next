@@ -3,7 +3,7 @@ import TableDataGrid from "@/components/TableDataGrid";
 import { TableRow, TableRowInsert } from "@/db/schema";
 import { create } from "@/lib/create";
 import { getRows } from "@/lib/get";
-import { update } from "@/lib/update";
+import { update, updateAction } from "@/lib/update";
 import log from "@/utils/stdlog";
 import {
     Queue as MockShowIcon,
@@ -97,10 +97,12 @@ export default function Page() {
         }
     };
 
-    const updateRowAction = async (row: TableRowInsert) => {
+    const updateRowAction = async (fd: FormData) => {
         "use server";
 
-        const result = await update(table, row);
+        fd.set("target", table);
+
+        const result = await updateAction(fd);
 
         if (!result.ok) {
             const message = `Failed to update row in action: ${result.error}`;

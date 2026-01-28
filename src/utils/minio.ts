@@ -16,7 +16,7 @@
 import { Client } from "minio";
 import log from "@/utils/stdlog";
 import { encodePath, getEnv, parseBool } from "@/utils/stdfunc";
-import { validatePath, validateFilename } from "@/utils/validate";
+import { pathSchema, filenameSchema } from "@/utils/validate/schemas";
 
 /**
  * Parse and validate a port value read from an environment variable.
@@ -248,7 +248,7 @@ export async function assertBucketExists(bucket: string): Promise<void> {
  * Constructs a MinIO object key from a directory path and filename.
  *
  * Behavior:
- * - Validates the filename using `validateFilename()` to ensure it is safe for storage.
+ * - Validates the filename using `filenameSchema` to ensure it is safe for storage.
  * - Optionally encodes the filename for use in URLs using `encodeURIComponent` if `needEncodeFilename` is true.
  * - Validates the directory path using `validateDirectory()` and encodes each path segment with `encodePath()`.
  * - Joins the encoded path and filename with a "/" to produce the final object key.
@@ -272,9 +272,9 @@ export function getObjectKey(
     needEncodeFilename: boolean = false,
 ) {
     const safeName = needEncodeFilename
-        ? encodeURIComponent(validateFilename(filename))
-        : validateFilename(filename);
-    const encodedPath = path ? encodePath(validatePath(path)) : "";
+        ? encodeURIComponent(filenameSchema.parse(filename))
+        : filenameSchema.parse(filename);
+    const encodedPath = path ? encodePath(pathSchema.parse(path)) : "";
     const objectKey = encodedPath ? `${encodedPath}/${safeName}` : safeName;
 
     return objectKey;

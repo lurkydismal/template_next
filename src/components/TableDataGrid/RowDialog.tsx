@@ -39,12 +39,12 @@ function RowDialogContent({
     apiRef,
     row,
     registerSubmit,
-    updateRow,
+    updateRowAction,
 }: {
     apiRef: RefObject<GridApi | null>;
     row: Readonly<TableRow>;
     registerSubmit: (fn: (() => Promise<void>) | null) => void;
-    updateRow: any;
+    updateRowAction: any;
 }) {
     const { showError } = useSnackbar();
     const [content, setContent] = useState<string | null>(row.content ?? null);
@@ -135,7 +135,7 @@ function RowDialogContent({
     const _updateRow = useCallback(
         async (fd: FormData) => {
             try {
-                const status: boolean = await updateRow(fd);
+                const status: boolean = await updateRowAction(fd);
 
                 if (status) {
                     // update DataGrid row locally (apiRef from parent)
@@ -152,7 +152,7 @@ function RowDialogContent({
                 showError(err);
             }
         },
-        [updateRow, row, content, apiRef],
+        [updateRowAction, row, content, apiRef],
     );
 
     const submit = useCallback(async () => {
@@ -272,14 +272,14 @@ export default function RowDialog({
     handleClose,
     selectedRow,
     setSelectedRow,
-    updateRow,
+    updateRowAction,
 }: {
     apiRef: RefObject<GridApi | null>;
     dialogOpen: boolean;
     handleClose: () => void;
     selectedRow: TableRow | null;
     setSelectedRow: Dispatch<SetStateAction<TableRow | null>>;
-    updateRow: any;
+    updateRowAction: any;
 }) {
     // store async submit function registered from the child
     const submitFnRef = useRef<(() => Promise<void>) | null>(null);
@@ -289,7 +289,7 @@ export default function RowDialog({
     };
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const onClose = async (_event?: unknown, reason?: unknown) => {
+    const onClose = async () => {
         if (submitFnRef.current) {
             try {
                 await submitFnRef.current();
@@ -305,7 +305,7 @@ export default function RowDialog({
     return (
         <Dialog
             open={dialogOpen}
-            onClose={onClose}
+            onClose={() => onClose()}
             maxWidth="md"
             fullWidth
             keepMounted
@@ -324,7 +324,7 @@ export default function RowDialog({
                         apiRef={apiRef}
                         row={selectedRow}
                         registerSubmit={registerSubmit}
-                        updateRow={updateRow}
+                        updateRowAction={updateRowAction}
                     />
                 )}
             </DialogContent>

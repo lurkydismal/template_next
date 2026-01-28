@@ -19,7 +19,7 @@ import {
     useRef,
     useState,
 } from "react";
-import { validateUploadInput } from "@/utils/validate";
+import { uploadSchema } from "@/utils/validate/schemas";
 import log from "@/utils/stdlog";
 import { uploadAction } from "@/lib/upload";
 import { ActionResult } from "@/lib/types";
@@ -50,7 +50,7 @@ export default function RowImageDialog({
         },
         {
             ok: false,
-            error: "",
+            error: "TODO: WRITE NOT STARTED",
         },
     );
 
@@ -66,7 +66,7 @@ export default function RowImageDialog({
             ?.value;
 
         try {
-            const { filename: sanitized } = await validateUploadInput({
+            const { filename: sanitized } = await uploadSchema.parseAsync({
                 filename: raw,
                 file,
             });
@@ -95,7 +95,7 @@ export default function RowImageDialog({
         const raw = getFilename(id);
 
         try {
-            const { filename: sanitized } = await validateUploadInput({
+            const { filename: sanitized } = await uploadSchema.parseAsync({
                 filename: raw,
                 file,
             });

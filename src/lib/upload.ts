@@ -16,7 +16,7 @@
  */
 
 import log from "@/utils/stdlog";
-import { validateUploadInput } from "@/utils/validate";
+import { uploadSchema } from "@/utils/validate/schemas";
 import { uploadToMinio } from "@/utils/minio";
 import { getEnv } from "@/utils/stdfunc";
 import { ActionResult } from "@/lib/types";
@@ -58,7 +58,7 @@ async function upload(
             throw new Error("Invalid upload target");
         }
 
-        const parsed = await validateUploadInput({ path, filename, file });
+        const parsed = await uploadSchema.parseAsync({ path, filename, file });
 
         // already validated as JPEG + size + mime
         const arrayBuffer = await parsed.file.arrayBuffer();

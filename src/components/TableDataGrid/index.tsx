@@ -1,24 +1,27 @@
 "use client";
 
-import CustomizedDataGrid from "@/components/CustomizedDataGrid";
+import CustomDataGrid from "@/components/CustomDataGrid";
 import columns from "@/data/table/columns";
-import { GridRowParams, GridRowsProp, useGridApiRef } from "@mui/x-data-grid";
 import { useCallback, useEffect, useState } from "react";
 import RowDialog from "./RowDialog";
 import log from "@/utils/stdlog";
 import { useSnackbar } from "@/components/SnackbarProvider";
+import CustomToolbar from "./Toolbar";
+import { useGridApiRef, GridRowsProp, GridRowParams } from "@mui/x-data-grid";
 
 export default function TableDataGrid<Row, EmptyRow>({
     emptyRow,
-    getRowsAction,
-    createRowAction,
-    updateRowAction,
-}: {
+    getRows,
+    createRow,
+    updateRow,
+    extraButtons,
+}: Readonly<{
     emptyRow: EmptyRow;
-    getRowsAction: any;
-    createRowAction: any;
-    updateRowAction: any;
-}) {
+    getRows: any;
+    createRow: any;
+    updateRow: any;
+    extraButtons?: React.ReactNode;
+}>) {
     const { showError } = useSnackbar();
     const apiRef = useGridApiRef();
     const [currentRows, setCurrentRows] =
@@ -29,11 +32,11 @@ export default function TableDataGrid<Row, EmptyRow>({
     // Getting rows
     const _getRows = useCallback(async () => {
         try {
-            setCurrentRows(await getRowsAction());
+            setCurrentRows(await getRows());
         } catch (err) {
             showError(err);
         }
-    }, [getRowsAction]);
+    }, [getRows]);
 
     useEffect(() => {
         _getRows();
@@ -43,12 +46,12 @@ export default function TableDataGrid<Row, EmptyRow>({
     const _createRow = useCallback(
         async (content: string) => {
             try {
-                await createRowAction(content);
+                await createRow(content);
             } catch (err) {
-                log.error(err);
+                showError(err);
             }
         },
-        [createRowAction],
+        [createRow],
     );
 
     useEffect(() => {
@@ -56,7 +59,7 @@ export default function TableDataGrid<Row, EmptyRow>({
             if (!currentRows) return;
 
             try {
-                await _createRow(emptyRow.content);
+                await _createRow(emptyRow);
             } catch (err) {
                 showError(err);
             }
@@ -102,7 +105,7 @@ export default function TableDataGrid<Row, EmptyRow>({
 
     return (
         <>
-            <CustomizedDataGrid
+            <CustomDataGrid
                 apiRef={apiRef}
                 columns={columns}
                 rows={currentRows ?? []}
@@ -112,6 +115,12 @@ export default function TableDataGrid<Row, EmptyRow>({
                     },
                 }}
                 onRowClick={handleRowClick}
+                slots={{ toolbar: CustomToolbar }}
+                slotProps={{
+                    toolbar: {
+                        extraButtons,
+                    },
+                }}
             />
 
             <RowDialog
@@ -120,7 +129,7 @@ export default function TableDataGrid<Row, EmptyRow>({
                 handleClose={handleClose}
                 selectedRow={selectedRow}
                 setSelectedRow={setSelectedRow}
-                updateRowAction={updateRowAction}
+                updateRow={updateRow}
             />
         </>
     );

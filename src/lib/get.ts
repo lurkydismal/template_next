@@ -3,12 +3,11 @@
 import db from "@/db";
 import log from "@/utils/stdlog";
 import { desc } from "drizzle-orm";
-import { GridRowsProp } from "@mui/x-data-grid";
 import { DbTarget, parseRawTarget } from "@/lib/types";
 import { ActionResult } from "@/lib/types";
 
 // TODO: Validate what returns
-export async function getRows(rawTarget: DbTarget): Promise<Return> {
+export async function getRows(rawTarget: DbTarget): Promise<ActionResult> {
     try {
         const table = parseRawTarget(rawTarget);
 

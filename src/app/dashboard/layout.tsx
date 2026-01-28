@@ -1,6 +1,5 @@
 "use client";
 
-import { SnackbarProvider } from "@/components/SnackbarProvider";
 /**
  * RootLayout Component
  *
@@ -21,6 +20,7 @@ import { SnackbarProvider } from "@/components/SnackbarProvider";
 import AppTheme from "@/theme/theme";
 import { Box, CircularProgress, CssBaseline } from "@mui/material";
 import { Suspense } from "react";
+import SnackbarProvider from "@/components/SnackbarProvider";
 
 export default function RootLayout({
     children,

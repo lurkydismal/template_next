@@ -11,7 +11,7 @@ import { isBrowser, isDev, needTrace } from "@/utils/stdvar";
  */
 const logLevel = needTrace ? 1 : isDev ? 2 : 3;
 
-type LogFn = (...args: unknown[]) => void;
+export type LogFn = (...args: unknown[]) => void;
 
 /**
  * Common logger shape used by both browser and server implementations.

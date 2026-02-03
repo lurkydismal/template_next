@@ -1,64 +1,11 @@
-import { Tooltip } from "@mui/material";
 import TableDataGrid from "@/components/TableDataGrid";
 import { TableRow, TableRowInsert } from "@/db/schema";
 import { create } from "@/lib/create";
 import { getRows } from "@/lib/get";
 import { updateAction } from "@/lib/update";
 import log from "@/utils/stdlog";
-import {
-    Queue as MockShowIcon,
-    AddBoxOutlined as AddIcon,
-} from "@mui/icons-material";
-import uuid from "@/utils/uuid";
-import { ToolbarButton } from "@mui/x-data-grid";
-import CustomDivider from "@/components/CustomDivider";
-import { useSnackbar } from "@/components/SnackbarProvider";
 import { DbTarget } from "@/lib/types";
-
-function ExtraToolbarButtons({
-    emptyRow,
-    createRowAction,
-}: Readonly<{
-    emptyRow: TableRowInsert;
-    createRowAction: any;
-}>) {
-    const { showMessage, showSuccess, showError, showWarning, showInfo } =
-        useSnackbar();
-
-    return (
-        <>
-            <Tooltip title="Show nock snackbars">
-                <ToolbarButton
-                    onClick={() => {
-                        showMessage(uuid());
-                        showSuccess(uuid());
-                        showError(uuid());
-                        showWarning(uuid());
-                        showInfo(uuid());
-                    }}
-                >
-                    <MockShowIcon fontSize="small" />
-                </ToolbarButton>
-            </Tooltip>
-
-            <Tooltip title="Add new row">
-                <ToolbarButton
-                    onClick={async () => {
-                        try {
-                            await createRowAction(emptyRow);
-                        } catch (err) {
-                            showError(err);
-                        }
-                    }}
-                >
-                    <AddIcon fontSize="small" />
-                </ToolbarButton>
-            </Tooltip>
-
-            <CustomDivider />
-        </>
-    );
-}
+import ExtraToolbarButtons from "@/components/ExtraToolbarButtons";
 
 export default function Page() {
     const table: DbTarget = "table";

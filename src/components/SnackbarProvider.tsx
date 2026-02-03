@@ -1,5 +1,6 @@
 "use client";
 
+import log, { LogFn } from "@/utils/stdlog";
 import {
     NotificationsNone as DefaultIcon,
     CheckCircleOutlined as SuccessIcon,
@@ -39,9 +40,11 @@ function errorToMessage(err: unknown): string {
 
 export function useSnackbar() {
     const ctx = useContext(SnackbarContext);
+
     if (!ctx) {
         throw new Error("useSnackbar must be used within SnackbarProvider");
     }
+
     return ctx;
 }
 
@@ -51,7 +54,29 @@ export default function CustomSnackbarProvider({
     children: React.ReactNode;
 }>) {
     const _showMessage = (err: unknown, variant?: VariantType) => {
-        enqueueSnackbar(errorToMessage(err), { variant });
+        const message = errorToMessage(err);
+
+        let logVariant: LogFn;
+
+        switch (variant) {
+            case "error":
+                logVariant = log.error;
+                break;
+
+            case "warning":
+                logVariant = log.warn;
+                break;
+
+            case "success":
+            case "info":
+            case "default":
+            default:
+                logVariant = log.info;
+        }
+
+        logVariant(message);
+
+        enqueueSnackbar(message, { variant });
     };
 
     const showMessage = (message: string) => {

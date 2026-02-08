@@ -16,7 +16,7 @@ import { useGridApiRef, GridRowsProp, GridRowParams } from "@mui/x-data-grid";
 
 export default function TableDataGrid<
     R extends Record<string, any>,
-    RI extends Record<string, any>
+    RI extends Record<string, any>,
 >({
     emptyRow,
     getRowsAction,
@@ -85,11 +85,15 @@ export default function TableDataGrid<
                 showError(err);
             }
             // scroll to top row (you might want to select the created row if you can get its id)
-            setTimeout(() => apiRef.current?.scrollToIndexes?.({ rowIndex: 0 }), 0);
+            setTimeout(
+                () => apiRef.current?.scrollToIndexes?.({ rowIndex: 0 }),
+                0,
+            );
         };
 
         const onKeyDown = (e: KeyboardEvent) => {
-            if (!((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "m")) return;
+            if (!((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "m"))
+                return;
 
             const active = document.activeElement;
             if (
@@ -119,9 +123,9 @@ export default function TableDataGrid<
     // If extraButtons is a React element, clone it and inject createRowAction + emptyRow
     const injectedExtraButtons = isValidElement(extraButtons)
         ? cloneElement(extraButtons as React.ReactElement<any>, {
-            createRowAction: createAndRefresh,
-            emptyRow,
-        })
+              createRowAction: createAndRefresh,
+              emptyRow,
+          })
         : extraButtons;
 
     return (

@@ -60,9 +60,6 @@ export default function CustomSnackbarProvider({
 
         switch (variant) {
             case "error":
-                logVariant = log.error;
-                break;
-
             case "warning":
                 logVariant = log.warn;
                 break;

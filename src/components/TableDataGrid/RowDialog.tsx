@@ -112,7 +112,7 @@ function RowDialogContent<
                 typeof f.isChanged === "function"
                     ? !f.isChanged(rowVal, newVal)
                     : String((rowVal ?? "").toString()).trim() ===
-                      String((newVal ?? "").toString()).trim();
+                    String((newVal ?? "").toString()).trim();
             if (!eq) return true;
         }
         return false;
@@ -335,19 +335,6 @@ function RowDialogContent<
                     <Typography variant="subtitle2" display="block">
                         {(row as any).last_editor ?? "—"}
                     </Typography>
-                </Grid>
-
-                <Grid size={{ xs: 12 }}>
-                    <Divider />
-                </Grid>
-
-                <Grid
-                    size={{ xs: 12 }}
-                    sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}
-                >
-                    <Button type="submit" variant="contained">
-                        Save
-                    </Button>
                 </Grid>
             </Grid>
         </form>

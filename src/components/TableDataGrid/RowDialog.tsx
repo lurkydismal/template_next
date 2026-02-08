@@ -57,7 +57,7 @@ type RowDialogContentProps<R, RI> = {
     apiRef: RefObject<GridApi | null>;
     row: R;
     fields: FieldConfig<R, RI>[];
-    registerSubmit: (fn: (() => Promise<void>) | null) => void;
+    registerSubmit: (fn: (() => Promise<boolean>) | null) => void;
     updateRowAction: UpdateRowAction;
     isRowChanged?: (row: R, values: Partial<RI>) => boolean;
     idKey?: keyof R; // defaults to "id"
@@ -119,9 +119,10 @@ function RowDialogContent<
     };
 
     const _updateRow = useCallback(
-        async (fd: FormData) => {
+        async (fd: FormData): Promise<boolean> => {
             try {
                 const status = await updateRowAction(fd);
+
                 if (status) {
                     // update DataGrid row locally (apiRef from parent)
                     const id = (row as any)[idKey];
@@ -134,15 +135,19 @@ function RowDialogContent<
                             },
                         ]);
                     }
+                    return true;
                 }
+
+                return false;
             } catch (err) {
                 showError(err);
+                return false;
             }
         },
         [updateRowAction, row, values, apiRef, showError, idKey],
     );
 
-    const submit = useCallback(async () => {
+    const submit = useCallback(async (): Promise<boolean> => {
         // values typed as Partial<RI>
         const currentValues = values as Partial<RI>;
 
@@ -151,7 +156,7 @@ function RowDialogContent<
                 ? isRowChanged(row, currentValues)
                 : defaultIsChanged(row, currentValues);
 
-        if (!changed) return;
+        if (!changed) return true;
 
         // FormData from DOM
         const fd = new FormData(formRef.current ?? undefined);
@@ -178,7 +183,7 @@ function RowDialogContent<
             }
         }
 
-        await _updateRow(fd);
+        return await _updateRow(fd);
     }, [_updateRow, fields, isRowChanged, row, values]);
 
     useEffect(() => {
@@ -368,20 +373,23 @@ export default function RowDialog<
     isRowChanged?: (row: R, values: Partial<RI>) => boolean;
     idKey?: keyof R;
 }) {
-    const submitFnRef = useRef<(() => Promise<void>) | null>(null);
+    const submitFnRef = useRef<(() => Promise<boolean>) | null>(null);
 
-    const registerSubmit = (fn: (() => Promise<void>) | null) => {
+    const registerSubmit = (fn: (() => Promise<boolean>) | null) => {
         submitFnRef.current = fn;
     };
 
     const onClose = async () => {
         if (submitFnRef.current) {
             try {
-                await submitFnRef.current();
+                const ok = await submitFnRef.current();
+                if (!ok) return; // prevent closing
             } catch (err) {
                 log.error("Failed to submit dialog form on close", err);
+                return;
             }
         }
+
         handleClose();
     };
 

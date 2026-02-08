@@ -1,8 +1,14 @@
 "use client";
 
+import React, {
+    useCallback,
+    useEffect,
+    useState,
+    cloneElement,
+    isValidElement,
+} from "react";
 import CustomDataGrid from "@/components/CustomDataGrid";
 import columns from "@/data/table/columns";
-import { useCallback, useEffect, useState } from "react";
 import RowDialog, { FieldConfig } from "./RowDialog";
 import { useSnackbar } from "@/components/SnackbarProvider";
 import CustomToolbar from "./Toolbar";
@@ -10,7 +16,7 @@ import { useGridApiRef, GridRowsProp, GridRowParams } from "@mui/x-data-grid";
 
 export default function TableDataGrid<
     R extends Record<string, any>,
-    RI extends Record<string, any>,
+    RI extends Record<string, any>
 >({
     emptyRow,
     getRowsAction,
@@ -24,7 +30,7 @@ export default function TableDataGrid<
     getRowsAction: () => Promise<Readonly<GridRowsProp>>;
     createRowAction: (row: RI) => Promise<any>;
     updateRowAction: (fd: FormData) => Promise<boolean>;
-    extraButtons?: React.ReactNode;
+    extraButtons?: React.ReactNode; // optionally a ReactElement expecting props
     fields: FieldConfig<R, RI>[];
     isRowChanged?: (row: R, values: Partial<RI>) => boolean;
 }>) {
@@ -42,41 +48,48 @@ export default function TableDataGrid<
         } catch (err) {
             showError(err);
         }
-    }, [getRowsAction]);
+    }, [getRowsAction, showError]);
 
     useEffect(() => {
         _getRows();
     }, [_getRows]);
 
-    // Creating row
-    const _createRow = useCallback(
+    // the original createRowAction wrapped so we always refresh UI after create
+    const createAndRefresh = useCallback(
         async (row: RI) => {
             try {
-                await createRowAction(row);
+                const created = await createRowAction(row);
+                // Option A: re-fetch full list (safe)
+                await _getRows();
+
+                // Option B (optimistic): if create returns the created row with id, you can:
+                // if (created && created.id !== undefined && apiRef?.current?.updateRows) {
+                //   apiRef.current.updateRows([{ id: created.id, ...created }]);
+                // }
+
+                return created;
             } catch (err) {
                 showError(err);
             }
         },
-        [createRowAction],
+        [createRowAction, _getRows, showError, apiRef],
     );
 
+    // Keyboard shortcut & other internal creators use createAndRefresh
     useEffect(() => {
         const submit = async () => {
             if (!currentRows) return;
-
             try {
-                // FIX: Improve
-                await _createRow(emptyRow);
+                await createAndRefresh(emptyRow);
             } catch (err) {
                 showError(err);
             }
-
-            await _getRows();
+            // scroll to top row (you might want to select the created row if you can get its id)
+            setTimeout(() => apiRef.current?.scrollToIndexes?.({ rowIndex: 0 }), 0);
         };
 
         const onKeyDown = (e: KeyboardEvent) => {
-            if (!((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "m"))
-                return;
+            if (!((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "m")) return;
 
             const active = document.activeElement;
             if (
@@ -89,19 +102,12 @@ export default function TableDataGrid<
             }
 
             e.preventDefault();
-
-            submit();
-
-            // select/ scroll:
-            setTimeout(() => {
-                // apiRef.current?.setSelectionModel?.([newId]);
-                apiRef.current?.scrollToIndexes?.({ rowIndex: 0 });
-            }, 0);
+            void submit();
         };
 
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
-    }, [_getRows, _createRow, currentRows, apiRef]);
+    }, [currentRows, createAndRefresh, emptyRow, showError, apiRef]);
 
     const handleRowClick = (params: GridRowParams) => {
         setSelectedRow(params.row as R);
@@ -109,6 +115,14 @@ export default function TableDataGrid<
     };
 
     const handleClose = () => setDialogOpen(false);
+
+    // If extraButtons is a React element, clone it and inject createRowAction + emptyRow
+    const injectedExtraButtons = isValidElement(extraButtons)
+        ? cloneElement(extraButtons as React.ReactElement<any>, {
+            createRowAction: createAndRefresh,
+            emptyRow,
+        })
+        : extraButtons;
 
     return (
         <>
@@ -125,7 +139,7 @@ export default function TableDataGrid<
                 slots={{ toolbar: CustomToolbar }}
                 slotProps={{
                     toolbar: {
-                        extraButtons,
+                        extraButtons: injectedExtraButtons,
                     },
                 }}
             />

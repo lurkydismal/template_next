@@ -93,6 +93,11 @@ export function isRecord(input: unknown): input is Record<string, any> {
     return proto === Object.prototype || proto === null;
 }
 
+// TODO: Document
+export function isBlob(v: unknown): v is Blob {
+    return typeof v === "object" && v !== null && v instanceof Blob;
+}
+
 /**
  * Extract a value from FormData or return the raw input.
  *

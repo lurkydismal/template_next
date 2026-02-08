@@ -112,7 +112,7 @@ function RowDialogContent<
                 typeof f.isChanged === "function"
                     ? !f.isChanged(rowVal, newVal)
                     : String((rowVal ?? "").toString()).trim() ===
-                    String((newVal ?? "").toString()).trim();
+                      String((newVal ?? "").toString()).trim();
             if (!eq) return true;
         }
         return false;

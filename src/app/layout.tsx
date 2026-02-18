@@ -13,7 +13,7 @@
  * - Logs current build environment (development or production) using a custom logger.
  *
  * Notes:
- * - `font.variable` sets a CSS variable `--font-nain` for use across the app.
+ * - `font.variable` sets a CSS variable `--font-main` for use across the app.
  * - `InitColorSchemeScript` ensures proper MUI theme handling on first load.
  * - `AppRouterCacheProvider` is configured with `enableCssLayer: true` to optimize style insertion.
  */
@@ -29,7 +29,7 @@ import MuiLayout from "@/components/MuiLayout";
 
 // Configure Geist Mono font with CSS variable for global usage
 const font = Geist_Mono({
-    variable: "--font-nain",
+    variable: "--font-main",
     subsets: ["latin"],
     display: "swap",
 });

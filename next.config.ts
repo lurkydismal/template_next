@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     experimental: {
         cssChunking: true,
         browserDebugInfoInTerminal: true,
-        viewTransition: true,
+        authInterrupts: true,
     },
 
     images: {

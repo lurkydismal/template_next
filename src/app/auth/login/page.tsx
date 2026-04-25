@@ -12,6 +12,7 @@ import { login } from "@/lib/auth";
 import { useSnackbar } from "@/providers/snackbar";
 import { UsersRowPublic } from "@/db/types";
 import { setUser } from "@/utils/stduser";
+import { afterLoginRoute } from "@/data/routes";
 
 export default function SignInPage() {
     const router = useRouter();
@@ -36,7 +37,7 @@ export default function SignInPage() {
 
             setUser(user);
 
-            router.push("/posts");
+            router.push(afterLoginRoute);
         } catch (err) {
             showError(err);
         }

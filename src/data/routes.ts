@@ -1,0 +1,1 @@
+export const afterLoginRoute = "/posts";

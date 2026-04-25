@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import { register } from "@/lib/auth";
 import { useSnackbar } from "@/providers/snackbar";
 import { setUser } from "@/utils/stduser";
+import { afterLoginRoute } from "@/data/routes";
 
 export default function SignUpPage() {
     const router = useRouter();
@@ -34,7 +35,7 @@ export default function SignUpPage() {
 
             setUser(user);
 
-            router.push("/posts");
+            router.push(afterLoginRoute);
         } catch (err) {
             showError(err);
         }

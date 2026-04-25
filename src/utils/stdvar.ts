@@ -109,20 +109,6 @@ export const timeZone = "UTC";
 export const dateTimeFormat = "HH:mm DD.MM.YYYY";
 
 /**
- * Maximum allowed image size for uploads.
- * - Set to 1 megabyte (1 MB) = 1 * 1024 * 1024 bytes.
- * - Used in file validation to prevent oversized uploads.
- */
-export const maxImageSize = 1 * 1024 * 1024; // 1 MB
-
-/**
- * Allowed MIME types for image uploads.
- * - Currently only supports JPEG images.
- * - Used in validation to reject unsupported formats.
- */
-export const allowedImageTypes = ["image/jpeg"];
-
-/**
  * Maximum number of retry attempts for network requests or operations.
  */
 export const maxRetries = 3;
@@ -134,13 +120,13 @@ export const maxRetries = 3;
 export const storageKeys = {
     client: isBrowser
         ? {
-              authStorageKey: "user", // FIX: Not found
-          }
+            authStorageKey: "user", // FIX: Not found
+        }
         : null,
 
     server: isServer
         ? {
-              accessToken: getEnv("COOKIE_NAME"),
-          }
+            accessToken: getEnv("COOKIE_NAME"),
+        }
         : null,
 };

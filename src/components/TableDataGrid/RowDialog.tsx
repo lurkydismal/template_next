@@ -21,7 +21,6 @@ import {
     useRef,
     useState,
 } from "react";
-import RowImageDialog from "./RowImageDialog";
 import log from "@/utils/stdlog";
 import { GridApi } from "@mui/x-data-grid";
 import { useSnackbar } from "@/providers/snackbar";
@@ -112,7 +111,7 @@ function RowDialogContent<
                 typeof f.isChanged === "function"
                     ? !f.isChanged(rowVal, newVal)
                     : String((rowVal ?? "").toString()).trim() ===
-                      String((newVal ?? "").toString()).trim();
+                    String((newVal ?? "").toString()).trim();
             if (!eq) return true;
         }
         return false;
@@ -224,12 +223,6 @@ function RowDialogContent<
                         />
                         {/* keep a hidden input so FormData picks up a string id if needed */}
                         <input type="hidden" name={name} value={val ?? ""} />
-                        <RowImageDialog
-                            id={(row as any)[idKey]}
-                            src={String(val ?? "")}
-                            open={imageOpenFor === key}
-                            setOpen={(v) => setImageOpenFor(v ? key : null)}
-                        />
                     </div>
                 );
 

@@ -7,7 +7,7 @@ import {
     CircularProgress,
     Alert,
 } from "@mui/material";
-import { ErrorOutline as ErrorIcon } from "@mui/icons-material";
+import { ErrorOutlined as ErrorIcon } from "@mui/icons-material";
 import {
     Dispatch,
     SetStateAction,

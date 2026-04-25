@@ -1,7 +1,8 @@
 import z from "zod";
-import { users, categories } from "@/db/schema";
+import { users, categories, table } from "@/db/schema";
 
 export const TABLES = {
+    table: table,
     users: users,
     categories: categories,
 } as const;

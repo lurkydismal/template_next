@@ -74,8 +74,16 @@ export async function mockAction<T>(
     milliseconds: number,
     data?: T,
 ): Promise<ActionResult<T>> {
+    const rawDelayMs = Number(milliseconds);
+    if (!Number.isFinite(rawDelayMs) || rawDelayMs < 0) {
+        throw new Error(`Invalid delay value: ${milliseconds}`);
+    }
+
+    const MAX_DELAY_MS = 60_000; // 1 minute
+    const safeDelayMs = Math.min(Math.floor(rawDelayMs), MAX_DELAY_MS);
+
     // Simulate async work
-    await delay(milliseconds);
+    await delay(safeDelayMs);
 
     // Default payload case
     return {

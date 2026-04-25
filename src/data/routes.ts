@@ -1,1 +1,1 @@
-export const afterLoginRoute = "/posts";
+export const afterLoginRoute = "/dashboard/table";

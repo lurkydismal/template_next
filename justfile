@@ -84,6 +84,13 @@ docker-remove-unused-images:
     set -euo pipefail
     docker images -f "dangling=true" -q | xargs -r docker rmi
 
+# Reload the reverse proxy.
+reverse-proxy-reload: caddy-reload
+
+# Reload Caddy configuration inside the running container.
+caddy-reload:
+    docker compose exec -w /etc/caddy caddy caddy reload
+
 # Generate a cryptographically secure random alphanumeric token of length `N`. Uses `openssl rand` as the entropy source, encodes as Base64, removes padding and non-alphanumeric output, then retries until the result is exactly `N` characters using only `[A-Za-z0-9]`.
 generate-token length='32':
     #!/usr/bin/env bash

@@ -1,30 +1,7 @@
-import { Logger } from "tslog";
-import { isBrowser, isDev, needTrace } from "@/utils/stdvar";
+"use client";
 
-/**
- * Determine minimum server log level:
- * - `needTrace` forces the most verbose level (1).
- * - In development (`isDev` true) use level 2.
- * - Otherwise use level 3 for production.
- *
- * These numeric levels are passed to `tslog` as `minLevel`.
- */
-const logLevel = needTrace ? 1 : isDev ? 2 : 3;
-
-export type LogFn = (...args: unknown[]) => void;
-
-/**
- * Common logger shape used by both browser and server implementations.
- * Each property is a logging function that accepts any arguments.
- */
-type CommonLogger = {
-    trace: LogFn;
-    debug: LogFn;
-    info: LogFn;
-    warn: LogFn;
-    error: LogFn;
-    fatal: LogFn;
-};
+import { isDev, needTrace } from "@/utils/stdvar";
+import { CommonLogger, LogFn } from "./types";
 
 /**
  * Create a browser-friendly logger that:
@@ -89,8 +66,8 @@ function makeBrowserLogger(): CommonLogger {
     };
 
     return {
-        trace: needTrace ? makeLevel("TRACE") : () => { },
-        debug: isDev ? makeLevel("DEBUG") : () => { },
+        trace: needTrace ? makeLevel("TRACE") : () => {},
+        debug: isDev ? makeLevel("DEBUG") : () => {},
         info: makeLevel("INFO"),
         warn: makeLevel("WARN"),
         error: makeLevel("ERROR"),
@@ -102,36 +79,3 @@ function makeBrowserLogger(): CommonLogger {
  * `browserLogger` - a lightweight, styled console logger for use in browser environments.
  */
 export const browserLogger = makeBrowserLogger();
-
-/**
- * `serverLogger` - `tslog`-based logger configured for server/node environments.
- * - `type: "pretty"` renders human-readable logs.
- * - `minLevel` is set based on environment and tracing flags.
- * - `prettyLogTemplate` is configured to show the log level name followed by a tab.
- */
-export const serverLogger = new Logger({
-    type: "pretty",
-    minLevel: logLevel,
-    prettyLogTemplate: "{{dateIsoStr}} {{logLevelName}}\t",
-});
-
-/**
- * `log` selects the appropriate logger implementation at runtime:
- * - `browserLogger` when running in a browser environment.
- * - `serverLogger` when running on server/node.
- *
- * It is typed as `CommonLogger` so consumers can call `.trace/.debug/.info/.warn/.error/.fatal`
- * uniformly without knowing the underlying implementation.
- */
-const log: CommonLogger = isBrowser
-    ? browserLogger
-    : (serverLogger as unknown as CommonLogger);
-
-export default log;
-
-// TODO: Document
-export function logVar<T extends Record<string, any>>(obj: T) {
-    for (const [key, value] of Object.entries(obj)) {
-        log.trace(`${key}:`, value, `(type: ${typeof value})`);
-    }
-}

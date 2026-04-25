@@ -10,12 +10,13 @@ import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { DefaultLogger, LogWriter } from "drizzle-orm/logger";
 import log from "@/utils/stdlog";
+import { relations } from "./relations";
 
 // Custom implementation of Drizzle's LogWriter interface
 // All log messages from Drizzle will be routed through this writer
 class MyLogWriter implements LogWriter {
     write(message: string) {
-        log.info(message);
+        log.debug(message);
     }
 }
 
@@ -35,6 +36,7 @@ const db = drizzle({
     },
     casing: "snake_case",
     logger,
+    relations: relations,
 });
 
 export default db;

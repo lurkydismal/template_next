@@ -1,3 +1,4 @@
+import { afterLoginRoute } from "@/data/routes";
 import { getSessionData } from "@/lib/auth";
 import { permanentRedirect } from "next/navigation";
 
@@ -8,5 +9,5 @@ export default async function Page() {
         permanentRedirect("/auth/register");
     }
 
-    permanentRedirect("/bans");
+    permanentRedirect(afterLoginRoute);
 }

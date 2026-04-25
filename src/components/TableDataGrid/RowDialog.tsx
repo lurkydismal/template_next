@@ -24,7 +24,7 @@ import {
 import RowImageDialog from "./RowImageDialog";
 import log from "@/utils/stdlog";
 import { GridApi } from "@mui/x-data-grid";
-import { useSnackbar } from "@/components/SnackbarProvider";
+import { useSnackbar } from "@/providers/snackbar";
 import { isBlob } from "@/utils/stdfunc";
 
 /* ----------------------------

@@ -10,7 +10,7 @@ import React, {
 import CustomDataGrid from "./CustomDataGrid";
 import columns from "@/data/table/columns";
 import RowDialog, { FieldConfig } from "./RowDialog";
-import { useSnackbar } from "@/components/SnackbarProvider";
+import { useSnackbar } from "@/providers/snackbar";
 import CustomToolbar from "./Toolbar";
 import { useGridApiRef, GridRowsProp, GridRowParams } from "@mui/x-data-grid";
 

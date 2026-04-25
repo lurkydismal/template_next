@@ -2,7 +2,7 @@
 
 import { TableRowInsert } from "@/db/schema";
 import CustomDivider from "./CustomDivider";
-import { useSnackbar } from "@/components/SnackbarProvider";
+import { useSnackbar } from "@/providers/snackbar";
 import uuid from "@/utils/uuid";
 import {
     Queue as MockShowIcon,

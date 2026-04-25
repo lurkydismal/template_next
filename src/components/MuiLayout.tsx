@@ -17,7 +17,7 @@
 
 import AppTheme from "@/theme/theme";
 import { Box, CircularProgress, CssBaseline } from "@mui/material";
-import SnackbarProvider from "@/components/SnackbarProvider";
+import SnackbarProvider from "@/providers/snackbar";
 import { Suspense } from "react";
 
 export default function MuiLayout({

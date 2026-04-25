@@ -3,12 +3,15 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
     cacheComponents: true,
 
+    logging: {
+        browserDebugInfoInTerminal: true,
+    },
+
     // Disable ONLY if nginx has enabled brotli
     // compress: false,
 
     experimental: {
         cssChunking: true,
-        browserDebugInfoInTerminal: true,
         authInterrupts: true,
     },
 

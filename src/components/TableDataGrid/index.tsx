@@ -72,7 +72,7 @@ export default function TableDataGrid<
                 showError(err);
             }
         },
-        [createRowAction, _getRows, showError, apiRef],
+        [createRowAction, _getRows, showError],
     );
 
     // Keyboard shortcut & other internal creators use createAndRefresh
@@ -123,9 +123,9 @@ export default function TableDataGrid<
     // If extraButtons is a React element, clone it and inject createRowAction + emptyRow
     const injectedExtraButtons = isValidElement(extraButtons)
         ? cloneElement(extraButtons as React.ReactElement<any>, {
-              createRowAction: createAndRefresh,
-              emptyRow,
-          })
+            createRowAction: createAndRefresh,
+            emptyRow,
+        })
         : extraButtons;
 
     return (

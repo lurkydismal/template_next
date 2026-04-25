@@ -247,10 +247,7 @@ export async function clearAuthCookie(cookieStore: CookieStore) {
  *
  * This implementation normalizes username and logs errors (without secrets) for auditing.
  */
-export async function register(user: {
-    username: string;
-    password: string;
-}) {
+export async function register(user: { username: string; password: string }) {
     // parse + validate input; throws on invalid input
     const parsed = userSelectPublicSchema
         .omit({

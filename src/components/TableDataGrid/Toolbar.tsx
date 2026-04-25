@@ -27,7 +27,7 @@ import {
     Search as SearchIcon,
     Cancel as CancelIcon,
 } from "@mui/icons-material";
-import { useState, useRef } from "react";
+import { MouseEvent, useState } from "react";
 import CustomDivider from "./CustomDivider";
 
 type OwnerState = {
@@ -62,19 +62,27 @@ const StyledTextField = styled(TextField)<{
 }));
 
 function ExportMenu() {
-    const [exportMenuOpen, setExportMenuOpen] = useState(false);
-    const exportMenuTriggerRef = useRef<HTMLButtonElement>(null);
+    const [exportMenuAnchorEl, setExportMenuAnchorEl] =
+        useState<HTMLElement | null>(null);
+    const exportMenuOpen = Boolean(exportMenuAnchorEl);
+
+    const handleExportMenuOpen = (event: MouseEvent<HTMLElement>) => {
+        setExportMenuAnchorEl(event.currentTarget);
+    };
+
+    const handleExportMenuClose = () => {
+        setExportMenuAnchorEl(null);
+    };
 
     return (
         <>
             <Tooltip title="Export">
                 <ToolbarButton
-                    ref={exportMenuTriggerRef}
                     id="export-menu-trigger"
                     aria-controls="export-menu"
                     aria-haspopup="true"
                     aria-expanded={exportMenuOpen ? "true" : undefined}
-                    onClick={() => setExportMenuOpen(true)}
+                    onClick={handleExportMenuOpen}
                 >
                     <FileDownloadIcon fontSize="small" />
                 </ToolbarButton>
@@ -82,9 +90,9 @@ function ExportMenu() {
 
             <Menu
                 id="export-menu"
-                anchorEl={exportMenuTriggerRef.current}
+                anchorEl={exportMenuAnchorEl}
                 open={exportMenuOpen}
-                onClose={() => setExportMenuOpen(false)}
+                onClose={handleExportMenuClose}
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
                 slotProps={{
@@ -95,13 +103,13 @@ function ExportMenu() {
             >
                 <ExportPrint
                     render={<MenuItem />}
-                    onClick={() => setExportMenuOpen(false)}
+                    onClick={handleExportMenuClose}
                 >
                     Print
                 </ExportPrint>
                 <ExportCsv
                     render={<MenuItem />}
-                    onClick={() => setExportMenuOpen(false)}
+                    onClick={handleExportMenuClose}
                 >
                     Download as CSV
                 </ExportCsv>
@@ -178,17 +186,28 @@ export default function CustomToolbar({ extraButtons }: CustomToolbarProps) {
         <Toolbar>
             {extraButtons}
 
-            <Tooltip title="Columns">
-                <ColumnsPanelTrigger render={<ToolbarButton />}>
-                    <ViewColumnIcon fontSize="small" />
-                </ColumnsPanelTrigger>
-            </Tooltip>
+            <ColumnsPanelTrigger
+                render={(triggerProps) => (
+                    <Tooltip title="Columns">
+                        <ToolbarButton {...triggerProps}>
+                            <ViewColumnIcon fontSize="small" />
+                        </ToolbarButton>
+                    </Tooltip>
+                )}
+            />
 
-            <Tooltip title="Filters">
-                <FilterPanelTrigger render={<ToolbarButton />}>
-                    <FilterListIcon fontSize="small" />
-                </FilterPanelTrigger>
-            </Tooltip>
+            <FilterPanelTrigger
+                render={(triggerProps, state) => (
+                    <Tooltip title="Filters">
+                        <ToolbarButton
+                            {...triggerProps}
+                            color={state.filterCount > 0 ? "primary" : "default"}
+                        >
+                            <FilterListIcon fontSize="small" />
+                        </ToolbarButton>
+                    </Tooltip>
+                )}
+            />
 
             <CustomDivider />
 

@@ -3,7 +3,7 @@ import {
     createInsertSchema,
     createSelectSchema,
     createUpdateSchema,
-} from "drizzle-orm/zod";
+} from "drizzle-zod";
 import { maxImageSize } from "@/utils/stdvar";
 import { sanitizeFilename } from "@/utils/stdfunc";
 import { categories, users } from "@/db/schema";
@@ -193,7 +193,6 @@ export const userSelectPublicSchema = userSelectSchema
     .extend({
         username: z.string().trim().min(1),
         username_normalized: z.string().trim().min(1).lowercase(),
-        avatar_url: z.string().trim().min(1).nullable(),
     });
 
 /**

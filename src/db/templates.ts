@@ -1,7 +1,4 @@
-import {
-    serial,
-    text,
-} from "drizzle-orm/pg-core";
+import { serial, text } from "drizzle-orm/pg-core";
 import { timestamps } from "./helpers";
 
 export const template_table = {

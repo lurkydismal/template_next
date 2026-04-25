@@ -36,7 +36,7 @@ export default function Footer() {
                     {/* LEFT SIDE */}
                     <Stack spacing={0.5}>
                         {/* Row 1 */}
-                        <Stack direction="row" spacing={1} alignItems="center">
+                        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                             <Link
                                 color="text.secondary"
                                 variant="body2"

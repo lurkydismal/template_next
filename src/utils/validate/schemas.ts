@@ -4,8 +4,6 @@ import {
     createSelectSchema,
     createUpdateSchema,
 } from "drizzle-zod";
-import { maxImageSize } from "@/utils/stdvar";
-import { sanitizeFilename } from "@/utils/stdfunc";
 import { categories, users } from "@/db/schema";
 import dayjs from "@/utils/dayjs";
 import { Dayjs } from "dayjs";

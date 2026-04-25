@@ -26,13 +26,13 @@ type Values = SignInValues | SignUpValues;
 
 type Props =
     | {
-        mode: "signin";
-        onSubmit: (data: SignInValues) => Promise<void> | void;
-    }
+          mode: "signin";
+          onSubmit: (data: SignInValues) => Promise<void> | void;
+      }
     | {
-        mode: "signup";
-        onSubmit: (data: SignUpValues) => Promise<void> | void;
-    };
+          mode: "signup";
+          onSubmit: (data: SignUpValues) => Promise<void> | void;
+      };
 
 export default function AuthForm(props: Props) {
     const isSignIn = props.mode === "signin";

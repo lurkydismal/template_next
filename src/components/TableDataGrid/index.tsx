@@ -123,10 +123,13 @@ export default function TableDataGrid<
 
     // If extraButtons is a React element, clone it and inject createRowAction + emptyRow
     const injectedExtraButtons = isValidElement(extraButtons)
-        ? cloneElement(extraButtons as React.ReactElement<Record<string, unknown>>, {
-            createRowAction: createAndRefresh,
-            emptyRow,
-        })
+        ? cloneElement(
+              extraButtons as React.ReactElement<Record<string, unknown>>,
+              {
+                  createRowAction: createAndRefresh,
+                  emptyRow,
+              },
+          )
         : extraButtons;
 
     return (

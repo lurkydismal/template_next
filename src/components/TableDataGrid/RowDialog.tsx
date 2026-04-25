@@ -92,8 +92,8 @@ function RowDialogContent<
         return out;
     };
 
-    const [values, setValues] = useState<Record<string, unknown>>(buildInitial());
-    const [_imageOpenFor, setImageOpenFor] = useState<string | null>(null);
+    const [values, setValues] =
+        useState<Record<string, unknown>>(buildInitial());
 
     // keep values in sync if selected row changes externally
     useEffect(() => {
@@ -115,7 +115,7 @@ function RowDialogContent<
                     typeof f.isChanged === "function"
                         ? !f.isChanged(rowVal, newVal)
                         : String((rowVal ?? "").toString()).trim() ===
-                          String((newVal ?? "").toString()).trim();
+                        String((newVal ?? "").toString()).trim();
                 if (!eq) return true;
             }
             return false;
@@ -213,25 +213,6 @@ function RowDialogContent<
         }
 
         switch (f.type ?? "text") {
-            case "image":
-                return (
-                    <div key={`${key}-${idx}`}>
-                        <Typography variant="subtitle1" color="text.secondary">
-                            {f.label}
-                        </Typography>
-                        <Chip
-                            icon={<ImageIcon />}
-                            label="Open image"
-                            size="medium"
-                            onClick={() => setImageOpenFor(key)}
-                            variant="outlined"
-                            sx={{ p: "0.5rem", fontSize: "1.125rem" }}
-                        />
-                        {/* keep a hidden input so FormData picks up a string id if needed */}
-                        <input type="hidden" name={name} value={val ?? ""} />
-                    </div>
-                );
-
             case "multiline":
                 return (
                     <div key={`${key}-${idx}`}>
@@ -284,13 +265,16 @@ function RowDialogContent<
         >
             <Grid container spacing={2}>
                 {/* Hidden id if present */}
-                {((row as Record<string, unknown>)[String(idKey)] ?? null) !== null && (
-                    <input
-                        type="hidden"
-                        name={String(idKey)}
-                        value={String((row as Record<string, unknown>)[String(idKey)])}
-                    />
-                )}
+                {((row as Record<string, unknown>)[String(idKey)] ?? null) !==
+                    null && (
+                        <input
+                            type="hidden"
+                            name={String(idKey)}
+                            value={String(
+                                (row as Record<string, unknown>)[String(idKey)],
+                            )}
+                        />
+                    )}
 
                 {fields.map((field, index) => (
                     <Grid
@@ -310,7 +294,10 @@ function RowDialogContent<
                         Created
                     </Typography>
                     <Typography variant="subtitle2" display="block">
-                        {formatDate((row as { created_at?: unknown }).created_at, true)}
+                        {formatDate(
+                            (row as { created_at?: unknown }).created_at,
+                            true,
+                        )}
                     </Typography>
                 </Grid>
 
@@ -319,7 +306,10 @@ function RowDialogContent<
                         Updated
                     </Typography>
                     <Typography variant="subtitle2" display="block">
-                        {formatDate((row as { updated_at?: unknown }).updated_at, true)}
+                        {formatDate(
+                            (row as { updated_at?: unknown }).updated_at,
+                            true,
+                        )}
                     </Typography>
                 </Grid>
 

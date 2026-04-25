@@ -34,6 +34,14 @@ generate-migration:
 migrate:
     pnpm migrate
 
+# Interactively review and upgrade package versions.
+packages-upgrade:
+    ncu -ui
+
+# Install project dependencies.
+packages-install:
+    pnpm i
+
 # Pull the current database schema into schema.
 pull-db-schema:
     pnpm pull

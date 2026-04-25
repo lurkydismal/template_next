@@ -142,7 +142,7 @@ function signJwt(
  * - Uses jsonwebtoken.verify which checks signature and expiration.
  * - Returns `null` for any verification/validation error.
  *
- * The function validates only the expected public fields (username, avatar_url)
+ * The function validates only the expected public fields (username)
  * using your existing userSelectPublicSchema to avoid iat/exp causing downstream failures.
  */
 async function verifyJwt(token: string): Promise<null | UsersRowPublic> {
@@ -163,15 +163,12 @@ async function verifyJwt(token: string): Promise<null | UsersRowPublic> {
         const publicSchema = userSelectPublicSchema.pick({
             username: true,
             username_normalized: true,
-            avatar_url: true,
         });
 
         // build a minimal object and validate it with Zod
         const parsed = publicSchema.parse({
             username: payload.username,
             username_normalized: payload.username_normalized,
-            // keep explicit null handling for avatar_url
-            avatar_url: payload.avatar_url ?? null,
         });
 
         // parsed is now a UsersRowPublic-like object (only the fields from publicSchema)
@@ -253,7 +250,6 @@ export async function clearAuthCookie(cookieStore: CookieStore) {
 export async function register(user: {
     username: string;
     password: string;
-    avatar_url: string | null;
 }) {
     // parse + validate input; throws on invalid input
     const parsed = userSelectPublicSchema
@@ -277,12 +273,10 @@ export async function register(user: {
                 username: parsed.username.trim(),
                 username_normalized: normalizedUsername,
                 password_hash: hash,
-                avatar_url: parsed.avatar_url ?? null,
             })
             .returning({
                 username: users.username,
                 username_normalized: users.username_normalized,
-                avatar_url: users.avatar_url,
             })
             .execute();
 
@@ -293,7 +287,6 @@ export async function register(user: {
         const payload = {
             username: created.username,
             username_normalized: created.username_normalized,
-            avatar_url: parsed.avatar_url ?? null,
         };
 
         const token = signJwt(payload, false);
@@ -305,7 +298,6 @@ export async function register(user: {
         const publicUser: UsersRowPublic = {
             username: created.username,
             username_normalized: created.username_normalized,
-            avatar_url: created.avatar_url ?? null,
         };
 
         return publicUser;
@@ -332,7 +324,6 @@ async function verifyPassword(user: { username: string; password: string }) {
     const parsed = userSelectPublicSchema
         .omit({
             username_normalized: true,
-            avatar_url: true,
         })
         .extend({
             password: z.string().trim().min(1),
@@ -378,7 +369,7 @@ export async function login(credentials: {
 }): Promise<UsersRowPublic> {
     // parse -> validate (this will throw on invalid shape)
     const parsed = userSelectPublicSchema
-        .omit({ username_normalized: true, avatar_url: true }) // only need username for auth
+        .omit({ username_normalized: true })
         .extend({
             password: z.string().trim().min(1),
             remember: z.boolean().optional(),
@@ -415,7 +406,6 @@ export async function login(credentials: {
             .select({
                 username: users.username,
                 username_normalized: users.username_normalized,
-                avatar_url: users.avatar_url,
             })
             .from(users)
             .where(eq(users.username_normalized, normalizedUsername))
@@ -433,7 +423,6 @@ export async function login(credentials: {
         const payload = {
             username: found.username,
             username_normalized: found.username_normalized,
-            avatar_url: found.avatar_url ?? null,
         };
 
         const token = signJwt(payload, Boolean(parsed.remember));
@@ -449,7 +438,6 @@ export async function login(credentials: {
         const publicUser: UsersRowPublic = {
             username: found.username,
             username_normalized: found.username_normalized,
-            avatar_url: found.avatar_url ?? null,
         };
 
         return publicUser;

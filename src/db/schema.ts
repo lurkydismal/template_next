@@ -1,5 +1,12 @@
-import { serial, pgTable, text, uniqueIndex, check } from "drizzle-orm/pg-core";
-import { timestamps } from "@/db/helpers";
+import {
+    varchar,
+    serial,
+    pgTable,
+    text,
+    check,
+    uniqueIndex,
+} from "drizzle-orm/pg-core";
+import { timestamps } from "./helpers";
 import { sql } from "drizzle-orm";
 
 export const template_table = {
@@ -7,6 +14,27 @@ export const template_table = {
     content: text().notNull(),
     ...timestamps,
 };
+export const users = pgTable(
+    "users",
+    {
+        id: serial().primaryKey(),
+        username: varchar({ length: 32 }).unique().notNull(),
+        username_normalized: varchar({ length: 32 }).unique().notNull(),
+        password_hash: text().notNull(),
+        ...timestamps,
+    },
+    (t) => [
+        check("username_not_blank", sql`length(trim(${t.username})) > 0`),
+        check(
+            "username_normalized_not_blank",
+            sql`length(trim(${t.username_normalized})) > 0`,
+        ),
+        check(
+            "username_normalized_lowercase",
+            sql`${t.username_normalized} = lower(${t.username_normalized})`,
+        ),
+    ],
+);
 
 export const table = pgTable("table", template_table, (t) => [
     check("content_not_blank", sql`length(trim(${t.content})) > 0`),
@@ -17,3 +45,12 @@ export const table = pgTable("table", template_table, (t) => [
 
 export type TableRow = typeof table.$inferSelect;
 export type TableRowInsert = typeof table.$inferInsert;
+export const categories = pgTable(
+    "categories",
+    {
+        id: serial().primaryKey(),
+        name: varchar({ length: 50 }).unique().notNull(),
+        ...timestamps,
+    },
+    (t) => [check("name_not_blank", sql`length(trim(${t.name})) > 0`)],
+);

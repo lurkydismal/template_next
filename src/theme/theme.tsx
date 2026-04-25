@@ -65,7 +65,7 @@ export default function AppTheme(props: AppThemeProps) {
             shadows,
             shape,
             components: {
-                ...themeComponents, // merge any user-provided component overrides
+                ...themeComponents, // merge user-provided component overrides
             },
         },
         mui, // apply MUI core locale

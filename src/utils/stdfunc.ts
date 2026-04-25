@@ -105,9 +105,9 @@ export function toPascalCase(text: string): string {
         text
             .trim()
             .toLowerCase()
-            // Replace any non-alphanumeric separator with a single space
+            // Replace each non-alphanumeric separator with a single space
             .replace(/[\s-_]+/g, " ")
-            // Remove any remaining non-alphanumeric characters
+            // Remove remaining non-alphanumeric characters
             .replace(/[^a-z0-9 ]+/g, "")
             // Split by spaces, capitalize each word, join
             .split(" ")
@@ -117,12 +117,12 @@ export function toPascalCase(text: string): string {
 }
 
 /**
- * Type guard to check if an input is a plain object (Record<string, any>).
+ * Type guard to check if an input is a plain object (Record<string, unknown>).
  *
  * @param input - The value to check
  * @returns True if input is a plain object
  */
-export function isRecord(input: unknown): input is Record<string, any> {
+export function isRecord(input: unknown): input is Record<string, unknown> {
     if (typeof input !== "object" || input === null) return false;
 
     const proto = Object.getPrototypeOf(input);
@@ -148,7 +148,7 @@ export function isBlob(v: unknown): v is Blob {
  * @returns Extracted value or undefined
  */
 export function extractFromFormData<T = unknown>(
-    input: FormData | Record<string, any> | unknown,
+    input: FormData | Record<string, unknown> | unknown,
     key: string,
 ): T | undefined {
     if (input instanceof FormData) {
@@ -213,7 +213,7 @@ export function paginate<T>(
  * This function checks if the input `item` is an array. If it is, the function returns the first element of the array.
  * If the input is a single value (not an array), the function returns the value itself.
  *
- * @template T - The type of the value that is passed in. This can be any type, and it can also be an array of that type.
+ * @template T - The type of the value that is passed in. This can be an arbitrary type, and it can also be an array of that type.
  * @param item - The value to be normalized. It can either be a single value of type `T` or an array of values of type `T[]`.
  * @returns The normalized value: if `item` is an array, it returns the first element (`item[0]`), otherwise it returns `item` itself.
  *
@@ -231,14 +231,14 @@ export function normalizeArrayOrValue<T>(item: T | T[]): T {
 /**
  * [TODO:description]
  */
-type AwaitedObject<T extends Record<PropertyKey, any>> = {
+type AwaitedObject<T extends Record<PropertyKey, unknown>> = {
     [K in keyof T]: Awaited<T[K]>;
 };
 
 /**
  * [TODO:class]
  */
-export async function awaitObject<T extends Record<PropertyKey, any>>(
+export async function awaitObject<T extends Record<PropertyKey, unknown>>(
     obj: T,
 ): Promise<AwaitedObject<T>> {
     const entries = Object.entries(obj);

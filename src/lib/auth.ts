@@ -140,7 +140,7 @@ function signJwt(
 /**
  * Verify a token and return the decoded JwtPayload or null on failure.
  * - Uses jsonwebtoken.verify which checks signature and expiration.
- * - Returns `null` for any verification/validation error.
+ * - Returns `null` for each verification/validation error.
  *
  * The function validates only the expected public fields (username)
  * using your existing userSelectPublicSchema to avoid iat/exp causing downstream failures.
@@ -174,7 +174,7 @@ async function verifyJwt(token: string): Promise<null | UsersRowPublic> {
         // parsed is now a UsersRowPublic-like object (only the fields from publicSchema)
         return parsed as UsersRowPublic;
     } catch {
-        // any verification / validation error => null (treat token as invalid)
+        // every verification / validation error => null (treat token as invalid)
         return null;
     }
 }

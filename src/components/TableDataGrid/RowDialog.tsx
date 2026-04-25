@@ -9,7 +9,6 @@ import {
     Grid,
     TextField,
     Typography,
-    Button,
 } from "@mui/material";
 import {
     ChangeEvent,
@@ -31,7 +30,11 @@ import { isBlob } from "@/utils/stdfunc";
    ---------------------------- */
 type DefaultFieldType = "text" | "multiline" | "image" | "custom";
 
-export type FieldConfig<R, RI = any, K extends keyof any = keyof R | string> = {
+export type FieldConfig<
+    R,
+    _RI = unknown,
+    K extends PropertyKey = keyof R | string,
+> = {
     key: K; // property key in row/insert (string allowed for synthetic fields)
     label: string;
     type?: DefaultFieldType;
@@ -40,14 +43,14 @@ export type FieldConfig<R, RI = any, K extends keyof any = keyof R | string> = {
     required?: boolean;
     // optional custom render: (value, setValue, row) => ReactNode
     render?: (
-        value: any,
-        setValue: (v: any) => void,
+        value: unknown,
+        setValue: (v: unknown) => void,
         row: R,
     ) => React.ReactNode;
     // convert local value to form payload value
-    toFormValue?: (v: any) => string | Blob | undefined;
+    toFormValue?: (v: unknown) => string | Blob | undefined;
     // optional comparator for this field
-    isChanged?: (rowValue: any, currentValue: any) => boolean;
+    isChanged?: (rowValue: unknown, currentValue: unknown) => boolean;
 };
 
 type UpdateRowAction = (fd: FormData) => Promise<boolean>;
@@ -63,8 +66,8 @@ type RowDialogContentProps<R, RI> = {
 };
 
 function RowDialogContent<
-    R extends Record<string, any>,
-    RI extends Record<string, any>,
+    R extends Record<string, unknown>,
+    RI extends Record<string, unknown>,
 >({
     apiRef,
     row,
@@ -79,18 +82,18 @@ function RowDialogContent<
 
     // build initial values map from row using fields
     const buildInitial = () => {
-        const out: Record<string, any> = {};
+        const out: Record<string, unknown> = {};
         for (const f of fields) {
             const key = String(f.key);
-            const raw = (row as any)[key];
+            const raw = (row as Record<string, unknown>)[key];
             // default initial value resolution:
             out[key] = raw ?? null;
         }
         return out;
     };
 
-    const [values, setValues] = useState<Record<string, any>>(buildInitial());
-    const [imageOpenFor, setImageOpenFor] = useState<string | null>(null);
+    const [values, setValues] = useState<Record<string, unknown>>(buildInitial());
+    const [_imageOpenFor, setImageOpenFor] = useState<string | null>(null);
 
     // keep values in sync if selected row changes externally
     useEffect(() => {
@@ -98,24 +101,27 @@ function RowDialogContent<
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [row]);
 
-    const setValue = (key: string, v: any) =>
+    const setValue = (key: string, v: unknown) =>
         setValues((s) => ({ ...s, [key]: v }));
 
     // default comparator if user didn't provide isRowChanged
-    const defaultIsChanged = (rowObj: R, newValues: Partial<RI>) => {
-        for (const f of fields) {
-            const key = String(f.key);
-            const rowVal = (rowObj as any)[key];
-            const newVal = (newValues as any)[key];
-            const eq =
-                typeof f.isChanged === "function"
-                    ? !f.isChanged(rowVal, newVal)
-                    : String((rowVal ?? "").toString()).trim() ===
-                    String((newVal ?? "").toString()).trim();
-            if (!eq) return true;
-        }
-        return false;
-    };
+    const defaultIsChanged = useCallback(
+        (rowObj: R, newValues: Partial<RI>) => {
+            for (const f of fields) {
+                const key = String(f.key);
+                const rowVal = (rowObj as Record<string, unknown>)[key];
+                const newVal = (newValues as Record<string, unknown>)[key];
+                const eq =
+                    typeof f.isChanged === "function"
+                        ? !f.isChanged(rowVal, newVal)
+                        : String((rowVal ?? "").toString()).trim() ===
+                          String((newVal ?? "").toString()).trim();
+                if (!eq) return true;
+            }
+            return false;
+        },
+        [fields],
+    );
 
     const _updateRow = useCallback(
         async (fd: FormData): Promise<boolean> => {
@@ -124,7 +130,7 @@ function RowDialogContent<
 
                 if (status) {
                     // update DataGrid row locally (apiRef from parent)
-                    const id = (row as any)[idKey];
+                    const id = (row as Record<string, unknown>)[String(idKey)];
                     if (id !== undefined && apiRef?.current?.updateRows) {
                         apiRef.current.updateRows([
                             {
@@ -168,7 +174,7 @@ function RowDialogContent<
 
             if (f.toFormValue) {
                 const v = f.toFormValue(val);
-                if (v !== undefined) fd.set(name, v as any);
+                if (v !== undefined) fd.set(name, v);
             } else {
                 // default stringify
                 if (val === null || val === undefined) {
@@ -183,7 +189,7 @@ function RowDialogContent<
         }
 
         return await _updateRow(fd);
-    }, [_updateRow, fields, isRowChanged, row, values]);
+    }, [_updateRow, defaultIsChanged, fields, isRowChanged, row, values]);
 
     useEffect(() => {
         registerSubmit(submit);
@@ -278,11 +284,11 @@ function RowDialogContent<
         >
             <Grid container spacing={2}>
                 {/* Hidden id if present */}
-                {((row as any)[idKey] ?? null) !== null && (
+                {((row as Record<string, unknown>)[String(idKey)] ?? null) !== null && (
                     <input
                         type="hidden"
                         name={String(idKey)}
-                        value={String((row as any)[idKey])}
+                        value={String((row as Record<string, unknown>)[String(idKey)])}
                     />
                 )}
 
@@ -304,7 +310,7 @@ function RowDialogContent<
                         Created
                     </Typography>
                     <Typography variant="subtitle2" display="block">
-                        {formatDate((row as any).created_at, true)}
+                        {formatDate((row as { created_at?: unknown }).created_at, true)}
                     </Typography>
                 </Grid>
 
@@ -313,7 +319,7 @@ function RowDialogContent<
                         Updated
                     </Typography>
                     <Typography variant="subtitle2" display="block">
-                        {formatDate((row as any).updated_at, true)}
+                        {formatDate((row as { updated_at?: unknown }).updated_at, true)}
                     </Typography>
                 </Grid>
 
@@ -322,7 +328,7 @@ function RowDialogContent<
                         Author
                     </Typography>
                     <Typography variant="subtitle2" display="block">
-                        {(row as any).author ?? "—"}
+                        {(row as { author?: unknown }).author ?? "—"}
                     </Typography>
                 </Grid>
 
@@ -331,7 +337,7 @@ function RowDialogContent<
                         Last editor
                     </Typography>
                     <Typography variant="subtitle2" display="block">
-                        {(row as any).last_editor ?? "—"}
+                        {(row as { last_editor?: unknown }).last_editor ?? "—"}
                     </Typography>
                 </Grid>
             </Grid>
@@ -343,8 +349,8 @@ function RowDialogContent<
    Outer Dialog
    ---------------------------- */
 export default function RowDialog<
-    R extends Record<string, any>,
-    RI extends Record<string, any>,
+    R extends Record<string, unknown>,
+    RI extends Record<string, unknown>,
 >({
     apiRef,
     dialogOpen,

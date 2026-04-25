@@ -26,7 +26,7 @@ type FollowedUserWithLatestPost = {
 
 /**
  * Returns one row per user that `userId` follows.
- * Each row contains the user + their latest post (if any) + that post's category.
+ * Each row contains the user + their latest post (if present) + that post's category.
  */
 async function getFollowedUsersWithLatestPost(
     userId: number,

@@ -165,8 +165,7 @@ const MarkdownComponents: Components = {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         node,
         ...props
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }: HTMLAttributes<HTMLModElement> & { node?: any }) => (
+    }: HTMLAttributes<HTMLModElement> & { node?: unknown }) => (
         <del {...props}></del>
     ),
 };

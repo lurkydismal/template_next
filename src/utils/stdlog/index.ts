@@ -46,7 +46,7 @@ export default log;
  * Each key-value pair of the input object is logged using `log.trace`.
  * The output format is: `<key>: <value> (type: <type of value>)`.
  *
- * @template T - The type of object to log. Can be any object with string keys.
+ * @template T - The type of object to log. Can be an arbitrary object with string keys.
  * @param {T} obj - The object whose properties will be logged.
  */
 export function logVar<T extends Record<string, unknown>>(obj: T) {

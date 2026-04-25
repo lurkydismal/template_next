@@ -63,7 +63,7 @@ function isEmptyNode(node?: ReactNode) {
     if (node === null || node === undefined) return true;
     if (typeof node === "string") return node.trim() === "";
     if (Array.isArray(node)) {
-        // any non-empty child counts as non-empty
+        // every non-empty child counts as non-empty
         return node.every(isEmptyNode);
     }
     // React element or object assumed non-empty

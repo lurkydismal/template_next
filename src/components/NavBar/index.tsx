@@ -40,7 +40,7 @@ export default function NavBar() {
                         containerSx={{ display: "flex", alignItems: "center" }}
                     />
 
-                    <MobileNav items={items} />
+                    {/* <MobileNav items={items} /> */}
                 </StyledToolbar>
             </Container>
         </AppBar>

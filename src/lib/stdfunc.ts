@@ -70,26 +70,12 @@ export async function mockAction<T, K extends string>(
  * This function is intended for testing, prototyping, or mocking
  * server actions with predictable timing and response shapes.
  */
-export async function mockAction<T, K extends string>(
+export async function mockAction<T>(
     milliseconds: number,
     data?: T,
-    fieldName?: K,
-): Promise<ActionResult> {
+): Promise<ActionResult<T>> {
     // Simulate async work
     await delay(milliseconds);
-
-    // No payload case
-    if (data === undefined) {
-        return { ok: true };
-    }
-
-    // Dynamic field name case
-    if (fieldName) {
-        return {
-            ok: true,
-            [fieldName]: data,
-        };
-    }
 
     // Default payload case
     return {

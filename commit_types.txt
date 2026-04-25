@@ -1,0 +1,10 @@
+feat - new feature
+fix - bug fix
+refactor - code change without behavior change
+perf - performance improvement
+docs - documentation only
+style - formatting, no logic change
+test - tests added/ changed
+build - build system/ dependencies
+ci - CI config
+chore - misc (not affecting tests)

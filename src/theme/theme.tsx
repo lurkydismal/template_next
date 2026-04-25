@@ -1,20 +1,23 @@
 "use client";
 
 import { ReactNode } from "react";
-import type { ThemeOptions } from "@mui/material/styles";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
 import {
     colorSchemes,
     shadows,
     shape,
     typography,
 } from "@/theme/themePrimitives";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import * as DG from "@mui/x-data-grid/locales";
 import * as DP from "@mui/x-date-pickers/locales";
 import * as MUI from "@mui/material/locale";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import {
+    ThemeOptions,
+    createTheme,
+    ThemeProvider,
+    useMediaQuery,
+} from "@mui/material";
 
 // Props for AppTheme wrapper
 export interface AppThemeProps {
@@ -25,7 +28,9 @@ export interface AppThemeProps {
 // Main AppTheme component providing theme and localization
 export default function AppTheme(props: AppThemeProps) {
     const { children, themeComponents } = props;
-    const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+    const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)", {
+        noSsr: true,
+    });
 
     // Get user's browser locale (e.g., "en-US") and extract language code ("en")
     const userLocale = navigator.language || "en-US";

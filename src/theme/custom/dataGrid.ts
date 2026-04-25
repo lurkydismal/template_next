@@ -1,14 +1,16 @@
-import { paperClasses } from "@mui/material/Paper";
-import { alpha, Theme } from "@mui/material/styles";
-
-import { menuItemClasses } from "@mui/material/MenuItem";
-import { listItemIconClasses } from "@mui/material/ListItemIcon";
-import { iconButtonClasses } from "@mui/material/IconButton";
-import { checkboxClasses } from "@mui/material/Checkbox";
-import { listClasses } from "@mui/material/List";
 import { gridClasses } from "@mui/x-data-grid";
-import { tablePaginationClasses } from "@mui/material/TablePagination";
 import { gray } from "@/theme/themePrimitives";
+import {
+    Theme,
+    checkboxClasses,
+    tablePaginationClasses,
+    paperClasses,
+    menuItemClasses,
+    listItemIconClasses,
+    listClasses,
+    iconButtonClasses,
+    alpha,
+} from "@mui/material";
 
 // Custom style overrides for MUI DataGrid and related components
 export const dataGridCustomizations = {

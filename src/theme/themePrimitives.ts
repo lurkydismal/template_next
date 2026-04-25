@@ -1,4 +1,4 @@
-import { Shadows, alpha, createTheme } from "@mui/material/styles";
+import { createTheme, alpha } from "@mui/material";
 
 // Extend MUI Paper component props to add a custom "highlighted" variant
 declare module "@mui/material/Paper" {

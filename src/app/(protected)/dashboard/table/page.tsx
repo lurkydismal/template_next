@@ -2,7 +2,7 @@
 
 import TableDataGrid from "@/components/TableDataGrid";
 import { TableRow, TableRowInsert } from "@/db/schema";
-import ExtraToolbarButtons from "@/components/ExtraToolbarButtons";
+import ExtraToolbarButtons from "@/components/dashboard/ExtraToolbarButtons";
 import {
     _getRowsAction,
     createRowAction,

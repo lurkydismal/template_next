@@ -1,6 +1,6 @@
 "use client";
 
-import { TableRowInsert } from "@/db/schema";
+import { TableRowInsert } from "@/db/types";
 import CustomDivider from "./CustomDivider";
 import { useSnackbar } from "@/providers/snackbar";
 import uuid from "@/utils/uuid";

@@ -1,6 +1,6 @@
 "use server";
 
-import { TableRowInsert } from "@/db/schema";
+import { TableRowInsert } from "@/db/types";
 import { ActionResult, DbTarget } from "@/lib/types";
 import { parseForm, save } from "@/lib/update_create";
 

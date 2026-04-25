@@ -1,7 +1,7 @@
 "use client";
 
 import TableDataGrid from "@/components/TableDataGrid";
-import { TableRow, TableRowInsert } from "@/db/schema";
+import { TableRow, TableRowInsert } from "@/db/types";
 import ExtraToolbarButtons from "@/components/dashboard/ExtraToolbarButtons";
 import {
     _getRowsAction,

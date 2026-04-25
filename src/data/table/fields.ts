@@ -1,5 +1,5 @@
 import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
-import { TableRow, TableRowInsert } from "@/db/schema";
+import { TableRow, TableRowInsert } from "@/db/types";
 
 // simple fields for your schema (content is the only editable column)
 const fields: FieldConfig<TableRow, TableRowInsert>[] = [

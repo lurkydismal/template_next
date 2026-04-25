@@ -1,6 +1,6 @@
 "use server";
 
-import { TableRowInsert } from "@/db/schema";
+import { TableRowInsert } from "@/db/types";
 import { create } from "@/lib/create";
 import { getRows } from "@/lib/get";
 import { updateAction } from "@/lib/update";

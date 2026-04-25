@@ -1,91 +1,127 @@
 /**
- * Get an environment variable, or throw/log error if not set.
- * @param key - The environment variable name
- * @returns The environment variable value as string
- * @throws Error if the environment variable is missing
+ * Utility functions for server and client use.
  */
-export function getEnv(key: string): string {
+
+/**
+ * Get an environment variable or return a default if missing.
+ *
+ * @param key - Environment variable name
+ * @param defaultValue - Optional default value to use if the env var is missing
+ * @returns Value of the environment variable, or the default if provided
+ * @throws Error if the variable is missing and no default is provided
+ */
+export function getEnv(key: string, defaultValue?: string): string {
     const value = process.env[key];
-    if (!value) {
-        console.error(`Environment variable "${key}" is not set`);
-        throw new Error(`Missing environment variable: ${key}`);
+
+    if (value !== undefined) {
+        return value;
     }
-    return value;
+
+    if (defaultValue !== undefined) {
+        return defaultValue;
+    }
+
+    console.error(`Environment variable "${key}" is not set`);
+    throw new Error(`Missing environment variable: ${key}`);
 }
 
 /**
- * Parse a string value into a boolean.
- * - Recognizes `"true"`, `"1"`, and `"yes"` as true.
- * - All other values are false.
- *
- * @param value - String to parse
- * @returns Boolean representation
+ * Parse a string into boolean.
+ * Accepts "true", "1", "yes" (case-sensitive) as true. Everything else is false.
  */
-export function parseBool(value: string) {
+export function parseBool(value: string): boolean {
     return value === "true" || value === "1" || value === "yes";
 }
 
 /**
- * Encode a URL/path segment safely.
- * - Splits the path by "/" and encodes each segment individually.
- * - Filters out empty segments to avoid duplicate slashes.
- *
- * @param path - The path string to encode
- * @returns Encoded path string safe for URLs
+ * Encode each segment of a URL/path safely.
+ * Filters out empty segments to avoid "//" and encodes each segment.
  */
 export function encodePath(path: string): string {
     return path.split("/").filter(Boolean).map(encodeURIComponent).join("/");
 }
 
 /**
- * Sanitize a filename string to be safe for file systems.
- * - Converts spaces to underscores
- * - Replaces unsafe characters with underscores
+ * Sanitize a filename to be filesystem-safe.
+ * - Replaces spaces with underscores
+ * - Replaces non-alphanumeric characters with underscores
  * - Removes leading dots
  * - Truncates to 100 characters
  * - Converts to lowercase
  *
- * @param raw - Input value to sanitize
- * @returns Sanitized filename or `null` if input is invalid or empty
+ * @param raw - Input to sanitize
+ * @returns Sanitized string or null if invalid/empty
  */
 export function sanitizeFilename(raw: unknown): string | null {
     if (typeof raw !== "string") return null;
 
     const s = raw
         .trim()
-        .replace(/\s+/g, "_") // spaces → _
-        .replace(/[^a-zA-Z0-9_\-\.]/g, "_") // replace unsafe chars
-        .replace(/^\.+/, "") // remove leading dots
-        .slice(0, 100) // max length 100
+        .replace(/\s+/g, "_")
+        .replace(/[^a-zA-Z0-9_\-\.]/g, "_")
+        .replace(/^\.+/, "")
+        .slice(0, 100)
         .toLowerCase();
 
     return s || null;
 }
 
 /**
- * Convert a string into camelCase.
- * - Trims and lowercases the input
- * - Removes special characters (except spaces)
- * - Converts words after spaces into uppercase to form camelCase
- *
- * Example: `"Folder Title"` → `"folderTitle"`
- *
- * @param header - The input string
- * @returns The camelCase
+ * Convert a string to camelCase.
+ * - Trims and lowercases
+ * - Removes special characters except spaces
+ * - Converts words after spaces to uppercase
  */
-export function toCamelCase(header: string): string {
+export function toCamelCase(text: string): string {
+    return text
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9 ]+/g, "")
+        .replace(/\s+([a-z0-9])/g, (_, c) => c.toUpperCase());
+}
+
+/**
+ * Convert a string to PascalCase.
+ *
+ * Rules:
+ * - Trims whitespace
+ * - Removes special characters except letters and numbers
+ * - Splits on spaces, hyphens, and underscores
+ * - Capitalizes the first letter of each word
+ *
+ * Examples:
+ * "hello world"     → "HelloWorld"
+ * "  user_name  "   → "UserName"
+ * "foo-bar-baz"     → "FooBarBaz"
+ * "FOO 2 bar!"      → "Foo2Bar"
+ *
+ * @param text - The input string
+ * @returns PascalCase version of the string
+ */
+export function toPascalCase(text: string): string {
+    if (!text) return "";
+
     return (
-        header
+        text
             .trim()
             .toLowerCase()
-            // Remove special chars (keep spaces)
+            // Replace any non-alphanumeric separator with a single space
+            .replace(/[\s-_]+/g, " ")
+            // Remove any remaining non-alphanumeric characters
             .replace(/[^a-z0-9 ]+/g, "")
-            .replace(/\s+([a-z0-9])/g, (_, c) => c.toUpperCase())
+            // Split by spaces, capitalize each word, join
+            .split(" ")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join("")
     );
 }
 
-// TODO: Document
-// Type guard for Record<string, any>
+/**
+ * Type guard to check if an input is a plain object (Record<string, any>).
+ *
+ * @param input - The value to check
+ * @returns True if input is a plain object
+ */
 export function isRecord(input: unknown): input is Record<string, any> {
     if (typeof input !== "object" || input === null) return false;
 
@@ -93,22 +129,23 @@ export function isRecord(input: unknown): input is Record<string, any> {
     return proto === Object.prototype || proto === null;
 }
 
-// TODO: Document
+/**
+ * Type guard for Blob objects.
+ *
+ * @param v - Value to check
+ * @returns True if v is a Blob instance
+ */
 export function isBlob(v: unknown): v is Blob {
-    return typeof v === "object" && v !== null && v instanceof Blob;
+    return v instanceof Blob;
 }
 
 /**
- * Extract a value from FormData or return the raw input.
+ * Extract a value from FormData, Record, or return raw value.
  *
- * - If `input` is a FormData instance, get the value for the given `key`.
- * - Returns `undefined` if the key is not present or the value is `null`.
- * - If `input` is not FormData, assumes it is already the raw value and returns it.
- *
- * @template T - Expected type of the value
- * @param input - The input, either a raw value or FormData
- * @param key - The key to extract from FormData
- * @returns The extracted value or undefined
+ * @template T - Expected type
+ * @param input - FormData, Record, or raw value
+ * @param key - Key to extract if input is FormData or Record
+ * @returns Extracted value or undefined
  */
 export function extractFromFormData<T = unknown>(
     input: FormData | Record<string, any> | unknown,
@@ -116,13 +153,11 @@ export function extractFromFormData<T = unknown>(
 ): T | undefined {
     if (input instanceof FormData) {
         const value = input.get(key);
-
         return value === null ? undefined : (value as T);
     }
 
     if (isRecord(input)) {
         if (!key) return undefined;
-
         return input[key] as T | undefined;
     }
 
@@ -130,11 +165,8 @@ export function extractFromFormData<T = unknown>(
 }
 
 /**
- * Delay execution by a specified number of milliseconds.
- * - Returns a Promise that resolves after the timeout.
- *
- * @param milliseconds - Time to wait in milliseconds
- * @returns Promise that resolves after the delay
+ * Delay execution for a specified number of milliseconds.
+ * - Validates input to avoid invalid or excessive delays.
  */
 export function delay(milliseconds: number): Promise<void> {
     const ms = Number(milliseconds);
@@ -152,7 +184,70 @@ export function delay(milliseconds: number): Promise<void> {
         );
     }
 
-    const safeMs = Math.floor(ms);
+    return new Promise((resolve) => setTimeout(resolve, Math.floor(ms)));
+}
 
-    return new Promise((resolve) => setTimeout(resolve, safeMs));
+/**
+ * Paginate an array of items.
+ *
+ * @template T - Array element type
+ * @param items - Array of items to paginate
+ * @param currentPage - 1-based page number
+ * @param perPage - Number of items per page
+ * @returns Slice of items for the current page
+ */
+export function paginate<T>(
+    items: T[],
+    currentPage: number,
+    perPage: number,
+): T[] {
+    const start = (currentPage - 1) * perPage;
+    const end = start + perPage;
+
+    return items.slice(start, end);
+}
+
+/**
+ * A utility function that normalizes a value or the first element of an array.
+ *
+ * This function checks if the input `item` is an array. If it is, the function returns the first element of the array.
+ * If the input is a single value (not an array), the function returns the value itself.
+ *
+ * @template T - The type of the value that is passed in. This can be any type, and it can also be an array of that type.
+ * @param item - The value to be normalized. It can either be a single value of type `T` or an array of values of type `T[]`.
+ * @returns The normalized value: if `item` is an array, it returns the first element (`item[0]`), otherwise it returns `item` itself.
+ *
+ * @example
+ * // If the input is an array, return the first element.
+ * normalizeArrayOrValue([1, 2, 3]); // Returns: 1
+ *
+ * // If the input is a single value, return the value itself.
+ * normalizeArrayOrValue(5); // Returns: 5
+ */
+export function normalizeArrayOrValue<T>(item: T | T[]): T {
+    return Array.isArray(item) ? item[0] : item;
+}
+
+/**
+ * [TODO:description]
+ */
+type AwaitedObject<T extends Record<PropertyKey, any>> = {
+    [K in keyof T]: Awaited<T[K]>;
+};
+
+/**
+ * [TODO:class]
+ */
+export async function awaitObject<T extends Record<PropertyKey, any>>(
+    obj: T,
+): Promise<AwaitedObject<T>> {
+    const entries = Object.entries(obj);
+
+    const resolved = await Promise.all(
+        entries.map(async ([key, value]) => {
+            return [key, await value] as const;
+        }),
+    );
+
+    return Object.fromEntries(resolved) as AwaitedObject<T>;
 }

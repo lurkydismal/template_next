@@ -28,7 +28,7 @@ export default function SignInPage() {
     const handleSignIn = async (data: {
         username: string;
         password: string;
-        rememberMe?: boolean;
+        remember?: boolean;
     }) => {
         log.trace(`onSubmit called: '${JSON.stringify(data)}'`);
 

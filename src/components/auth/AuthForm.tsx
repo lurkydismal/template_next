@@ -14,7 +14,7 @@ import { Controller, useForm } from "react-hook-form";
 type SignInValues = {
     username: string;
     password: string;
-    rememberMe?: boolean;
+    remember?: boolean;
 };
 
 type SignUpValues = {
@@ -26,19 +26,19 @@ type Values = SignInValues | SignUpValues;
 
 type Props =
     | {
-          mode: "signin";
-          onSubmit: (data: SignInValues) => Promise<void> | void;
-      }
+        mode: "signin";
+        onSubmit: (data: SignInValues) => Promise<void> | void;
+    }
     | {
-          mode: "signup";
-          onSubmit: (data: SignUpValues) => Promise<void> | void;
-      };
+        mode: "signup";
+        onSubmit: (data: SignUpValues) => Promise<void> | void;
+    };
 
 export default function AuthForm(props: Props) {
     const isSignIn = props.mode === "signin";
     const { control, handleSubmit } = useForm<Values>({
         defaultValues: isSignIn
-            ? { username: "", password: "", rememberMe: false }
+            ? { username: "", password: "", remember: false }
             : { username: "", password: "" },
     });
     const [loading, setLoading] = useState(false);
@@ -129,7 +129,7 @@ export default function AuthForm(props: Props) {
 
             {isSignIn && (
                 <Controller
-                    name="rememberMe"
+                    name="remember"
                     control={control}
                     render={({ field }) => (
                         <FormControlLabel

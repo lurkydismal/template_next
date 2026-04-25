@@ -7,7 +7,7 @@ import React, {
     cloneElement,
     isValidElement,
 } from "react";
-import CustomDataGrid from "@/components/CustomDataGrid";
+import CustomDataGrid from "./CustomDataGrid";
 import columns from "@/data/table/columns";
 import RowDialog, { FieldConfig } from "./RowDialog";
 import { useSnackbar } from "@/components/SnackbarProvider";
@@ -123,9 +123,9 @@ export default function TableDataGrid<
     // If extraButtons is a React element, clone it and inject createRowAction + emptyRow
     const injectedExtraButtons = isValidElement(extraButtons)
         ? cloneElement(extraButtons as React.ReactElement<any>, {
-              createRowAction: createAndRefresh,
-              emptyRow,
-          })
+            createRowAction: createAndRefresh,
+            emptyRow,
+        })
         : extraButtons;
 
     return (

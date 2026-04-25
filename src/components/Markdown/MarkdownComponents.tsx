@@ -16,7 +16,7 @@ import {
     Container,
     CardMedia,
 } from "@mui/material";
-import CodeBlock from "@/components/CodeBlock";
+import CodeBlock from "./CodeBlock";
 import { AnchorHTMLAttributes, HTMLAttributes, ImgHTMLAttributes } from "react";
 
 /**

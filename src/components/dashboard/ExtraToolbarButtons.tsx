@@ -1,7 +1,7 @@
 "use client";
 
 import { TableRowInsert } from "@/db/schema";
-import CustomDivider from "@/components/CustomDivider";
+import CustomDivider from "./CustomDivider";
 import { useSnackbar } from "@/components/SnackbarProvider";
 import uuid from "@/utils/uuid";
 import {

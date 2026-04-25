@@ -10,7 +10,7 @@ import {
     ContentCopy as ContentCopyIcon,
 } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
-import Mermaid from "@/components/Mermaid";
+import Mermaid from "./Mermaid";
 import { gray } from "@/theme/themePrimitives";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Box, IconButton, Snackbar, Tooltip, Typography } from "@mui/material";

@@ -1,7 +1,7 @@
 "use client";
 
 import { TableRowInsert } from "@/db/types";
-import CustomDivider from "./CustomDivider";
+import CustomDivider from "@/components/TableDataGrid/CustomDivider";
 import { useSnackbar } from "@/providers/snackbar";
 import uuid from "@/utils/uuid";
 import {

@@ -16,7 +16,7 @@ export default function ExtraToolbarButtons({
     createRowAction,
 }: Readonly<{
     emptyRow: TableRowInsert;
-    createRowAction: any;
+    createRowAction: (row: TableRowInsert) => Promise<unknown>;
 }>) {
     const { showMessage, showSuccess, showError, showWarning, showInfo } =
         useSnackbar();

@@ -15,8 +15,8 @@ import CustomToolbar from "./Toolbar";
 import { useGridApiRef, GridRowsProp, GridRowParams } from "@mui/x-data-grid";
 
 export default function TableDataGrid<
-    R extends Record<string, any>,
-    RI extends Record<string, any>,
+    R extends Record<string, unknown>,
+    RI extends Record<string, unknown>,
 >({
     emptyRow,
     getRowsAction,
@@ -28,7 +28,7 @@ export default function TableDataGrid<
 }: Readonly<{
     emptyRow: RI;
     getRowsAction: () => Promise<Readonly<GridRowsProp>>;
-    createRowAction: (row: RI) => Promise<any>;
+    createRowAction: (row: RI) => Promise<unknown>;
     updateRowAction: (fd: FormData) => Promise<boolean>;
     extraButtons?: React.ReactNode; // optionally a ReactElement expecting props
     fields: FieldConfig<R, RI>[];
@@ -51,6 +51,7 @@ export default function TableDataGrid<
     }, [getRowsAction, showError]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         _getRows();
     }, [_getRows]);
 
@@ -122,7 +123,7 @@ export default function TableDataGrid<
 
     // If extraButtons is a React element, clone it and inject createRowAction + emptyRow
     const injectedExtraButtons = isValidElement(extraButtons)
-        ? cloneElement(extraButtons as React.ReactElement<any>, {
+        ? cloneElement(extraButtons as React.ReactElement<Record<string, unknown>>, {
             createRowAction: createAndRefresh,
             emptyRow,
         })

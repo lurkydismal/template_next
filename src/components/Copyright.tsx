@@ -21,8 +21,8 @@ function GitHubLink({ href, ...props }: Readonly<GitHubLinkProps>) {
             {...props}
             href={href}
             color="inherit" // inherit from parent typography (guarantees visibility if parent is readable)
-            display="inline-block"
             sx={{
+                display: "inline-block",
                 textDecoration: "none",
                 transition:
                     "color 120ms ease, text-decoration-color 120ms ease",

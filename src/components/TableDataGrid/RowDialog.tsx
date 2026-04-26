@@ -1,8 +1,6 @@
 // RowDialog.tsx
 import { formatDate } from "@/utils/dayjs";
-import { Image as ImageIcon } from "@mui/icons-material";
 import {
-    Chip,
     Dialog,
     DialogContent,
     Divider,
@@ -293,7 +291,7 @@ function RowDialogContent<
                     <Typography variant="subtitle2" color="text.secondary">
                         Created
                     </Typography>
-                    <Typography variant="subtitle2" display="block">
+                    <Typography variant="subtitle2" sx={{ display: "block" }}>
                         {formatDate(
                             (row as { created_at?: unknown }).created_at,
                             true,
@@ -305,7 +303,7 @@ function RowDialogContent<
                     <Typography variant="subtitle2" color="text.secondary">
                         Updated
                     </Typography>
-                    <Typography variant="subtitle2" display="block">
+                    <Typography variant="subtitle2" sx={{ display: "block" }}>
                         {formatDate(
                             (row as { updated_at?: unknown }).updated_at,
                             true,
@@ -317,7 +315,7 @@ function RowDialogContent<
                     <Typography variant="subtitle2" color="text.secondary">
                         Author
                     </Typography>
-                    <Typography variant="subtitle2" display="block">
+                    <Typography variant="subtitle2" sx={{ display: "block" }}>
                         {(row as { author?: unknown }).author ?? "—"}
                     </Typography>
                 </Grid>
@@ -326,7 +324,7 @@ function RowDialogContent<
                     <Typography variant="subtitle2" color="text.secondary">
                         Last editor
                     </Typography>
-                    <Typography variant="subtitle2" display="block">
+                    <Typography variant="subtitle2" sx={{ display: "block" }}>
                         {(row as { last_editor?: unknown }).last_editor ?? "—"}
                     </Typography>
                 </Grid>

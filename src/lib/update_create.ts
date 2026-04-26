@@ -1,5 +1,6 @@
 import db from "@/db";
 import { TableRowInsert } from "@/db/types";
+import { getSessionData } from "@/lib/auth";
 import { ActionResult, DbTarget, parseRawTarget } from "@/lib/types";
 import log from "@/utils/stdlog";
 import { rowSchema } from "@/utils/validate/schemas";
@@ -10,12 +11,25 @@ type Input = {
     content: string;
 };
 
-async function buildInsert(parsed: {
-    content: string;
-}): Promise<TableRowInsert> {
+function buildMutation(
+    parsed: {
+        content: string;
+    },
+    actor: string,
+    opts: { isUpdate?: boolean },
+): Partial<TableRowInsert> {
+    if (opts.isUpdate) {
+        return {
+            content: parsed.content,
+            last_editor: actor,
+        };
+    }
+
     return {
         content: parsed.content,
-    } as const;
+        author: actor,
+        last_editor: actor,
+    };
 }
 
 export async function save(
@@ -31,9 +45,20 @@ export async function save(
             content: input.content,
         });
 
-        const row = await buildInsert({
-            content: parsed.content,
-        });
+        const sessionUser = await getSessionData();
+        const actor = sessionUser?.username;
+
+        if (!actor) {
+            throw new Error("Missing authenticated user");
+        }
+
+        const row = buildMutation(
+            {
+                content: parsed.content,
+            },
+            actor,
+            opts,
+        );
 
         if (opts.isUpdate) {
             await db

@@ -143,15 +143,11 @@ export function delay(milliseconds: number): Promise<void> {
         throw new Error(`Invalid delay value: ${milliseconds}`);
     }
 
-    // Enforce an upper bound to prevent resource exhaustion
+    // Enforce an upper bound and pass only a sanitized integer to the timer sink
     const MAX_DELAY_MS = 60_000; // 1 minute
-    if (ms > MAX_DELAY_MS) {
-        throw new Error(
-            `Delay value ${milliseconds} exceeds maximum allowed of ${MAX_DELAY_MS} ms`,
-        );
-    }
+    const safeDelayMs = Math.min(Math.floor(ms), MAX_DELAY_MS);
 
-    return new Promise((resolve) => setTimeout(resolve, Math.floor(ms)));
+    return new Promise((resolve) => setTimeout(resolve, safeDelayMs));
 }
 
 /**

@@ -165,7 +165,6 @@ export default function TableDataGrid<
             />
 
             <RowDialog<R, RI>
-                apiRef={apiRef}
                 dialogOpen={dialogOpen}
                 fields={fields}
                 handleClose={handleClose}
@@ -173,6 +172,7 @@ export default function TableDataGrid<
                 selectedRow={selectedRow}
                 setSelectedRow={setSelectedRow}
                 updateRowAction={updateRowAction}
+                onUpdated={_getRows}
             />
         </>
     );

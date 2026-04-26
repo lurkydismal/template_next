@@ -11,7 +11,6 @@ import {
 import {
     ChangeEvent,
     Dispatch,
-    RefObject,
     SetStateAction,
     useCallback,
     useEffect,
@@ -19,7 +18,6 @@ import {
     useState,
 } from "react";
 import log from "@/utils/stdlog";
-import { GridApi } from "@mui/x-data-grid";
 import { useSnackbar } from "@/providers/snackbar";
 import { isBlob } from "@/utils/stdfunc";
 
@@ -54,11 +52,11 @@ export type FieldConfig<
 type UpdateRowAction = (fd: FormData) => Promise<boolean>;
 
 type RowDialogContentProps<R, RI> = {
-    apiRef: RefObject<GridApi | null>;
     row: R;
     fields: FieldConfig<R, RI>[];
     registerSubmit: (fn: (() => Promise<boolean>) | null) => void;
     updateRowAction: UpdateRowAction;
+    onUpdated?: () => Promise<void> | void;
     isRowChanged?: (row: R, values: Partial<RI>) => boolean;
     idKey?: keyof R; // defaults to "id"
 };
@@ -67,11 +65,11 @@ function RowDialogContent<
     R extends Record<string, unknown>,
     RI extends Record<string, unknown>,
 >({
-    apiRef,
     row,
     fields,
     registerSubmit,
     updateRowAction,
+    onUpdated,
     isRowChanged,
     idKey = "id" as keyof R,
 }: RowDialogContentProps<R, RI>) {
@@ -127,17 +125,7 @@ function RowDialogContent<
                 const status = await updateRowAction(fd);
 
                 if (status) {
-                    // update DataGrid row locally (apiRef from parent)
-                    const id = (row as Record<string, unknown>)[String(idKey)];
-                    if (id !== undefined && apiRef?.current?.updateRows) {
-                        apiRef.current.updateRows([
-                            {
-                                id,
-                                ...values,
-                                updated_at: new Date(),
-                            },
-                        ]);
-                    }
+                    await onUpdated?.();
                     return true;
                 }
 
@@ -147,7 +135,7 @@ function RowDialogContent<
                 return false;
             }
         },
-        [updateRowAction, row, values, apiRef, showError, idKey],
+        [updateRowAction, onUpdated, showError],
     );
 
     const submit = useCallback(async (): Promise<boolean> => {
@@ -340,22 +328,22 @@ export default function RowDialog<
     R extends Record<string, unknown>,
     RI extends Record<string, unknown>,
 >({
-    apiRef,
     dialogOpen,
     handleClose,
     selectedRow,
     setSelectedRow,
     updateRowAction,
+    onUpdated,
     fields,
     isRowChanged,
     idKey = "id" as keyof R,
 }: {
-    apiRef: RefObject<GridApi | null>;
     dialogOpen: boolean;
     handleClose: () => void;
     selectedRow: R | null;
     setSelectedRow: Dispatch<SetStateAction<R | null>>;
     updateRowAction: UpdateRowAction;
+    onUpdated?: () => Promise<void> | void;
     fields: FieldConfig<R, RI>[];
     isRowChanged?: (row: R, values: Partial<RI>) => boolean;
     idKey?: keyof R;
@@ -398,11 +386,11 @@ export default function RowDialog<
             <DialogContent>
                 {selectedRow && (
                     <RowDialogContent<R, RI>
-                        apiRef={apiRef}
                         row={selectedRow}
                         fields={fields}
                         registerSubmit={registerSubmit}
                         updateRowAction={updateRowAction}
+                        onUpdated={onUpdated}
                         isRowChanged={isRowChanged}
                         idKey={idKey}
                     />

@@ -13,6 +13,7 @@ import RowDialog, { FieldConfig } from "./RowDialog";
 import { useSnackbar } from "@/providers/snackbar";
 import CustomToolbar from "./Toolbar";
 import { useGridApiRef, GridRowsProp, GridRowParams } from "@mui/x-data-grid";
+import { Box, CircularProgress } from "@mui/material";
 
 export default function TableDataGrid<
     R extends Record<string, unknown>,
@@ -124,15 +125,26 @@ export default function TableDataGrid<
     // If extraButtons is a React element, clone it and inject createRowAction + emptyRow
     const injectedExtraButtons = isValidElement(extraButtons)
         ? cloneElement(
-              extraButtons as React.ReactElement<Record<string, unknown>>,
-              {
-                  createRowAction: createAndRefresh,
-                  emptyRow,
-              },
-          )
+            extraButtons as React.ReactElement<Record<string, unknown>>,
+            {
+                createRowAction: createAndRefresh,
+                emptyRow,
+            },
+        )
         : extraButtons;
 
-    return (
+    return currentRows === null ? (
+        <Box
+            sx={{
+                flexGrow: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+            }}
+        >
+            <CircularProgress />
+        </Box>
+    ) : (
         <>
             <CustomDataGrid
                 apiRef={apiRef}

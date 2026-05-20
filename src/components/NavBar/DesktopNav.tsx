@@ -1,4 +1,4 @@
-import { NavItem } from "@/data/navbat";
+import { NavItem } from "@/data/navbar";
 import NextLink from "@/components/Link";
 import { Badge, Box, Button, SxProps } from "@mui/material";
 import { usePathname } from "next/navigation";
@@ -12,6 +12,9 @@ const badgeSx = {
     },
 };
 
+/**
+ * Renders the nav button component.
+ */
 function NavButton({ item, isActive }: { item: NavItem; isActive: boolean }) {
     const button = (
         <Button
@@ -47,6 +50,9 @@ function NavButton({ item, isActive }: { item: NavItem; isActive: boolean }) {
     );
 }
 
+/**
+ * Renders the desktop nav component.
+ */
 export default function DesktopNav({
     items,
     containerSx,
@@ -64,6 +70,9 @@ export default function DesktopNav({
         { left: [] as NavItem[], right: [] as NavItem[] },
     );
 
+    /**
+     * Checks whether the value is an active.
+     */
     const isActive = (href?: string) =>
         !!(href && (pathname === href || pathname.startsWith(href + "/")));
 

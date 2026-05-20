@@ -13,6 +13,9 @@ import { useSnackbar } from "@/providers/snackbar";
 import { setUser } from "@/utils/stduser";
 import { afterLoginRoute } from "@/data/routes";
 
+/**
+ * Renders the sign up page component.
+ */
 export default function SignUpPage() {
     const router = useRouter();
     const { showError } = useSnackbar();
@@ -24,6 +27,9 @@ export default function SignUpPage() {
         };
     }, []);
 
+    /**
+     * Handles sign up.
+     */
     const handleSignUp = async (data: {
         username: string;
         password: string;

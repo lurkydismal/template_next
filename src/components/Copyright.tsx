@@ -15,6 +15,9 @@ type GitHubLinkProps = MuiLinkProps & {
     href: GitHubLinkComposedProps["href"];
 };
 
+/**
+ * Renders the git hub link component.
+ */
 function GitHubLink({ href, ...props }: Readonly<GitHubLinkProps>) {
     return (
         <Link
@@ -42,6 +45,9 @@ type Props = TypographyProps & {
     sx?: SxProps<Theme>;
 };
 
+/**
+ * Renders the copyright base component.
+ */
 function CopyrightBase({
     href = githubUrl,
     openInNewTab = true,
@@ -74,10 +80,16 @@ function CopyrightBase({
     );
 }
 
+/**
+ * Renders the copyright aligned component.
+ */
 export function CopyrightAligned(props: Omit<Props, "centered">) {
     return <CopyrightBase {...props} centered />;
 }
 
+/**
+ * Renders the copyright component.
+ */
 export function Copyright(props: Props) {
     return <CopyrightBase {...props} />;
 }

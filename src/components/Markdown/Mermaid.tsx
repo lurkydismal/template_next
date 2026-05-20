@@ -5,6 +5,9 @@ import { useTheme } from "@mui/material/styles";
 import { useEffect, useRef } from "react";
 
 // React component that renders a Mermaid chart
+/**
+ * Renders the mermaid component.
+ */
 export default function Mermaid({ chart }: { chart: string }) {
     // Access the current theme (light/dark) from Material UI
     const theme = useTheme();

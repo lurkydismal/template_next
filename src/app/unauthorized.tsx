@@ -1,5 +1,8 @@
 import NextLink from "next/link";
 
+/**
+ * Renders the error icon component.
+ */
 function ErrorIcon() {
     return (
         <svg
@@ -21,6 +24,9 @@ function ErrorIcon() {
     );
 }
 
+/**
+ * Renders the unauthorized page component.
+ */
 export default function UnauthorizedPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">

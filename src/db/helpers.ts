@@ -1,4 +1,4 @@
-import { timestamp } from "drizzle-orm/pg-core";
+import { timestamp, varchar } from "drizzle-orm/pg-core";
 
 /**
  * timestamps
@@ -17,10 +17,10 @@ import { timestamp } from "drizzle-orm/pg-core";
  * const users = pgTable("users", {
  *     id: serial("id").primaryKey(),
  *     name: text("name").notNull(),
- *     ...timestamps,
+ *     ...timestampsColumns,
  * });
  */
-export const timestamps = {
+export const timestampsColumns = {
     updated_at: timestamp({ precision: 0, withTimezone: true })
         .defaultNow()
         .notNull(),
@@ -29,6 +29,7 @@ export const timestamps = {
         .notNull(),
 };
 
+// * NOTE: PSQL function to automatically update updated_at on any row change
 /*
 -- Functions
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -45,3 +46,31 @@ BEFORE UPDATE ON "table"
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 */
+
+/**
+ * Common authorship metadata columns for mutable records.
+ *
+ * const posts = pgTable("posts", {
+ *   id: serial("id").primaryKey(),
+ *   title: text("title").notNull(),
+ *   ...auditColumns,
+ * });
+ */
+export const auditColumns = {
+    author: varchar({ length: 32 }).default("system").notNull(),
+    last_editor: varchar({ length: 32 }).default("system").notNull(),
+};
+
+/**
+ * Full metadata bundle combining author/edit columns with timestamps.
+ *
+ * @example
+ * const auditTable = pgTable("audit", {
+ *   id: serial("id").primaryKey(),
+ *   ...metadataColumns,
+ * });
+ */
+export const metadataColumns = {
+    ...auditColumns,
+    ...timestampsColumns,
+};

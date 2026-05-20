@@ -20,6 +20,9 @@ import { Box, CircularProgress, CssBaseline } from "@mui/material";
 import SnackbarProvider from "@/providers/snackbar";
 import { Suspense } from "react";
 
+/**
+ * Renders the mui layout component.
+ */
 export default function MuiLayout({
     children,
 }: Readonly<{

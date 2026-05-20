@@ -1,5 +1,8 @@
 import NextLink from "next/link";
 
+/**
+ * Renders the lock icon component.
+ */
 function LockIcon() {
     return (
         <svg
@@ -24,6 +27,9 @@ function LockIcon() {
     );
 }
 
+/**
+ * Renders the forbidden component.
+ */
 export default function Forbidden() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">

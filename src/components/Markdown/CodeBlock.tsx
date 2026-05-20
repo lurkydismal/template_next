@@ -128,7 +128,7 @@ export default function CodeBlock({
     }
 
     return (
-        <Box position="relative" sx={{ mt: 2, mb: 2 }}>
+        <Box sx={{ position: "relative", mt: 2, mb: 2 }}>
             {/* Copy button positioned at top-right */}
             <Box
                 sx={{

@@ -49,9 +49,13 @@ dayjs.extend(customParseFormat);
  * @returns The formatted date string in local time
  */
 export function formatDate(
-    date: string | Date | Dayjs,
+    date: string | Date | Dayjs | null | undefined,
     needTime: boolean = false,
 ): string {
+    if (date == null) {
+        return "—";
+    }
+
     const parsed = dateInputSchema.parse(date);
 
     return parsed.local().format(needTime ? dateTimeFormat : dateFormat);

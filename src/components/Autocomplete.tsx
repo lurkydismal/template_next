@@ -11,6 +11,9 @@ type OptionWithLabel = {
     label?: unknown;
 };
 
+/**
+ * Gets option label.
+ */
 function getOptionLabel(option: unknown): string {
     if (typeof option === "string") return option;
     if (typeof option === "number" || typeof option === "boolean") {
@@ -23,9 +26,15 @@ function getOptionLabel(option: unknown): string {
     return String(option ?? "");
 }
 
+/**
+ * Renders the autocomplete with highlight component.
+ */
 export default function AutocompleteWithHighlight(props: AnyAutoProps) {
     const { options, renderInput, renderOption, ...rest } = props;
 
+    /**
+     * Renders an autocomplete option with highlighted matched text.
+     */
     const defaultRenderOption: RenderOptionFn = (liProps, option, state) => {
         const { key, ...optionProps } = liProps as LiProps & {
             key?: React.Key;

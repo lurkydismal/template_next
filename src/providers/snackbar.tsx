@@ -27,6 +27,9 @@ const SnackbarContext = createContext<{
     showInfo: (message: string) => void;
 } | null>(null);
 
+/**
+ * Converts an unknown error value into a user-facing message.
+ */
 function errorToMessage(err: unknown): string {
     if (err instanceof Error) {
         return err.message || "Operation failed";
@@ -39,6 +42,9 @@ function errorToMessage(err: unknown): string {
     return "Operation failed";
 }
 
+/**
+ * Returns the snackbar hook state and actions.
+ */
 export function useSnackbar() {
     const ctx = useContext(SnackbarContext);
 
@@ -49,11 +55,17 @@ export function useSnackbar() {
     return ctx;
 }
 
+/**
+ * Renders the custom snackbar provider component.
+ */
 export default function CustomSnackbarProvider({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    /**
+     * Handles show message behavior.
+     */
     const _showMessage = (err: unknown, variant?: VariantType) => {
         const message = errorToMessage(err);
 
@@ -80,22 +92,37 @@ export default function CustomSnackbarProvider({
         enqueueSnackbar(message, { variant });
     };
 
+    /**
+     * Handles show message behavior.
+     */
     const showMessage = (message: string) => {
         _showMessage(message, "default");
     };
 
+    /**
+     * Handles show success behavior.
+     */
     const showSuccess = (message: string) => {
         _showMessage(message, "success");
     };
 
+    /**
+     * Handles show error behavior.
+     */
     const showError = (err: unknown) => {
         _showMessage(err, "error");
     };
 
+    /**
+     * Handles show warning behavior.
+     */
     const showWarning = (warn: unknown) => {
         _showMessage(warn, "warning");
     };
 
+    /**
+     * Handles show info behavior.
+     */
     const showInfo = (message: string) => {
         _showMessage(message, "info");
     };

@@ -20,6 +20,9 @@ type RHFTextFieldProps<T extends FieldValues> = TextFieldProps & {
     name: Path<T>;
 };
 
+/**
+ * Renders the rhf text field component.
+ */
 export function RHFTextField<T extends FieldValues>({
     name,
     ...props
@@ -53,6 +56,9 @@ type RHFOutlinedInputProps<T extends FieldValues> = {
     size?: "small" | "medium";
 };
 
+/**
+ * Renders the rhf outlined input component.
+ */
 export function RHFOutlinedInput<T extends FieldValues>({
     name,
     ...props
@@ -85,6 +91,9 @@ type RHFRadioGroupProps<T extends FieldValues> = {
     row?: boolean;
 };
 
+/**
+ * Renders the rhf radio group component.
+ */
 export function RHFRadioGroup<T extends FieldValues>({
     name,
     options,
@@ -122,6 +131,9 @@ type RHFCheckboxProps<T extends FieldValues> = {
     label: string;
 };
 
+/**
+ * Renders the rhf checkbox component.
+ */
 export function RHFCheckbox<T extends FieldValues>({
     name,
     label,

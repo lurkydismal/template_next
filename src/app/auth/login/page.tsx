@@ -14,6 +14,9 @@ import { UsersRowPublic } from "@/db/types";
 import { setUser } from "@/utils/stduser";
 import { afterLoginRoute } from "@/data/routes";
 
+/**
+ * Renders the sign in page component.
+ */
 export default function SignInPage() {
     const router = useRouter();
     const { showError } = useSnackbar();
@@ -25,6 +28,9 @@ export default function SignInPage() {
         };
     }, []);
 
+    /**
+     * Handles sign in.
+     */
     const handleSignIn = async (data: {
         username: string;
         password: string;

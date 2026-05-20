@@ -28,6 +28,11 @@ export function getEnv(key: string, defaultValue?: string): string {
 /**
  * Parse a string into boolean.
  * Accepts "true", "1", "yes" (case-sensitive) as true. Everything else is false.
+ *
+ * @example
+ * parseBool("true"); // true
+ * parseBool("1"); // true
+ * parseBool("false"); // false
  */
 export function parseBool(value: string): boolean {
     return value === "true" || value === "1" || value === "yes";
@@ -43,7 +48,9 @@ export function toCamelCase(text: string): string {
     return text
         .trim()
         .toLowerCase()
+        .replace(/[_-]+/g, " ")
         .replace(/[^a-z0-9 ]+/g, "")
+        .replace(/\s+/g, " ")
         .replace(/\s+([a-z0-9])/g, (_, c) => c.toUpperCase());
 }
 
@@ -64,6 +71,9 @@ export function toCamelCase(text: string): string {
  *
  * @param text - The input string
  * @returns PascalCase version of the string
+ *
+ * @example
+ * toPascalCase("release notes"); // "ReleaseNotes"
  */
 export function toPascalCase(text: string): string {
     if (!text) return "";
@@ -88,6 +98,10 @@ export function toPascalCase(text: string): string {
  *
  * @param input - The value to check
  * @returns True if input is a plain object
+ *
+ * @example
+ * isRecord({ id: 1 }); // true
+ * isRecord([1, 2, 3]); // false
  */
 export function isRecord(input: unknown): input is Record<string, unknown> {
     if (typeof input !== "object" || input === null) return false;
@@ -101,6 +115,10 @@ export function isRecord(input: unknown): input is Record<string, unknown> {
  *
  * @param v - Value to check
  * @returns True if v is a Blob instance
+ *
+ * @example
+ * isBlob(new Blob(["hello"])); // true
+ * isBlob("hello"); // false
  */
 export function isBlob(v: unknown): v is Blob {
     return v instanceof Blob;
@@ -113,6 +131,9 @@ export function isBlob(v: unknown): v is Blob {
  * @param input - FormData, Record, or raw value
  * @param key - Key to extract if input is FormData or Record
  * @returns Extracted value or undefined
+ *
+ * @example
+ * extractFromFormData({ email: "a@b.com" }, "email"); // "a@b.com"
  */
 export function extractFromFormData<T = unknown>(
     input: FormData | Record<string, unknown> | unknown,
@@ -134,6 +155,9 @@ export function extractFromFormData<T = unknown>(
 /**
  * Delay execution for a specified number of milliseconds.
  * - Validates input to avoid invalid or excessive delays.
+ *
+ * @example
+ * await delay(150);
  */
 export function delay(milliseconds: number): Promise<void> {
     const ms = Number(milliseconds);
@@ -158,6 +182,9 @@ export function delay(milliseconds: number): Promise<void> {
  * @param currentPage - 1-based page number
  * @param perPage - Number of items per page
  * @returns Slice of items for the current page
+ *
+ * @example
+ * paginate(["a", "b", "c", "d"], 2, 2); // ["c", "d"]
  */
 export function paginate<T>(
     items: T[],
@@ -192,14 +219,28 @@ export function normalizeArrayOrValue<T>(item: T | T[]): T {
 }
 
 /**
- * [TODO:description]
+ * Mapped type that unwraps promise-like values in an object shape.
+ *
+ * @example
+ * type Input = { id: Promise<number>; name: string };
+ * type Output = AwaitedObject<Input>; // { id: number; name: string }
  */
 type AwaitedObject<T extends Record<PropertyKey, unknown>> = {
     [K in keyof T]: Awaited<T[K]>;
 };
 
 /**
- * [TODO:class]
+ * Resolves all values in an object while preserving keys and inferred types.
+ *
+ * This is useful when composing multiple async operations into one payload
+ * that should be awaited as a group.
+ *
+ * @example
+ * const result = await awaitObject({
+ *   users: Promise.resolve(["alice"]),
+ *   count: Promise.resolve(1),
+ * });
+ * // result => { users: ["alice"], count: 1 }
  */
 export async function awaitObject<T extends Record<PropertyKey, unknown>>(
     obj: T,

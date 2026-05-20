@@ -1,5 +1,8 @@
 import { Divider } from "@mui/material";
 
+/**
+ * Renders the custom divider component.
+ */
 export default function CustomDivider({ flex }: { flex?: boolean }) {
     return (
         <Divider

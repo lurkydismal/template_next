@@ -26,6 +26,9 @@ export interface AppThemeProps {
 }
 
 // Main AppTheme component providing theme and localization
+/**
+ * Renders the app theme component.
+ */
 export default function AppTheme(props: AppThemeProps) {
     const { children, themeComponents } = props;
     const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)", {
@@ -38,6 +41,9 @@ export default function AppTheme(props: AppThemeProps) {
 
     // Function to fetch localized messages for MUI components, DataGrid, and DatePicker
     // with a fallback to enUS
+    /**
+     * Gets locales.
+     */
     const getLocales = (localeName: string) => ({
         mui: (MUI as Record<string, typeof MUI.enUS>)[localeName] || MUI.enUS,
         dg:

@@ -3,6 +3,9 @@
 import { useEffect } from "react";
 import { useSnackbar } from "@/providers/snackbar";
 
+/**
+ * Renders the error icon component.
+ */
 function ErrorIcon() {
     return (
         <svg
@@ -26,6 +29,9 @@ function ErrorIcon() {
     );
 }
 
+/**
+ * Renders the error page component.
+ */
 export default function ErrorPage({
     error,
     reset,

@@ -8,39 +8,95 @@ import React, {
     isValidElement,
 } from "react";
 import CustomDataGrid from "./CustomDataGrid";
-import columns from "@/data/table/columns";
 import RowDialog, { FieldConfig } from "./RowDialog";
 import { useSnackbar } from "@/providers/snackbar";
 import CustomToolbar from "./Toolbar";
 import { useGridApiRef, GridRowsProp, GridRowParams } from "@mui/x-data-grid";
 import { Box, CircularProgress } from "@mui/material";
+import { columnsFromFields } from "@/utils/columns";
 
+/**
+ * Renders the table data grid component.
+ */
 export default function TableDataGrid<
     R extends Record<string, unknown>,
     RI extends Record<string, unknown>,
 >({
-    emptyRow,
     getRowsAction,
     createRowAction,
     updateRowAction,
     extraButtons,
     fields,
-    isRowChanged,
 }: Readonly<{
-    emptyRow: RI;
     getRowsAction: () => Promise<Readonly<GridRowsProp>>;
-    createRowAction: (row: RI) => Promise<unknown>;
-    updateRowAction: (fd: FormData) => Promise<boolean>;
+    createRowAction: (row: RI) => Promise<void>;
+    updateRowAction: (fd: FormData) => Promise<void>;
     extraButtons?: React.ReactNode; // optionally a ReactElement expecting props
     fields: FieldConfig<R, RI>[];
-    isRowChanged?: (row: R, values: Partial<RI>) => boolean;
 }>) {
     const { showError } = useSnackbar();
     const apiRef = useGridApiRef();
     const [currentRows, setCurrentRows] =
         useState<Readonly<GridRowsProp> | null>(null);
+    const [resolvedFields, setResolvedFields] = useState(fields);
+    const [fieldsResolving, setFieldsResolving] = useState(false);
     const [selectedRow, setSelectedRow] = useState<R | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
+    const emptyRow = React.useMemo(
+        () =>
+            resolvedFields.reduce((row, field) => {
+                row[field.key as keyof RI] = (field.placeholder ??
+                    null) as RI[keyof RI];
+                return row;
+            }, {} as RI),
+        [resolvedFields],
+    );
+
+    useEffect(() => {
+        let active = true;
+
+        /**
+         * Resolves async field configuration declared by each field.
+         */
+        const resolveFields = async () => {
+            const hasLoaders = fields.some((field) => field.loadOptions);
+            if (!hasLoaders) {
+                setResolvedFields(fields);
+                return;
+            }
+
+            setFieldsResolving(true);
+            try {
+                const nextFields = await Promise.all(
+                    fields.map(async (field) => {
+                        if (!field.loadOptions) return field;
+
+                        try {
+                            return {
+                                ...field,
+                                autocompleteOptions: await field.loadOptions(),
+                            };
+                        } catch {
+                            // Preserve field without resolved options on individual failure
+                            return field;
+                        }
+                    }),
+                );
+
+                if (active) setResolvedFields(nextFields);
+            } catch (error) {
+                if (active) showError(error);
+            } finally {
+                if (active) setFieldsResolving(false);
+            }
+        };
+
+        void resolveFields();
+
+        return () => {
+            active = false;
+        };
+    }, [fields, showError]);
 
     // Getting rows
     const _getRows = useCallback(async () => {
@@ -52,7 +108,6 @@ export default function TableDataGrid<
     }, [getRowsAction, showError]);
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         _getRows();
     }, [_getRows]);
 
@@ -60,7 +115,7 @@ export default function TableDataGrid<
     const createAndRefresh = useCallback(
         async (row: RI) => {
             try {
-                const created = await createRowAction(row);
+                await createRowAction(row);
                 // Option A: re-fetch full list (safe)
                 await _getRows();
 
@@ -68,24 +123,27 @@ export default function TableDataGrid<
                 // if (created && created.id !== undefined && apiRef?.current?.updateRows) {
                 //   apiRef.current.updateRows([{ id: created.id, ...created }]);
                 // }
-
-                return created;
             } catch (err) {
                 showError(err);
+                throw err;
             }
         },
         [createRowAction, _getRows, showError],
     );
 
-    // Keyboard shortcut & other internal creators use createAndRefresh
+    const openCreateDialog = useCallback(() => {
+        setSelectedRow(emptyRow as unknown as R);
+        setDialogOpen(true);
+    }, [emptyRow]);
+
+    // Keyboard shortcut opens create dialog with empty defaults
     useEffect(() => {
-        const submit = async () => {
+        /**
+         * Submits the current form or dialog state.
+         */
+        const submit = () => {
             if (!currentRows) return;
-            try {
-                await createAndRefresh(emptyRow);
-            } catch (err) {
-                showError(err);
-            }
+            openCreateDialog();
             // scroll to top row (you might want to select the created row if you can get its id)
             setTimeout(
                 () => apiRef.current?.scrollToIndexes?.({ rowIndex: 0 }),
@@ -93,6 +151,9 @@ export default function TableDataGrid<
             );
         };
 
+        /**
+         * Handles keyboard shortcuts for the editable data grid.
+         */
         const onKeyDown = (e: KeyboardEvent) => {
             if (!((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "m"))
                 return;
@@ -108,18 +169,24 @@ export default function TableDataGrid<
             }
 
             e.preventDefault();
-            void submit();
+            submit();
         };
 
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
-    }, [currentRows, createAndRefresh, emptyRow, showError, apiRef]);
+    }, [currentRows, openCreateDialog, apiRef]);
 
+    /**
+     * Handles row click.
+     */
     const handleRowClick = (params: GridRowParams) => {
         setSelectedRow(params.row as R);
         setDialogOpen(true);
     };
 
+    /**
+     * Handles close.
+     */
     const handleClose = () => setDialogOpen(false);
 
     // If extraButtons is a React element, clone it and inject createRowAction + emptyRow
@@ -127,29 +194,38 @@ export default function TableDataGrid<
         ? cloneElement(
               extraButtons as React.ReactElement<Record<string, unknown>>,
               {
-                  createRowAction: createAndRefresh,
+                  createRowAction: {
+                      type: "dialog",
+                      action: openCreateDialog,
+                  },
                   emptyRow,
               },
           )
         : extraButtons;
 
-    return currentRows === null ? (
-        <Box
-            sx={{
-                flexGrow: 1,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-            }}
-        >
-            <CircularProgress />
-        </Box>
-    ) : (
+    const columns = columnsFromFields(resolvedFields);
+
+    if (currentRows === null || fieldsResolving) {
+        return (
+            <Box
+                sx={{
+                    flexGrow: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}
+            >
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    return (
         <>
             <CustomDataGrid
                 apiRef={apiRef}
                 columns={columns}
-                rows={currentRows ?? []}
+                rows={currentRows}
                 sx={{
                     "& .MuiDataGrid-row": {
                         cursor: "pointer",
@@ -166,11 +242,11 @@ export default function TableDataGrid<
 
             <RowDialog<R, RI>
                 dialogOpen={dialogOpen}
-                fields={fields}
+                fields={resolvedFields}
                 handleClose={handleClose}
-                isRowChanged={isRowChanged}
                 selectedRow={selectedRow}
                 setSelectedRow={setSelectedRow}
+                createRowAction={createAndRefresh}
                 updateRowAction={updateRowAction}
                 onUpdated={_getRows}
             />

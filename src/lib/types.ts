@@ -1,11 +1,7 @@
 import z from "zod";
-import { users, categories, table } from "@/db/schema";
+import * as schema from "@/db/schema";
 
-export const TABLES = {
-    table: table,
-    users: users,
-    categories: categories,
-} as const;
+export const TABLES = schema;
 
 export type DbTarget = keyof typeof TABLES;
 
@@ -13,6 +9,9 @@ export const DbTargetSchema = z.enum(
     Object.keys(TABLES) as [DbTarget, ...DbTarget[]],
 );
 
+/**
+ * Parses raw target.
+ */
 export function parseRawTarget(rawTarget: DbTarget) {
     const target = DbTargetSchema.parse(rawTarget);
     const table = TABLES[target];

@@ -2,6 +2,9 @@ import Footer from "@/components/Footer";
 import NavBar from "@/components/NavBar";
 import { Box, Container } from "@mui/material";
 
+/**
+ * Renders the protected application layout shell.
+ */
 export default async function Layout({
     children,
 }: Readonly<{

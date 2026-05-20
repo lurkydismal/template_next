@@ -1,5 +1,8 @@
 import { Box, Pagination } from "@mui/material";
 
+/**
+ * Renders the posts pagination component.
+ */
 export default function PostsPagination({
     total,
     perPage,

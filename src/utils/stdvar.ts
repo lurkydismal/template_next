@@ -4,6 +4,9 @@ import { getEnv } from "./stdfunc";
  * Flag indicating whether detailed trace logging should be enabled.
  * - `true` forces verbose logging regardless of environment.
  * - `false` disables trace-level logging unless explicitly set elsewhere.
+ *
+ * @example
+ * if (needTrace) console.log("trace logging enabled");
  */
 export const needTrace = false;
 
@@ -45,6 +48,10 @@ export const isServer = !isBrowser;
 /**
  * URL for the GitHub repository or project link.
  * - Defaults to `"#"` if the environment variable `GITHUB_LINK` is not set.
+ *
+ * @example
+ * // "https://github.com/org/repo"
+ * console.log(githubUrl);
  */
 export const githubUrl = getEnv("NEXT_PUBLIC_GITHUB_LINK", "#");
 
@@ -116,6 +123,10 @@ export const maxRetries = 3;
 /**
  * Keys used for localStorage, sessionStorage or cookies.
  * - Example: storing auth tokens, theme preferences, etc.
+ *
+ * @example
+ * // Browser: localStorage key for serialized user session.
+ * storageKeys.client?.authStorageKey;
  */
 export const storageKeys = {
     client: isBrowser

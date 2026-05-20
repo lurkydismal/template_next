@@ -33,15 +33,17 @@ import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import db from "@/db";
-import { eq } from "drizzle-orm";
 import { users } from "@/db/schema";
 import { UsersRowPublic } from "@/db/types";
+import { updateDbCacheTags } from "@/lib/cache";
+import { eq } from "drizzle-orm";
 import { getEnv, normalizeArrayOrValue } from "@/utils/stdfunc";
 import { userSelectPublicSchema } from "@/utils/validate/schemas";
 import z from "zod";
 import ms from "ms";
 import { storageKeys } from "@/utils/stdvar";
 import log from "@/utils/stdlog";
+import { unauthorized } from "next/navigation";
 
 /*
  * Environment-configured values.
@@ -69,7 +71,11 @@ const LOGIN_ATTEMPTS = new Map<
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
+/**
+ * Handles record failed login attempt behavior.
+ */
 function recordFailedLoginAttempt(normalizedUsername: string) {
+    log.trace("recordFailedLoginAttempt called", { normalizedUsername });
     const now = Date.now();
     const record = LOGIN_ATTEMPTS.get(normalizedUsername);
     if (!record) {
@@ -77,6 +83,7 @@ function recordFailedLoginAttempt(normalizedUsername: string) {
             count: 1,
             firstAttemptTs: now,
         });
+        log.info("recordFailedLoginAttempt initialized counter");
         return;
     }
     // if window expired, reset
@@ -92,7 +99,16 @@ function recordFailedLoginAttempt(normalizedUsername: string) {
     LOGIN_ATTEMPTS.set(normalizedUsername, record);
 }
 
+/**
+ * Returns `true` when the username exceeded allowed failures in the active window.
+ *
+ * @example
+ * if (isLoginBlocked("alice")) {
+ *   throw new Error("Too many attempts");
+ * }
+ */
 function isLoginBlocked(normalizedUsername: string) {
+    log.trace("isLoginBlocked called", { normalizedUsername });
     const now = Date.now();
     const record = LOGIN_ATTEMPTS.get(normalizedUsername);
     if (!record) return false;
@@ -101,9 +117,17 @@ function isLoginBlocked(normalizedUsername: string) {
         LOGIN_ATTEMPTS.delete(normalizedUsername);
         return false;
     }
-    return record.count >= MAX_LOGIN_ATTEMPTS;
+    const blocked = record.count >= MAX_LOGIN_ATTEMPTS;
+    log.info("isLoginBlocked result computed", { blocked });
+    return blocked;
 }
 
+/**
+ * Clears the in-memory failed-attempt counter for a username.
+ *
+ * @example
+ * resetLoginAttempts("alice");
+ */
 function resetLoginAttempts(normalizedUsername: string) {
     LOGIN_ATTEMPTS.delete(normalizedUsername);
 }
@@ -114,6 +138,7 @@ function resetLoginAttempts(normalizedUsername: string) {
  * - Keep the argon2 options centralized if you later need to tweak memory/cost.
  */
 async function hashPassword(password: string) {
+    log.trace("hashPassword called");
     return await argon2.hash(password);
 }
 
@@ -129,6 +154,7 @@ function signJwt(
     payload: Partial<UsersRowPublic> | { username: string },
     remember: boolean,
 ) {
+    log.trace("signJwt called", { remember });
     const expiresIn = Math.floor(ms(remember ? "100d" : jwtExpiresIn) / 1000);
 
     return jwt.sign(payload, jwtSecret, {
@@ -146,6 +172,7 @@ function signJwt(
  * using your existing userSelectPublicSchema to avoid iat/exp causing downstream failures.
  */
 async function verifyJwt(token: string): Promise<null | UsersRowPublic> {
+    log.trace("verifyJwt called", { tokenLength: token.length });
     try {
         // verify signature + expiry and restrict algorithm to HS256
         const verified = jwt.verify(token, jwtSecret, {
@@ -206,6 +233,7 @@ async function cookieForToken(
     token: string,
     remember: boolean,
 ) {
+    log.trace("cookieForToken called", { remember });
     const maxAge = Math.floor(ms(remember ? "100d" : jwtExpiresIn) / 1000);
 
     cookieStore.set({
@@ -222,6 +250,10 @@ async function cookieForToken(
 /**
  * Clear the auth cookie by setting an expired cookie value.
  * - Setting `expires: new Date(0)` causes the browser to remove the cookie.
+ *
+ * @example
+ * const store = await cookies();
+ * await clearAuthCookie(store);
  */
 export async function clearAuthCookie(cookieStore: CookieStore) {
     return cookieStore.delete({
@@ -246,8 +278,13 @@ export async function clearAuthCookie(cookieStore: CookieStore) {
  * - The JWT contains the public fields you selected — keep that minimal to avoid stale data and large token size.
  *
  * This implementation normalizes username and logs errors (without secrets) for auditing.
+ *
+ * @example
+ * const created = await register({ username: "alice", password: "secret" });
+ * console.log(created.username);
  */
 export async function register(user: { username: string; password: string }) {
+    log.trace("register called");
     // parse + validate input; throws on invalid input
     const parsed = userSelectPublicSchema
         .omit({
@@ -277,7 +314,9 @@ export async function register(user: { username: string; password: string }) {
             })
             .execute();
 
-        // Normalize
+        // Invalidate cached user reads before normalizing the returned row.
+        updateDbCacheTags(["users"]);
+
         const created = normalizeArrayOrValue(inserted);
 
         // Create minimal payload for token
@@ -316,6 +355,10 @@ export async function register(user: { username: string; password: string }) {
  * - Returns boolean success/failure.
  *
  * Note: timing and error messages are intentionally generic to avoid leaking info.
+ *
+ * @example
+ * const ok = await verifyPassword({ username: "alice", password: "secret" });
+ * // true when credentials match
  */
 async function verifyPassword(user: { username: string; password: string }) {
     const parsed = userSelectPublicSchema
@@ -358,12 +401,17 @@ async function verifyPassword(user: { username: string; password: string }) {
  * Potential improvements:
  * - Replace in-memory rate limiter with Redis or other central store for production.
  * - Rate-limit by IP as well as by username.
+ *
+ * @example
+ * const user = await login({ username: "alice", password: "secret", remember: true });
+ * console.log(user.username_normalized);
  */
 export async function login(credentials: {
     username: string;
     password: string;
     remember?: boolean;
 }): Promise<UsersRowPublic> {
+    log.trace("login called");
     // parse -> validate (this will throw on invalid shape)
     const parsed = userSelectPublicSchema
         .omit({ username_normalized: true })
@@ -460,6 +508,10 @@ export async function login(credentials: {
  *   Use `.passthrough()` or explicitly pick the fields you expect from the verified payload.
  * - This function returns only what is present in the token; for authoritative profile data, query the DB
  *   (token can be stale).
+ *
+ * @example
+ * const session = await getSessionData();
+ * if (!session) return null;
  */
 export async function getSessionData(): Promise<null | UsersRowPublic> {
     const cookieStore = await cookies();
@@ -472,4 +524,24 @@ export async function getSessionData(): Promise<null | UsersRowPublic> {
     const parsed: UsersRowPublic = userSelectPublicSchema.parse(payload);
 
     return parsed;
+}
+
+/**
+ * Returns session data or triggers Next.js `unauthorized()`.
+ *
+ * Use this helper in protected server components/actions when unauthenticated
+ * access should immediately resolve to the framework unauthorized boundary.
+ *
+ * @example
+ * const user = await getSessionDataOrUnauthorized();
+ * // user is guaranteed non-null past this point.
+ */
+export async function getSessionDataOrUnauthorized(): Promise<UsersRowPublic> {
+    const user = await getSessionData();
+
+    if (!user) {
+        unauthorized();
+    }
+
+    return user!;
 }

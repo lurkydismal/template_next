@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 
+/**
+ * Renders the loading component.
+ */
 export default function Loading() {
     const [progress, setProgress] = useState(0);
 

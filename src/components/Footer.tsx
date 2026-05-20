@@ -11,6 +11,9 @@ import {
     IconButton,
 } from "@mui/material";
 
+/**
+ * Renders the footer component.
+ */
 export default function Footer() {
     return (
         <>

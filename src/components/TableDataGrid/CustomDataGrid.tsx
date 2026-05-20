@@ -12,6 +12,9 @@ type TasksGridProps = Omit<DataGridProps, "rows" | "columns"> & {
     rows: Readonly<GridRowsProp>;
 };
 
+/**
+ * Renders the custom data grid component.
+ */
 export default function CustomDataGrid({
     columns,
     rows,

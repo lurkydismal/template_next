@@ -11,8 +11,8 @@ build-release:
     pnpm build
 
 # Start the built production server.
-run-release:
-    pnpm start
+run-release port='3000':
+    pnpm start -p '{{ port }}'
 
 # Run the test suite.
 run-tests:

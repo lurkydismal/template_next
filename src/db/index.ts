@@ -15,6 +15,9 @@ import { relations } from "./relations";
 // Custom implementation of Drizzle's LogWriter interface
 // All log messages from Drizzle will be routed through this writer
 class MyLogWriter implements LogWriter {
+    /**
+     * Forwards database driver notices to log.debug().
+     */
     write(message: string) {
         log.debug(message);
     }

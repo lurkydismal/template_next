@@ -1,39 +1,34 @@
 "use client";
 
 import TableDataGrid from "@/components/TableDataGrid";
-import { TableRow, TableRowInsert } from "@/db/types";
 import ExtraToolbarButtons from "@/components/dashboard/ExtraToolbarButtons";
+import fields from "@/data/dashboard/table/fields";
+import type {
+    TableRow as TableRow,
+    TableRowInsert as TableRowInsert,
+} from "@/db/types";
 import {
-    _getRowsAction,
     createRowAction,
+    getRowsAction,
     updateRowAction,
-} from "@/lib/table/function";
-import fields from "@/data/table/fields";
+} from "@/lib/dashboard/table/function";
 
+/**
+ * Renders the protected bans dashboard page.
+ */
 export default function Page() {
-    const emptyRow: TableRowInsert = {
-        content: "-",
-    };
-
-    // Optional: custom change detector (compares trimmed content)
-    const isRowChanged = (row: TableRow, values: Partial<TableRowInsert>) => {
-        const a = String(row.content ?? "").trim();
-        const b = String(values.content ?? "").trim();
-        return a !== b;
-    };
-
     return (
         <TableDataGrid<TableRow, TableRowInsert>
             createRowAction={createRowAction}
-            emptyRow={emptyRow}
             fields={fields}
-            getRowsAction={_getRowsAction}
-            isRowChanged={isRowChanged}
+            getRowsAction={getRowsAction}
             updateRowAction={updateRowAction}
             extraButtons={
                 <ExtraToolbarButtons
-                    emptyRow={emptyRow}
-                    createRowAction={createRowAction}
+                    createRowAction={{
+                        type: "direct",
+                        action: createRowAction,
+                    }}
                 />
             }
         />

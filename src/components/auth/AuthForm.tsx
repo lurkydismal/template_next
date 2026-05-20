@@ -34,6 +34,9 @@ type Props =
           onSubmit: (data: SignUpValues) => Promise<void> | void;
       };
 
+/**
+ * Renders the auth form component.
+ */
 export default function AuthForm(props: Props) {
     const isSignIn = props.mode === "signin";
     const { control, handleSubmit } = useForm<Values>({
@@ -43,6 +46,9 @@ export default function AuthForm(props: Props) {
     });
     const [loading, setLoading] = useState(false);
 
+    /**
+     * Submits the current form or dialog state.
+     */
     const _onSubmit = async (data: Values) => {
         setLoading(true);
 

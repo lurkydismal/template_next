@@ -4,10 +4,13 @@ import {
     createSelectSchema,
     createUpdateSchema,
 } from "drizzle-zod";
-import { categories, users } from "@/db/schema";
+import { users } from "@/db/schema";
 import dayjs from "@/utils/dayjs";
 import { Dayjs } from "dayjs";
 
+/**
+ * Handles empty to null behavior.
+ */
 export const emptyToNull = <T extends z.ZodTypeAny>(schema: T) =>
     z.preprocess((val) => (val === "" ? null : val), schema.nullable());
 
@@ -75,28 +78,9 @@ export const userSelectPublicSchema = userSelectSchema
         username_normalized: z.string().trim().min(1).lowercase(),
     });
 
-/**
- * Category schemas for select, insert, and update operations.
- * - `categorySelectSchema` – full category selection
- * - `categoryInsertSchema` – insertion fields
- * - `categoryUpdateSchema` – update fields
- * - `categorySelectPublicSchema` – public-facing version with only name
- */
-export const categorySelectSchema = createSelectSchema(categories);
-export const categoryInsertSchema = createInsertSchema(categories);
-export const categoryUpdateSchema = createUpdateSchema(categories);
-export const categorySelectPublicSchema = categorySelectSchema
-    .pick({ name: true })
-    .extend({ name: z.string().trim().min(1) });
-
-// TODO: Document
-export const idSchema = z.number();
-
-// TODO: Document
-export const contentSchema = z.string();
-
-// TODO: Document
-export const rowSchema = z.object({
-    id: idSchema.optional(),
-    content: contentSchema,
-});
+// TODO: Comment
+export const mutationInputSchema = z.record(z.string(), z.unknown()).and(
+    z.object({
+        id: z.coerce.number().int().positive().optional(),
+    }),
+);

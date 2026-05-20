@@ -12,6 +12,9 @@ type Props = {
     className?: string;
 };
 
+/**
+ * Provides the fullscreen layout wrapper for fallback states.
+ */
 const Root = styled(Box)(({ theme }) => ({
     display: "flex",
     alignItems: "center",
@@ -33,6 +36,9 @@ const pulseGlow = keyframes`
   50% { text-shadow: 0 10px 30px rgba(255,255,255,0.10), 0 18px 50px rgba(0,0,0,0.6); }
 `;
 
+/**
+ * Provides the animated headline text used by fallback states.
+ */
 const Fancy = styled(Typography)(({ theme }) => ({
     position: "relative",
     fontWeight: theme.typography.fontWeightMedium,
@@ -59,6 +65,9 @@ const Fancy = styled(Typography)(({ theme }) => ({
     },
 }));
 
+/**
+ * Checks whether the value is an empty node.
+ */
 function isEmptyNode(node?: ReactNode) {
     if (node === null || node === undefined) return true;
     if (typeof node === "string") return node.trim() === "";
@@ -70,6 +79,9 @@ function isEmptyNode(node?: ReactNode) {
     return false;
 }
 
+/**
+ * Renders the main fallback component.
+ */
 export default function MainFallback({
     children,
     message = "No content yet",

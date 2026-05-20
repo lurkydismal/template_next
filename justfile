@@ -26,6 +26,10 @@ format:
 lint:
     pnpm lint
 
+# Run better static analysis and lint checks.
+hard-lint:
+    pnpm tsc --noEmit
+
 # Generate a new migration from schema changes.
 generate-migration:
     pnpm generate
@@ -69,6 +73,10 @@ docker-down:
 # Open an interactive shell inside a running service container.
 docker-interact image='postgres':
     docker compose exec '{{ image }}' bash
+
+# Stream logs from all services and follow output
+docker-logs:
+    docker compose logs -f
 
 # Attach to a running service container without signal proxying.
 docker-attach image='postgres':

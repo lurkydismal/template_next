@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
     cacheComponents: true,
 
     logging: {
-        browserDebugInfoInTerminal: true,
+        browserToTerminal: true,
     },
 
     // Disable ONLY if nginx has enabled brotli

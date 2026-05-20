@@ -16,7 +16,7 @@ run-release:
 
 # Run the test suite.
 run-tests:
-    pnpm test
+    pnpm test --run
 
 # Format source files using the project's formatter configuration.
 format:

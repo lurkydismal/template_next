@@ -208,11 +208,29 @@ export default function RowDialogContent<
     }, [registerSubmit, submit]);
 
     const initialRunRef = useRef<string | null>(null);
+    const createSessionCounterRef = useRef(0);
+    const unsavedRowKeyRef = useRef<string | null>(null);
+
+    /**
+     * Builds a stable unique key for each unsaved create session so dialog-open
+     * initialization runs once per distinct create flow.
+     */
+    const getRowKey = useCallback((): string => {
+        if (rowHasId(row, idKey)) {
+            unsavedRowKeyRef.current = null;
+            return String((row as Record<string, unknown>)[String(idKey)]);
+        }
+
+        if (unsavedRowKeyRef.current == null) {
+            createSessionCounterRef.current += 1;
+            unsavedRowKeyRef.current = `new-${createSessionCounterRef.current}`;
+        }
+
+        return unsavedRowKeyRef.current;
+    }, [idKey, row]);
 
     useEffect(() => {
-        const rowKey = rowHasId(row, idKey)
-            ? String((row as Record<string, unknown>)[String(idKey)])
-            : "new";
+        const rowKey = getRowKey();
         if (initialRunRef.current === rowKey) return;
         initialRunRef.current = rowKey;
 
@@ -240,7 +258,7 @@ export default function RowDialogContent<
                 false,
             );
         }
-    }, [fields, idKey, row, runFieldValueChange]);
+    }, [fields, getRowKey, row, runFieldValueChange]);
 
     return (
         <form

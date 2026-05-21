@@ -4,7 +4,12 @@ import { FieldConfig } from "../types";
  * Resolves an interconnected field value from a relation descriptor.
  */
 function resolveInterconnectedRelationValue(
-    relation: NonNullable<FieldConfig<Record<string, unknown>, Record<string, unknown>>["interconnected"]>["relation"],
+    relation: NonNullable<
+        FieldConfig<
+            Record<string, unknown>,
+            Record<string, unknown>
+        >["interconnected"]
+    >["relation"],
     values: Record<string, unknown>,
 ) {
     if (!relation) return undefined;
@@ -36,7 +41,10 @@ export async function resolveInterconnectedFieldValue<
 
     return resolveInterconnectedRelationValue(
         interconnected.relation as NonNullable<
-            FieldConfig<Record<string, unknown>, Record<string, unknown>>["interconnected"]
+            FieldConfig<
+                Record<string, unknown>,
+                Record<string, unknown>
+            >["interconnected"]
         >["relation"],
         values,
     );

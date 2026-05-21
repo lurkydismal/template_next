@@ -99,12 +99,14 @@ function isValidIpv6Address(value: string) {
             groups: groups.slice(0, -1).concat(["ffff", "ffff"]),
             ipv4Tail: true,
         };
-    };
+    }
 
     const leftNormalized = normalizeIpv4Tail(leftGroups);
-    if (leftNormalized.ipv4Tail && leftNormalized.groups.length === 0) return false;
+    if (leftNormalized.ipv4Tail && leftNormalized.groups.length === 0)
+        return false;
     const rightNormalized = normalizeIpv4Tail(rightGroups);
-    if (rightNormalized.ipv4Tail && rightNormalized.groups.length === 0) return false;
+    if (rightNormalized.ipv4Tail && rightNormalized.groups.length === 0)
+        return false;
 
     const normalizedLeft = leftNormalized.groups;
     const normalizedRight = rightNormalized.groups;
@@ -128,24 +130,37 @@ function validateInetValue(value: unknown, allowPort = false) {
     const rawValue = String(value).trim();
 
     if (allowPort) {
-        const ipv4WithPort = rawValue.match(/^(?<host>(?:\d{1,3}\.){3}\d{1,3}):(?<port>\d{1,5})$/);
+        const ipv4WithPort = rawValue.match(
+            /^(?<host>(?:\d{1,3}\.){3}\d{1,3}):(?<port>\d{1,5})$/,
+        );
         if (ipv4WithPort?.groups) {
             const port = Number(ipv4WithPort.groups.port);
-            if (isValidIpv4Address(ipv4WithPort.groups.host) && port >= 0 && port <= 65535) {
+            if (
+                isValidIpv4Address(ipv4WithPort.groups.host) &&
+                port >= 0 &&
+                port <= 65535
+            ) {
                 return true;
             }
         }
 
-        const ipv6WithPort = rawValue.match(/^\[(?<host>.+)\]:(?<port>\d{1,5})$/);
+        const ipv6WithPort = rawValue.match(
+            /^\[(?<host>.+)\]:(?<port>\d{1,5})$/,
+        );
         if (ipv6WithPort?.groups) {
             const port = Number(ipv6WithPort.groups.port);
-            if (isValidIpv6Address(ipv6WithPort.groups.host) && port >= 0 && port <= 65535) {
+            if (
+                isValidIpv6Address(ipv6WithPort.groups.host) &&
+                port >= 0 &&
+                port <= 65535
+            ) {
                 return true;
             }
         }
     }
 
-    if (isValidIpv4Address(rawValue) || isValidIpv6Address(rawValue)) return true;
+    if (isValidIpv4Address(rawValue) || isValidIpv6Address(rawValue))
+        return true;
 
     return allowPort
         ? "Enter a valid IPv4/IPv6 value. For ports use IPv4:port or [IPv6]:port"

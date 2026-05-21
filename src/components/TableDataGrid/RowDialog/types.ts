@@ -28,6 +28,27 @@ export type FieldValueChangeContext<R> = {
     values: Record<string, unknown>;
 };
 
+export type InterconnectedFieldRelation = {
+    sourceField: string;
+    lookupField: string;
+    valueField: string;
+    rows: Record<string, unknown>[];
+};
+
+export type InterconnectedFieldContext<R> = {
+    row: R;
+    values: Record<string, unknown>;
+};
+
+export type InterconnectedFieldConfig<R> = {
+    dependsOn: string[];
+    makeReadOnly?: boolean;
+    getter?: (
+        context: InterconnectedFieldContext<R>,
+    ) => unknown | Promise<unknown>;
+    relation?: InterconnectedFieldRelation;
+};
+
 export type FieldConfig<
     R,
     RI = unknown,
@@ -68,6 +89,7 @@ export type FieldConfig<
     ) => FieldValueChangeResult;
     // run onValueChange with the initial dialog value when the dialog content opens
     runOnDialogOpen?: boolean;
+    interconnected?: InterconnectedFieldConfig<R>;
     validate?: (
         value: unknown,
         row: R,

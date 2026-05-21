@@ -11,7 +11,11 @@ export type DefaultFieldType =
     | "autocomplete"
     | "date"
     | "time"
-    | "datetime";
+    | "datetime"
+    | "number"
+    | "uuid"
+    | "hex"
+    | "tableLookup";
 
 export type FieldValueChangeResult =
     | void
@@ -68,6 +72,12 @@ export type FieldConfig<
         row: R,
         values: Record<string, unknown>,
     ) => true | string | Promise<true | string>;
+    tableLookup?: (
+        value: unknown,
+        row: R,
+        values: Record<string, unknown>,
+    ) => boolean | Promise<boolean>;
+    tableLookupErrorMessage?: string;
 };
 
 export type UpdateRowAction = (fd: FormData) => Promise<void>;

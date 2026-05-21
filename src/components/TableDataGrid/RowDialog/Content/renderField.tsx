@@ -9,6 +9,7 @@ import CustomFieldInput from "../CustomFieldInput";
 import MultilineFieldInput from "../MultilineFieldInput";
 import AutocompleteFieldInput from "../AutocompleteFieldInput";
 import DateTimeFieldInput from "../DateTimeFieldInput";
+import NumberFieldInput from "../NumberFieldInput";
 import TextFieldInput from "../TextFieldInput";
 
 type RenderFieldParams<
@@ -117,6 +118,26 @@ export const renderField = <
 
                     handleFieldValueChange(field, nextValue, packedValues);
                 }}
+                control={form.control}
+                error={error}
+                rules={rules}
+            />
+        );
+    }
+
+    if (field.type === "number") {
+        return (
+            <NumberFieldInput
+                key={`${key}-${idx}`}
+                fieldKey={key}
+                label={field.label}
+                name={name}
+                required={!!field.required}
+                readOnly={!!field.readOnly}
+                value={value}
+                onValueChange={(nextValue) =>
+                    handleFieldValueChange(field, nextValue)
+                }
                 control={form.control}
                 error={error}
                 rules={rules}

@@ -3,6 +3,9 @@ import { FieldConfig } from "../types";
 
 /**
  * Checks whether a value is considered empty for row dialog validation.
+ * Treats null/undefined and whitespace-only string coercions as empty.
+ * Note: object values stringify to "[object Object]" and will NEVER be
+ * reported as empty here.
  */
 function isEmptyValue(value: unknown) {
     return value === null || value === undefined || String(value).trim() === "";

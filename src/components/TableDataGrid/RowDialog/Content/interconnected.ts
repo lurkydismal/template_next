@@ -79,7 +79,12 @@ export async function resolveInterconnectedFieldUpdates<
         }
 
         const key = String(field.key);
-        updates[key] = await resolveInterconnectedFieldValue(field, row, values);
+        const mergedValues = { ...values, ...updates };
+        updates[key] = await resolveInterconnectedFieldValue(
+            field,
+            row,
+            mergedValues,
+        );
     }
 
     return updates;

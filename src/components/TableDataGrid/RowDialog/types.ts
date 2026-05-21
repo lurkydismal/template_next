@@ -11,7 +11,12 @@ export type DefaultFieldType =
     | "autocomplete"
     | "date"
     | "time"
-    | "datetime";
+    | "datetime"
+    | "number"
+    | "uuid"
+    | "hex"
+    | "inet"
+    | "tableLookup";
 
 export type FieldValueChangeResult =
     | void
@@ -21,6 +26,27 @@ export type FieldValueChangeResult =
 export type FieldValueChangeContext<R> = {
     row: R;
     values: Record<string, unknown>;
+};
+
+export type InterconnectedFieldRelation = {
+    sourceField: string;
+    lookupField: string;
+    valueField: string;
+    rows: Record<string, unknown>[];
+};
+
+export type InterconnectedFieldContext<R> = {
+    row: R;
+    values: Record<string, unknown>;
+};
+
+export type InterconnectedFieldConfig<R> = {
+    dependsOn: string[];
+    makeReadOnly?: boolean;
+    getter?: (
+        context: InterconnectedFieldContext<R>,
+    ) => unknown | Promise<unknown>;
+    relation?: InterconnectedFieldRelation;
 };
 
 export type FieldConfig<
@@ -40,6 +66,13 @@ export type FieldConfig<
     requiredGroupMin?: number;
     placeholder?: unknown;
     autocompleteOptions?: readonly AutocompleteOption[];
+    /**
+     * List of sibling autocomplete field keys that cannot share the same selected value.
+     *
+     * When provided, options selected in the listed fields are filtered out from this
+     * field's options list (while still keeping this field's current value visible).
+     */
+    mutuallyExclusiveWith?: string[];
     loadOptions?: () => Promise<readonly AutocompleteOption[]>;
     autocompleteLoading?: boolean;
     autocompleteOpen?: boolean;
@@ -63,11 +96,19 @@ export type FieldConfig<
     ) => FieldValueChangeResult;
     // run onValueChange with the initial dialog value when the dialog content opens
     runOnDialogOpen?: boolean;
+    interconnected?: InterconnectedFieldConfig<R>;
     validate?: (
         value: unknown,
         row: R,
         values: Record<string, unknown>,
     ) => true | string | Promise<true | string>;
+    tableLookup?: (
+        value: unknown,
+        row: R,
+        values: Record<string, unknown>,
+    ) => boolean | Promise<boolean>;
+    tableLookupErrorMessage?: string;
+    inetAllowPort?: boolean;
 };
 
 export type UpdateRowAction = (fd: FormData) => Promise<void>;

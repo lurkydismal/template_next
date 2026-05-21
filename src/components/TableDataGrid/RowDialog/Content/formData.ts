@@ -10,7 +10,7 @@ function setFormDataField<
     RI extends Record<string, unknown>,
 >(fd: FormData, field: FieldConfig<R, RI>, sourceValues: Partial<RI>) {
     const name = field.name ?? String(field.key);
-    if (field.readOnly) {
+    if (field.readOnly && !field.interconnected) {
         fd.delete(name);
         return;
     }

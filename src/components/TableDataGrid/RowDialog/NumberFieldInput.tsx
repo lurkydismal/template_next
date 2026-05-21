@@ -1,4 +1,4 @@
-import { ChangeEvent } from "react";
+import { useState, ChangeEvent } from "react";
 import { TextField as NumberField, Typography } from "@mui/material";
 import {
     Control,
@@ -46,6 +46,10 @@ export default function NumberFieldInput({
     rules,
     onValueChange,
 }: NumberFieldInputProps) {
+    const [draftValue, setDraftValue] = useState<string>(
+        value === null || value === undefined ? "" : String(value),
+    );
+
     return (
         <div>
             <Typography variant="subtitle1" color="text.secondary">
@@ -64,13 +68,19 @@ export default function NumberFieldInput({
                         slotProps={{ htmlInput: { readOnly } }}
                         id={`${fieldKey}-number`}
                         type="number"
-                        value={field.value ?? ""}
+                        value={draftValue}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => {
                             if (readOnly) return;
 
-                            const normalized = toNullableNumber(e.target.value);
+                            setDraftValue(e.target.value);
+                        }}
+                        onBlur={() => {
+                            const normalized = toNullableNumber(draftValue);
                             field.onChange(normalized);
                             onValueChange(normalized);
+                            setDraftValue(
+                                normalized === null ? "" : String(normalized),
+                            );
                         }}
                         error={!!error}
                         helperText={error?.message}

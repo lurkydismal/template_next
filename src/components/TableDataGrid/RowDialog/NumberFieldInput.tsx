@@ -1,10 +1,11 @@
-import { useState, ChangeEvent } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { TextField as NumberField, Typography } from "@mui/material";
 import {
     Control,
     Controller,
     FieldError,
     RegisterOptions,
+    useWatch,
 } from "react-hook-form";
 
 type NumberFieldInputProps = {
@@ -49,6 +50,18 @@ export default function NumberFieldInput({
     const [draftValue, setDraftValue] = useState<string>(
         value === null || value === undefined ? "" : String(value),
     );
+    const controllerValue = useWatch({ control, name });
+
+    // Keep local draft display aligned with external and RHF-controlled values.
+    useEffect(() => {
+        const normalized =
+            controllerValue === undefined
+                ? toNullableNumber(value)
+                : toNullableNumber(controllerValue);
+
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setDraftValue(normalized === null ? "" : String(normalized));
+    }, [controllerValue, value]);
 
     return (
         <div>
@@ -73,6 +86,7 @@ export default function NumberFieldInput({
                             if (readOnly) return;
 
                             setDraftValue(e.target.value);
+                            field.onChange(toNullableNumber(e.target.value));
                         }}
                         onBlur={() => {
                             const normalized = toNullableNumber(draftValue);

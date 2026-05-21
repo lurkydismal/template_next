@@ -50,6 +50,109 @@ function validateNumberValue(value: unknown) {
 }
 
 /**
+ * Validates IPv4 addresses in dotted-decimal notation.
+ */
+function isValidIpv4Address(value: string) {
+    const octets = value.split(".");
+
+    if (octets.length !== 4) return false;
+
+    return octets.every((octet) => {
+        if (!/^\d{1,3}$/.test(octet)) return false;
+
+        const parsed = Number(octet);
+        return parsed >= 0 && parsed <= 255;
+    });
+}
+
+/**
+ * Validates IPv6 addresses, including compressed forms and IPv4-mapped endings.
+ */
+function isValidIpv6Address(value: string) {
+    if (!value.includes(":")) return false;
+
+    const hasDoubleColon = value.includes("::");
+    if (value.indexOf("::") !== value.lastIndexOf("::")) return false;
+
+    const [leftSide, rightSide = ""] = value.split("::");
+    const leftGroups = leftSide ? leftSide.split(":") : [];
+    const rightGroups = rightSide ? rightSide.split(":") : [];
+
+    /**
+     * Checks whether an IPv6 segment is a valid hexadecimal group.
+     */
+    function isHexGroup(group: string) {
+        return /^[0-9a-f]{1,4}$/i.test(group);
+    }
+
+    /**
+     * Converts an IPv4 tail to its two-group IPv6 equivalent for counting/validation.
+     */
+    function normalizeIpv4Tail(groups: string[]) {
+        if (groups.length === 0) return { groups, ipv4Tail: false };
+        const tail = groups[groups.length - 1];
+        if (!tail.includes(".")) return { groups, ipv4Tail: false };
+
+        if (!isValidIpv4Address(tail)) return { groups: [], ipv4Tail: true };
+
+        return {
+            groups: groups.slice(0, -1).concat(["ffff", "ffff"]),
+            ipv4Tail: true,
+        };
+    };
+
+    const leftNormalized = normalizeIpv4Tail(leftGroups);
+    if (leftNormalized.ipv4Tail && leftNormalized.groups.length === 0) return false;
+    const rightNormalized = normalizeIpv4Tail(rightGroups);
+    if (rightNormalized.ipv4Tail && rightNormalized.groups.length === 0) return false;
+
+    const normalizedLeft = leftNormalized.groups;
+    const normalizedRight = rightNormalized.groups;
+    const normalizedCount = normalizedLeft.length + normalizedRight.length;
+
+    if (hasDoubleColon) {
+        if (normalizedCount >= 8) return false;
+    } else if (normalizedCount !== 8) {
+        return false;
+    }
+
+    return normalizedLeft.concat(normalizedRight).every(isHexGroup);
+}
+
+/**
+ * Validates inet values for IPv4/IPv6 addresses with optional ports.
+ */
+function validateInetValue(value: unknown, allowPort = false) {
+    if (isEmptyValue(value)) return true;
+
+    const rawValue = String(value).trim();
+
+    if (allowPort) {
+        const ipv4WithPort = rawValue.match(/^(?<host>(?:\d{1,3}\.){3}\d{1,3}):(?<port>\d{1,5})$/);
+        if (ipv4WithPort?.groups) {
+            const port = Number(ipv4WithPort.groups.port);
+            if (isValidIpv4Address(ipv4WithPort.groups.host) && port >= 0 && port <= 65535) {
+                return true;
+            }
+        }
+
+        const ipv6WithPort = rawValue.match(/^\[(?<host>.+)\]:(?<port>\d{1,5})$/);
+        if (ipv6WithPort?.groups) {
+            const port = Number(ipv6WithPort.groups.port);
+            if (isValidIpv6Address(ipv6WithPort.groups.host) && port >= 0 && port <= 65535) {
+                return true;
+            }
+        }
+    }
+
+    if (isValidIpv4Address(rawValue) || isValidIpv6Address(rawValue)) return true;
+
+    return allowPort
+        ? "Enter a valid IPv4/IPv6 value. For ports use IPv4:port or [IPv6]:port"
+        : "Enter a valid IPv4 or IPv6 value";
+}
+
+/**
  * Validates a grouped requirement for fields where at least N values are needed.
  */
 function validateRequiredGroup<
@@ -98,6 +201,8 @@ async function validateByFieldType<
     if (field.type === "number") return validateNumberValue(value);
     if (field.type === "uuid") return validateUuidValue(value);
     if (field.type === "hex") return validateHexValue(value);
+    if (field.type === "inet")
+        return validateInetValue(value, field.inetAllowPort);
 
     if (field.type === "tableLookup") {
         if (!field.tableLookup || isEmptyValue(value)) return true;

@@ -66,6 +66,13 @@ export type FieldConfig<
     requiredGroupMin?: number;
     placeholder?: unknown;
     autocompleteOptions?: readonly AutocompleteOption[];
+    /**
+     * List of sibling autocomplete field keys that cannot share the same selected value.
+     *
+     * When provided, options selected in the listed fields are filtered out from this
+     * field's options list (while still keeping this field's current value visible).
+     */
+    mutuallyExclusiveWith?: string[];
     loadOptions?: () => Promise<readonly AutocompleteOption[]>;
     autocompleteLoading?: boolean;
     autocompleteOpen?: boolean;

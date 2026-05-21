@@ -5,6 +5,7 @@ import {
     UseFormReturn,
 } from "react-hook-form";
 import { FieldConfig } from "../types";
+import { AutocompleteOption } from "../types";
 import CustomFieldInput from "../CustomFieldInput";
 import MultilineFieldInput from "../MultilineFieldInput";
 import AutocompleteFieldInput from "../AutocompleteFieldInput";
@@ -30,6 +31,51 @@ type RenderFieldParams<
         value: unknown,
         packedValues?: Record<string, unknown>,
     ) => void;
+};
+
+/**
+ * Returns the primitive value used to compare two autocomplete options.
+ */
+const getAutocompleteComparableValue = (value: unknown): unknown => {
+    if (value && typeof value === "object" && "label" in value) {
+        return (value as { label?: unknown }).label;
+    }
+
+    return value;
+};
+
+/**
+ * Filters autocomplete options by removing values currently selected by sibling fields.
+ */
+const getFilteredAutocompleteOptions = <
+    R extends Record<string, unknown>,
+    RI extends Record<string, unknown>,
+>(
+    field: FieldConfig<R, RI>,
+    values: Record<string, unknown>,
+): readonly AutocompleteOption[] => {
+    const options = field.autocompleteOptions ?? [];
+    const excludedFieldKeys = field.mutuallyExclusiveWith ?? [];
+
+    if (excludedFieldKeys.length === 0) return options;
+
+    const currentComparableValue = getAutocompleteComparableValue(
+        values[String(field.key)],
+    );
+
+    const excludedValues = new Set<unknown>(
+        excludedFieldKeys
+            .map((excludedFieldKey) =>
+                getAutocompleteComparableValue(values[excludedFieldKey]),
+            )
+            .filter((value) => value !== null && value !== undefined),
+    );
+
+    return options.filter((option) => {
+        const optionComparableValue = getAutocompleteComparableValue(option);
+        if (optionComparableValue === currentComparableValue) return true;
+        return !excludedValues.has(optionComparableValue);
+    }) as readonly AutocompleteOption[];
 };
 
 /**
@@ -91,6 +137,8 @@ export const renderField = <
     }
 
     if (field.type === "autocomplete") {
+        const filteredOptions = getFilteredAutocompleteOptions(field, values);
+
         return (
             <AutocompleteFieldInput
                 key={`${key}-${idx}`}
@@ -100,7 +148,7 @@ export const renderField = <
                 required={!!field.required}
                 readOnly={readOnly}
                 value={value}
-                options={field.autocompleteOptions ?? []}
+                options={filteredOptions}
                 loading={field.autocompleteLoading}
                 open={field.autocompleteOpen}
                 onOpen={field.onAutocompleteOpen}

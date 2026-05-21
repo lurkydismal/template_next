@@ -39,7 +39,14 @@ function validateHexValue(value: unknown) {
 function validateNumberValue(value: unknown) {
     if (isEmptyValue(value)) return true;
 
-    return Number.isFinite(Number(value)) || "Enter a valid number";
+    if (typeof value === "number") {
+        return Number.isFinite(value) || "Enter a valid number";
+    }
+    if (typeof value === "string") {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) || "Enter a valid number";
+    }
+    return "Enter a valid number";
 }
 
 /**
@@ -95,12 +102,19 @@ async function validateByFieldType<
     if (field.type === "tableLookup") {
         if (!field.tableLookup || isEmptyValue(value)) return true;
 
-        const exists = await field.tableLookup(value, row, allValues);
-        return (
-            exists ||
-            field.tableLookupErrorMessage ||
-            `${field.label} does not exist in the selected table`
-        );
+        try {
+            const exists = await field.tableLookup(value, row, allValues);
+            return (
+                exists ||
+                field.tableLookupErrorMessage ||
+                `${field.label} does not exist in the selected table`
+            );
+        } catch {
+            return (
+                field.tableLookupErrorMessage ||
+                `${field.label} could not be verified against the selected table`
+            );
+        }
     }
 
     return true;

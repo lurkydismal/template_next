@@ -15,6 +15,7 @@ export type DefaultFieldType =
     | "number"
     | "uuid"
     | "hex"
+    | "inet"
     | "tableLookup";
 
 export type FieldValueChangeResult =
@@ -78,6 +79,7 @@ export type FieldConfig<
         values: Record<string, unknown>,
     ) => boolean | Promise<boolean>;
     tableLookupErrorMessage?: string;
+    inetAllowPort?: boolean;
 };
 
 export type UpdateRowAction = (fd: FormData) => Promise<void>;

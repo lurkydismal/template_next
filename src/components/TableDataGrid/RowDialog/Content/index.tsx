@@ -80,8 +80,8 @@ export default function RowDialogContent<
             value: unknown,
             nextValues: Record<string, unknown>,
             shouldDirty = true,
-        ) => {
-            if (!field.onValueChange) return;
+        ): Promise<Record<string, unknown>> => {
+            if (!field.onValueChange) return {};
 
             try {
                 const changedValues = await field.onValueChange(value, {
@@ -91,13 +91,18 @@ export default function RowDialogContent<
 
                 if (changedValues && typeof changedValues === "object") {
                     setValuesAndForm(changedValues, shouldDirty);
+                    return changedValues;
                 }
             } catch (error) {
                 showError(error);
             }
+
+            return {};
         },
         [row, setValuesAndForm, showError],
     );
+
+    const interconnectedRequestEpochRef = useRef(0);
 
     /**
      * Stores an edited value, then lets the field derive any dependent values.
@@ -111,17 +116,29 @@ export default function RowDialogContent<
             const key = String(field.key);
             const changedValues = { [key]: value, ...packedValues };
             const nextValues = { ...values, ...changedValues };
+            const requestEpoch = ++interconnectedRequestEpochRef.current;
 
             setValuesAndForm(changedValues);
-            void runFieldValueChange(field, value, nextValues);
+
             void (async () => {
+                const siblingUpdates = await runFieldValueChange(
+                    field,
+                    value,
+                    nextValues,
+                );
+                const mergedNextValues = { ...nextValues, ...siblingUpdates };
                 const interconnectedUpdates =
                     await resolveInterconnectedFieldUpdates(
                         fields,
                         row,
-                        nextValues,
+                        mergedNextValues,
                         key,
                     );
+
+                if (requestEpoch !== interconnectedRequestEpochRef.current) {
+                    return;
+                }
+
                 if (Object.keys(interconnectedUpdates).length > 0) {
                     setValuesAndForm(interconnectedUpdates);
                 }

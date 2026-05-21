@@ -25,6 +25,7 @@ type NumberFieldInputProps = {
  */
 function toNullableNumber(value: unknown): number | null {
     if (value === "" || value === null || value === undefined) return null;
+    if (typeof value === "string" && value.trim() === "") return null;
 
     const numericValue = Number(value);
     return Number.isFinite(numericValue) ? numericValue : null;

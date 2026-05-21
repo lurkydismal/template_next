@@ -8,7 +8,7 @@ export function rowHasChanges<
     RI extends Record<string, unknown>,
 >(row: R, values: Partial<RI>, fields: FieldConfig<R, RI>[]) {
     return fields.some((field) => {
-        if (field.readOnly) return false;
+        if (field.readOnly && !field.interconnected) return false;
 
         const key = String(field.key);
         const rowVal = (row as Record<string, unknown>)[key];

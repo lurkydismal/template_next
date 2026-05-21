@@ -11,6 +11,7 @@ import AutocompleteFieldInput from "../AutocompleteFieldInput";
 import DateTimeFieldInput from "../DateTimeFieldInput";
 import NumberFieldInput from "../NumberFieldInput";
 import TextFieldInput from "../TextFieldInput";
+import { isFieldReadOnly } from "./interconnected";
 
 type RenderFieldParams<
     R extends Record<string, unknown>,
@@ -49,6 +50,7 @@ export const renderField = <
     const key = String(field.key);
     const name = field.name ?? key;
     const value = values[key];
+    const readOnly = isFieldReadOnly(field);
     const error = (
         form.formState.errors as FieldErrors<Record<string, unknown>>
     )[name] as FieldError | undefined;
@@ -76,7 +78,7 @@ export const renderField = <
                 label={field.label}
                 name={name}
                 required={!!field.required}
-                readOnly={!!field.readOnly}
+                readOnly={readOnly}
                 value={value}
                 onValueChange={(nextValue) =>
                     handleFieldValueChange(field, nextValue)
@@ -96,7 +98,7 @@ export const renderField = <
                 label={field.label}
                 name={name}
                 required={!!field.required}
-                readOnly={!!field.readOnly}
+                readOnly={readOnly}
                 value={value}
                 options={field.autocompleteOptions ?? []}
                 loading={field.autocompleteLoading}
@@ -133,7 +135,7 @@ export const renderField = <
                 label={field.label}
                 name={name}
                 required={!!field.required}
-                readOnly={!!field.readOnly}
+                readOnly={readOnly}
                 value={value}
                 onValueChange={(nextValue) =>
                     handleFieldValueChange(field, nextValue)
@@ -157,7 +159,7 @@ export const renderField = <
                 label={field.label}
                 name={name}
                 required={!!field.required}
-                readOnly={!!field.readOnly}
+                readOnly={readOnly}
                 type={field.type}
                 value={value}
                 onValueChange={(nextValue) =>
@@ -177,7 +179,7 @@ export const renderField = <
             label={field.label}
             name={name}
             required={!!field.required}
-            readOnly={!!field.readOnly}
+            readOnly={readOnly}
             value={value}
             onValueChange={(nextValue) =>
                 handleFieldValueChange(field, nextValue)

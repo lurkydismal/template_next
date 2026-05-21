@@ -8,6 +8,7 @@ import { buildUpdateFormData } from "./formData";
 import { buildInitialValues } from "./helpers";
 import MetadataFields from "./MetadataFields";
 import { renderField } from "./renderField";
+import { resolveInterconnectedFieldUpdates } from "./interconnected";
 import { getFieldRules } from "./validation";
 
 type RowDialogContentProps<R, RI> = {
@@ -113,8 +114,20 @@ export default function RowDialogContent<
 
             setValuesAndForm(changedValues);
             void runFieldValueChange(field, value, nextValues);
+            void (async () => {
+                const interconnectedUpdates =
+                    await resolveInterconnectedFieldUpdates(
+                        fields,
+                        row,
+                        nextValues,
+                        key,
+                    );
+                if (Object.keys(interconnectedUpdates).length > 0) {
+                    setValuesAndForm(interconnectedUpdates);
+                }
+            })();
         },
-        [runFieldValueChange, setValuesAndForm, values],
+        [fields, row, runFieldValueChange, setValuesAndForm, values],
     );
 
     const updateRow = useCallback(
@@ -187,6 +200,17 @@ export default function RowDialogContent<
         initialRunRef.current = rowKey;
 
         const initialValues = buildInitialValues(row, fields);
+        void (async () => {
+            const interconnectedUpdates =
+                await resolveInterconnectedFieldUpdates(
+                    fields,
+                    row,
+                    initialValues,
+                );
+            if (Object.keys(interconnectedUpdates).length > 0) {
+                setValuesAndForm(interconnectedUpdates, false);
+            }
+        })();
 
         for (const field of fields) {
             if (!field.runOnDialogOpen) continue;

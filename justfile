@@ -42,9 +42,9 @@ migrate:
 packages-upgrade:
     ncu -ui
 
-# Install project dependencies.
+# Install project dependencies using cached packages when available.
 packages-install:
-    pnpm i
+    pnpm i --prefer-offline
 
 # Pull the current database schema into schema.
 pull-db-schema:

@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { rowHasChanges, rowHasId } from '../src/components/TableDataGrid/RowDialog/Content/changeDetection';
 import { getFieldRules } from '../src/components/TableDataGrid/RowDialog/Content/validation';
+import type { FieldConfig } from '../src/components/TableDataGrid/RowDialog/types';
+import type { UseFormReturn } from 'react-hook-form';
 
 type Row = {
   id: string | null;
@@ -12,21 +14,7 @@ type Row = {
   custom?: string;
 };
 
-type Field = {
-  key: keyof Row;
-  label: string;
-  readOnly?: boolean;
-  interconnected?: boolean;
-  required?: boolean;
-  requiredGroup?: string;
-  requiredGroupMin?: number;
-  type?: 'number' | 'uuid' | 'hex' | 'inet' | 'tableLookup';
-  inetAllowPort?: boolean;
-  tableLookup?: (value: unknown) => Promise<boolean>;
-  tableLookupErrorMessage?: string;
-  validate?: (value: unknown) => Promise<true | string>;
-  isChanged?: (oldValue: unknown, newValue: unknown) => boolean;
-};
+type Field = FieldConfig<Row, Row>;
 
 /**
  * Creates a tiny form stub that matches only getValues() required by getFieldRules.
@@ -34,7 +22,7 @@ type Field = {
 function createFormStub(allValues: Record<string, unknown>) {
   return {
     getValues: () => allValues,
-  } as any;
+  } as UseFormReturn<Record<string, unknown>>;
 }
 
 describe('row change detection', () => {
@@ -48,7 +36,7 @@ describe('row change detection', () => {
       rowHasChanges(
         { id: '1', custom: 'A', uuid: ' value ' },
         { custom: 'B', uuid: 'value' },
-        fields as any,
+        fields,
       ),
     ).toBe(false);
 
@@ -56,7 +44,7 @@ describe('row change detection', () => {
       rowHasChanges(
         { id: '1', custom: 'A', uuid: 'x' },
         { custom: 'A', uuid: 'y' },
-        fields as any,
+        fields,
       ),
     ).toBe(true);
   });
@@ -70,8 +58,8 @@ describe('row change detection', () => {
       },
     ];
 
-    expect(rowHasChanges({ id: '1', amount: 1 }, { amount: '1' as any }, fields as any)).toBe(false);
-    expect(rowHasChanges({ id: '1', amount: 1 }, { amount: 2 }, fields as any)).toBe(true);
+    expect(rowHasChanges({ id: '1', amount: 1 }, { amount: '1' }, fields)).toBe(false);
+    expect(rowHasChanges({ id: '1', amount: 1 }, { amount: 2 }, fields)).toBe(true);
   });
 
   it('rowHasId validates null/non-null id values', () => {
@@ -83,7 +71,7 @@ describe('row change detection', () => {
 describe('getFieldRules validation', () => {
   it('returns empty rules for readOnly fields', () => {
     const rules = getFieldRules(
-      { key: 'uuid', label: 'UUID', readOnly: true } as any,
+      { key: 'uuid', label: 'UUID', readOnly: true },
       [],
       createFormStub({}),
       { id: '1' },
@@ -101,26 +89,26 @@ describe('getFieldRules validation', () => {
       { key: 'inet', label: 'INET', type: 'inet', inetAllowPort: true },
       { key: 'custom', label: 'Custom', requiredGroup: 'g1', requiredGroupMin: 1 },
       { key: 'amount', label: 'Amount 2', requiredGroup: 'g1', requiredGroupMin: 1 },
-    ] as any[];
+    ] as Field[];
 
     const form = createFormStub({ custom: '', amount: '' });
 
-    const numberRules = getFieldRules(fields[0], fields as any, form, baseRow, {});
+    const numberRules = getFieldRules(fields[0], fields, form, baseRow, {});
     await expect(numberRules.validate?.('2')).resolves.toBe(true);
     await expect(numberRules.validate?.('abc')).resolves.toBe('Enter a valid number');
 
-    const uuidRules = getFieldRules(fields[1], fields as any, form, baseRow, {});
+    const uuidRules = getFieldRules(fields[1], fields, form, baseRow, {});
     await expect(uuidRules.validate?.('not-uuid')).resolves.toBe('Enter a valid UUID value');
 
-    const hexRules = getFieldRules(fields[2], fields as any, form, baseRow, {});
+    const hexRules = getFieldRules(fields[2], fields, form, baseRow, {});
     await expect(hexRules.validate?.('0x1af')).resolves.toBe(true);
 
-    const inetRules = getFieldRules(fields[3], fields as any, form, baseRow, {});
+    const inetRules = getFieldRules(fields[3], fields, form, baseRow, {});
     await expect(inetRules.validate?.('127.0.0.1:3000')).resolves.toBe(true);
     await expect(inetRules.validate?.('[2001:db8::1]:443')).resolves.toBe(true);
     await expect(inetRules.validate?.('999.0.0.1')).resolves.toContain('Enter a valid IPv4/IPv6 value');
 
-    const groupRules = getFieldRules(fields[4], fields as any, form, baseRow, {});
+    const groupRules = getFieldRules(fields[4], fields, form, baseRow, {});
     await expect(groupRules.validate?.('')).resolves.toContain('Enter at least 1 of:');
   });
 
@@ -139,7 +127,7 @@ describe('getFieldRules validation', () => {
     };
 
     const form = createFormStub({ custom: 'ok' });
-    const rules = getFieldRules(field as any, [field] as any, form, { id: '1' }, {});
+    const rules = getFieldRules(field, [field], form, { id: '1' }, {});
 
     expect(rules.required).toBe('Custom is required');
     await expect(rules.validate?.('ok')).resolves.toBe(true);

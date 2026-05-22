@@ -10,14 +10,11 @@ type DashboardChangeEvent = {
 type DashboardListener = (event: DashboardChangeEvent) => void;
 
 declare global {
-    var __dashboardListeners:
-        | Set<DashboardListener>
-        | undefined;
+    var __dashboardListeners: Set<DashboardListener> | undefined;
 }
 
 const listeners =
-    globalThis.__dashboardListeners ??
-    new Set<DashboardListener>();
+    globalThis.__dashboardListeners ?? new Set<DashboardListener>();
 
 globalThis.__dashboardListeners = listeners;
 

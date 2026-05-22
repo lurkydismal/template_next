@@ -1,7 +1,7 @@
 "use server";
 
 import { GridValidRowModel } from "@mui/x-data-grid";
-import { AnyColumn, desc, getColumns } from "drizzle-orm";
+import { AnyColumn, desc } from "drizzle-orm";
 import { createSelectSchema } from "drizzle-zod";
 
 import db from "@/db";
@@ -15,7 +15,7 @@ import { toCamelCase } from "@/utils/stdfunc";
  */
 export async function getRows(
     rawTarget: DbTarget,
-    idColumnName: string,
+    idColumn: AnyColumn,
 ): Promise<ActionResult<readonly GridValidRowModel[]>> {
     "use cache";
     cacheDbRequest([rawTarget]);
@@ -23,16 +23,11 @@ export async function getRows(
     try {
         const table = parseRawTarget(rawTarget);
 
-        const columns = getColumns(table) as Record<
-            string,
-            AnyColumn | undefined
-        >;
-        const id = columns[idColumnName];
-        if (!id) {
-            return { ok: false, error: "Unknown id column" };
-        }
-
-        const rows = await db.select().from(table).orderBy(desc(id)).execute();
+        const rows = await db
+            .select()
+            .from(table)
+            .orderBy(desc(idColumn))
+            .execute();
         const rowSchema = createSelectSchema(table).array();
         const validRows = await rowSchema.parseAsync(rows);
 
@@ -49,10 +44,10 @@ export async function getRows(
         const result = hasId
             ? validRows
             : validRows.map((row: Row) => ({
-                  ...row,
-                  id:
-                      row[toCamelCase(id.name) as keyof Row] ??
-                      row[id.name as keyof Row], // fallback to original name
+                      ...row,
+                      id:
+                      row[toCamelCase(idColumn.name) as keyof Row] ??
+                      row[idColumn.name as keyof Row], // fallback to original name
               }));
 
         return {

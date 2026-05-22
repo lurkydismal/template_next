@@ -13,7 +13,7 @@ const target: DbTarget = "table";
 const idColumn = table.id;
 
 export async function getRowsAction(): ReturnType<typeof _getRowsAction> {
-    return _getRowsAction(target, idColumn.name);
+    return _getRowsAction(target, idColumn);
 }
 
 export async function createRowAction(

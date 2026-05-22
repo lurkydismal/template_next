@@ -23,6 +23,7 @@ export default function Page() {
             fields={fields}
             getRowsAction={getRowsAction}
             updateRowAction={updateRowAction}
+            dashboardKey="table"
             extraButtons={
                 <ExtraToolbarButtons
                     createRowAction={{

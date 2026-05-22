@@ -14,6 +14,7 @@ import { getFieldRules } from "./validation";
 type RowDialogContentProps<R, RI> = {
     row: R;
     fields: FieldConfig<R, RI>[];
+    dashboardKey: string;
     registerSubmit: (fn: (() => Promise<boolean>) | null) => void;
     createRowAction: CreateRowAction<RI>;
     updateRowAction: UpdateRowAction;
@@ -30,6 +31,7 @@ export default function RowDialogContent<
 >({
     row,
     fields,
+    dashboardKey,
     registerSubmit,
     createRowAction,
     updateRowAction,
@@ -202,14 +204,58 @@ export default function RowDialogContent<
         [fields, form, row, values],
     );
 
-    useEffect(() => {
-        registerSubmit(submit);
-        return () => registerSubmit(null);
-    }, [registerSubmit, submit]);
-
     const initialRunRef = useRef<string | null>(null);
     const createSessionCounterRef = useRef(0);
     const unsavedRowKeyRef = useRef<string | null>(null);
+
+    /**
+     * Builds the localStorage key used to persist in-progress dialog values.
+     */
+    const getDraftStorageKey = useCallback(
+        (rowKey: string): string => `row-dialog-draft:${dashboardKey}:${rowKey}`,
+        [dashboardKey],
+    );
+
+    /**
+     * Loads any previously saved draft values for the active dashboard row.
+     */
+    const loadDraftValues = useCallback(
+        (rowKey: string): Record<string, unknown> | null => {
+            const raw = window.localStorage.getItem(getDraftStorageKey(rowKey));
+            if (!raw) return null;
+
+            try {
+                const parsed = JSON.parse(raw) as Record<string, unknown>;
+                return parsed && typeof parsed === "object" ? parsed : null;
+            } catch {
+                return null;
+            }
+        },
+        [getDraftStorageKey],
+    );
+
+    /**
+     * Persists form values for the active dashboard row to survive crashes/reloads.
+     */
+    const saveDraftValues = useCallback(
+        (rowKey: string, nextValues: Record<string, unknown>) => {
+            window.localStorage.setItem(
+                getDraftStorageKey(rowKey),
+                JSON.stringify(nextValues),
+            );
+        },
+        [getDraftStorageKey],
+    );
+
+    /**
+     * Removes any saved draft values for the active dashboard row.
+     */
+    const clearDraftValues = useCallback(
+        (rowKey: string) => {
+            window.localStorage.removeItem(getDraftStorageKey(rowKey));
+        },
+        [getDraftStorageKey],
+    );
 
     /**
      * Builds a stable unique key for each unsaved create session so dialog-open
@@ -229,18 +275,34 @@ export default function RowDialogContent<
         return unsavedRowKeyRef.current;
     }, [idKey, row]);
 
+    const activeRowKey = getRowKey();
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            saveDraftValues(activeRowKey, values);
+        }, 700);
+
+        return () => clearTimeout(timeout);
+    }, [activeRowKey, saveDraftValues, values]);
+
     useEffect(() => {
         const rowKey = getRowKey();
         if (initialRunRef.current === rowKey) return;
         initialRunRef.current = rowKey;
 
         const initialValues = buildInitialValues(row, fields);
+        const restoredValues = loadDraftValues(rowKey);
+        const bootstrapValues = restoredValues
+            ? { ...initialValues, ...restoredValues }
+            : initialValues;
+
+        setValuesAndForm(bootstrapValues, false);
         void (async () => {
             const interconnectedUpdates =
                 await resolveInterconnectedFieldUpdates(
                     fields,
                     row,
-                    initialValues,
+                    bootstrapValues,
                 );
             if (Object.keys(interconnectedUpdates).length > 0) {
                 setValuesAndForm(interconnectedUpdates, false);
@@ -253,19 +315,40 @@ export default function RowDialogContent<
             const key = String(field.key);
             void runFieldValueChange(
                 field,
-                initialValues[key],
-                initialValues,
+                bootstrapValues[key],
+                bootstrapValues,
                 false,
             );
         }
-    }, [fields, getRowKey, row, runFieldValueChange, setValuesAndForm]);
+    }, [
+        fields,
+        getRowKey,
+        loadDraftValues,
+        row,
+        runFieldValueChange,
+        setValuesAndForm,
+    ]);
+
+    const submitWithDraftCleanup = useCallback(async (): Promise<boolean> => {
+        const ok = await submit();
+        if (ok) {
+            clearDraftValues(activeRowKey);
+        }
+
+        return ok;
+    }, [activeRowKey, clearDraftValues, submit]);
+
+    useEffect(() => {
+        registerSubmit(submitWithDraftCleanup);
+        return () => registerSubmit(null);
+    }, [registerSubmit, submitWithDraftCleanup]);
 
     return (
         <form
             ref={formRef}
             onSubmit={(event) => {
                 event.preventDefault();
-                submit();
+                submitWithDraftCleanup();
             }}
         >
             <Grid container spacing={2}>

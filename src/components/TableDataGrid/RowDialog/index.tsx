@@ -17,6 +17,7 @@ export default function RowDialog<
     handleClose,
     selectedRow,
     setSelectedRow,
+    dashboardKey,
     createRowAction,
     updateRowAction,
     onUpdated,
@@ -27,6 +28,7 @@ export default function RowDialog<
     handleClose: () => void;
     selectedRow: R | null;
     setSelectedRow: Dispatch<SetStateAction<R | null>>;
+    dashboardKey: string;
     createRowAction: CreateRowAction<RI>;
     updateRowAction: UpdateRowAction;
     onUpdated?: () => Promise<void> | void;
@@ -81,6 +83,7 @@ export default function RowDialog<
                     <RowDialogContent<R, RI>
                         row={selectedRow}
                         fields={fields}
+                        dashboardKey={dashboardKey}
                         registerSubmit={registerSubmit}
                         createRowAction={createRowAction}
                         updateRowAction={updateRowAction}

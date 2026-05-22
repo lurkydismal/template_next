@@ -9,7 +9,7 @@ import { AnyColumn } from "drizzle-orm";
  */
 export async function updateAction(
     rawTarget: DbTarget,
-    idColumn: AnyColumn,
+    idColumn: AnyColumn | AnyColumn[],
     formData: FormData,
 ) {
     const input = await parseForm(formData);

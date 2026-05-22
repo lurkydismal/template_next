@@ -43,7 +43,7 @@ export async function createRowAction<RI extends Record<string, unknown>>(
  */
 export async function updateRowAction(
     target: DbTarget,
-    id: AnyColumn,
+    id: AnyColumn | AnyColumn[],
     fd: FormData,
 ) {
     const result = await updateAction(target, id, fd);

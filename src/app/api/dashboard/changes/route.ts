@@ -33,9 +33,19 @@ export async function GET(): Promise<Response> {
              * Serializes and sends an SSE data frame.
              */
             const send = (payload: unknown) => {
-                controller.enqueue(
-                    encoder.encode(`data: ${JSON.stringify(payload)}\n\n`),
-                );
+                try {
+                    controller.enqueue(
+                        encoder.encode(`data: ${JSON.stringify(payload)}\n\n`),
+                    );
+                } catch {
+                    cleanup();
+
+                    try {
+                        controller.close();
+                    } catch {
+                        // Stream is already closed/cancelled.
+                    }
+                }
             };
 
             send({ type: "connected" });

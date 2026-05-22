@@ -258,7 +258,7 @@ export default function RowDialogContent<
                 false,
             );
         }
-    }, [fields, getRowKey, row, runFieldValueChange]);
+    }, [fields, getRowKey, row, runFieldValueChange, setValuesAndForm]);
 
     return (
         <form

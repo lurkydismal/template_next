@@ -107,9 +107,58 @@ export default function TableDataGrid<
         }
     }, [getRowsAction, showError]);
 
+
+    /**
+     * Opens an SSE channel and refreshes rows when a mutation event is received.
+     */
+    const subscribeToRowChanges = useCallback(() => {
+        const source = new EventSource("/api/dashboard/changes");
+        let refreshTimeout: ReturnType<typeof setTimeout> | null = null;
+
+        /**
+         * Schedules a near-immediate single refresh to coalesce rapid events.
+         */
+        const scheduleRefresh = () => {
+            if (refreshTimeout) {
+                clearTimeout(refreshTimeout);
+            }
+
+            refreshTimeout = setTimeout(() => {
+                void _getRows();
+                refreshTimeout = null;
+            }, 120);
+        };
+
+        source.onmessage = (event) => {
+            try {
+                const payload = JSON.parse(event.data) as
+                    | { type?: string }
+                    | undefined;
+                if (payload?.type === "dashboard-change") {
+                    scheduleRefresh();
+                }
+            } catch {
+                // Ignore malformed messages and keep listening.
+            }
+        };
+
+        source.onerror = () => {
+            // EventSource reconnects automatically; no manual retry required.
+        };
+
+        return () => {
+            if (refreshTimeout) {
+                clearTimeout(refreshTimeout);
+            }
+            source.close();
+        };
+    }, [_getRows]);
+
     useEffect(() => {
         _getRows();
     }, [_getRows]);
+
+    useEffect(() => subscribeToRowChanges(), [subscribeToRowChanges]);
 
     // the original createRowAction wrapped so we always refresh UI after create
     const createAndRefresh = useCallback(

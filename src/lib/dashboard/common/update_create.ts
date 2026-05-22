@@ -6,6 +6,7 @@ import db from "@/db";
 import { getSessionData } from "@/lib/auth";
 import { cacheDbRequest, updateDbCacheTags } from "@/lib/cache";
 import { ActionResult, DbTarget, parseRawTarget } from "@/lib/types";
+import { emitDashboardChange } from "@/lib/dashboard/common/change-events";
 import log from "@/utils/stdlog";
 import { mutationInputSchema } from "@/utils/validate/schemas";
 import {
@@ -161,6 +162,9 @@ export async function save(
         } catch (cacheErr) {
             log.error("Cache revalidation error:", cacheErr);
         }
+
+        emitDashboardChange(rawTarget);
+
         return { ok: true };
     } catch (err) {
         log.error(opts.isUpdate ? "Update error:" : "Create error:", err);

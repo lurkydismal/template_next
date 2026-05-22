@@ -107,7 +107,6 @@ export default function TableDataGrid<
         }
     }, [getRowsAction, showError]);
 
-
     /**
      * Opens an SSE channel and refreshes rows when a mutation event is received.
      */

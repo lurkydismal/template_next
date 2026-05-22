@@ -19,7 +19,11 @@ export function emitDashboardChange(target: DbTarget): void {
     };
 
     listeners.forEach((listener) => {
-        listener(event);
+        try {
+            listener(event);
+        } catch (error) {
+            console.error("Dashboard change listener failed", error);
+        }
     });
 }
 

@@ -1,4 +1,6 @@
+import "server-only";
 import { DbTarget } from "@/lib/types";
+import log from "@/utils/stdlog";
 
 type DashboardChangeEvent = {
     target: DbTarget;
@@ -7,7 +9,17 @@ type DashboardChangeEvent = {
 
 type DashboardListener = (event: DashboardChangeEvent) => void;
 
-const listeners = new Set<DashboardListener>();
+declare global {
+    var __dashboardListeners:
+        | Set<DashboardListener>
+        | undefined;
+}
+
+const listeners =
+    globalThis.__dashboardListeners ??
+    new Set<DashboardListener>();
+
+globalThis.__dashboardListeners = listeners;
 
 /**
  * Broadcasts a dashboard table mutation event to all active listeners.
@@ -22,7 +34,7 @@ export function emitDashboardChange(target: DbTarget): void {
         try {
             listener(event);
         } catch (error) {
-            console.error("Dashboard change listener failed", error);
+            log.error("Dashboard change listener failed", error);
         }
     });
 }

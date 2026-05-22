@@ -139,11 +139,11 @@ export async function save(
             // Ensure mutation actually affected one row.
             const affectedRows =
                 typeof (updateResult as { rowCount?: number }).rowCount ===
-                "number"
+                    "number"
                     ? (updateResult as { rowCount: number }).rowCount
                     : Array.isArray(updateResult)
-                      ? updateResult.length
-                      : undefined;
+                        ? updateResult.length
+                        : undefined;
 
             if (affectedRows === undefined) {
                 throw new Error(
@@ -163,7 +163,7 @@ export async function save(
             log.error("Cache revalidation error:", cacheErr);
         }
 
-        emitDashboardChange(rawTarget);
+        await emitDashboardChange(rawTarget);
 
         return { ok: true };
     } catch (err) {

@@ -1,4 +1,5 @@
-import "server-only";
+"use server";
+
 import { DbTarget } from "@/lib/types";
 import log from "@/utils/stdlog";
 
@@ -21,7 +22,7 @@ globalThis.__dashboardListeners = listeners;
 /**
  * Broadcasts a dashboard table mutation event to all active listeners.
  */
-export function emitDashboardChange(target: DbTarget): void {
+export async function emitDashboardChange(target: DbTarget): Promise<void> {
     const event: DashboardChangeEvent = {
         target,
         occurredAt: new Date().toISOString(),
@@ -39,9 +40,9 @@ export function emitDashboardChange(target: DbTarget): void {
 /**
  * Registers a listener and returns an unsubscribe callback.
  */
-export function subscribeToDashboardChanges(
+export async function subscribeToDashboardChanges(
     listener: DashboardListener,
-): () => void {
+): Promise<() => void> {
     listeners.add(listener);
 
     return () => {

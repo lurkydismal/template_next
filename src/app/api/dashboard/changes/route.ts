@@ -26,7 +26,7 @@ export async function GET(): Promise<Response> {
         /**
          * Starts the SSE stream and pushes dashboard change events.
          */
-        start(controller) {
+        async start(controller) {
             const encoder = new TextEncoder();
 
             /**
@@ -50,7 +50,7 @@ export async function GET(): Promise<Response> {
 
             send({ type: "connected" });
 
-            unsubscribe = subscribeToDashboardChanges((event) => {
+            unsubscribe = await subscribeToDashboardChanges((event) => {
                 send({ type: "dashboard-change", ...event });
             });
 

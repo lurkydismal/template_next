@@ -75,6 +75,10 @@ function buildPrimaryKeyWhereClause(
     parsedInput: MutationRow,
     idColumns: AnyColumn[],
 ): SQL {
+    if (idColumns.length === 0) {
+        throw new Error("Missing primary key columns for update");
+    }
+
     const predicates = idColumns.map((column) => {
         const value = getPrimaryKeyValue(parsedInput, column);
         if (value === undefined) {

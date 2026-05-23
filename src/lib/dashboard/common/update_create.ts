@@ -1,6 +1,6 @@
 "use server";
 
-import { AnyColumn, eq, getColumns } from "drizzle-orm";
+import { and, AnyColumn, eq, SQL } from "drizzle-orm";
 
 import db from "@/db";
 import { getSessionData } from "@/lib/auth";
@@ -20,7 +20,7 @@ type MutationRow = Record<string, unknown>;
 
 type SaveOptions = {
     isUpdate?: boolean;
-    idColumn?: AnyColumn;
+    idColumn?: AnyColumn | AnyColumn[];
 };
 
 /**
@@ -49,23 +49,65 @@ function toDbMutation(
 }
 
 /**
- * Finds the target table id column by its database column name.
+ * Normalizes one-or-many id columns into an array.
  */
-function getIdColumnByName(
-    rawTarget: DbTarget,
-    idColumnName: string,
-): AnyColumn {
-    const table = parseRawTarget(rawTarget);
-    const columns = getColumns(table) as Record<string, AnyColumn | undefined>;
-    const idColumn = Object.values(columns).find(
-        (column) => column?.name === idColumnName,
-    );
+function normalizeIdColumns(idColumn: AnyColumn | AnyColumn[]): AnyColumn[] {
+    return Array.isArray(idColumn) ? idColumn : [idColumn];
+}
 
-    if (!idColumn) {
-        throw new Error("Unknown id column for update");
+/**
+ * Gets the value for a primary-key column from parsed input.
+ */
+function getPrimaryKeyValue(
+    parsedInput: MutationRow,
+    idColumn: AnyColumn,
+): unknown {
+    const camelKey = idColumn.keyAsName;
+    const dbKey = idColumn.name;
+
+    return parsedInput[camelKey] ?? parsedInput[dbKey];
+}
+
+/**
+ * Builds the primary-key filter for update/existence queries.
+ */
+function buildPrimaryKeyWhereClause(
+    parsedInput: MutationRow,
+    idColumns: AnyColumn[],
+): SQL {
+    if (idColumns.length === 0) {
+        throw new Error("Missing primary key columns for update");
     }
 
-    return idColumn;
+    const predicates = idColumns.map((column) => {
+        const value = getPrimaryKeyValue(parsedInput, column);
+        if (value === undefined) {
+            throw new Error(`Missing primary key value for ${column.name}`);
+        }
+        return eq(column, value);
+    });
+
+    if (predicates.length === 1) {
+        return predicates[0]!;
+    }
+
+    return and(...predicates)!;
+}
+
+/**
+ * Removes normalized primary-key fields from an update mutation payload.
+ */
+function removeIdColumnsFromMutation(
+    row: MutationRow,
+    idColumns: AnyColumn[],
+): MutationRow {
+    const mutation = { ...row };
+    for (const column of idColumns) {
+        delete mutation[column.keyAsName];
+        delete mutation[column.name];
+    }
+
+    return mutation;
 }
 
 /**
@@ -73,16 +115,13 @@ function getIdColumnByName(
  */
 async function getExistingRows(
     rawTarget: DbTarget,
-    idColumnName: string,
-    id: unknown,
+    whereClause: SQL,
 ): Promise<MutationRow[]> {
     "use cache";
     cacheDbRequest([rawTarget]);
 
     const table = parseRawTarget(rawTarget);
-    const idColumn = getIdColumnByName(rawTarget, idColumnName);
-
-    return db.select().from(table).where(eq(idColumn, id)).limit(1).execute();
+    return db.select().from(table).where(whereClause).limit(1).execute();
 }
 
 /**
@@ -114,26 +153,25 @@ export async function save(
         );
 
         if (opts.isUpdate) {
-            if (parsedInput.id === undefined) {
-                throw new Error("Missing id for update");
-            }
-
             if (!opts.idColumn) {
                 throw new Error("Missing id column for update");
             }
 
+            const idColumns = normalizeIdColumns(opts.idColumn);
+            const mutationRow = removeIdColumnsFromMutation(row, idColumns);
+            const whereClause = buildPrimaryKeyWhereClause(parsedInput, idColumns);
+
             const existingRows = await getExistingRows(
                 rawTarget,
-                opts.idColumn.name,
-                parsedInput.id,
+                whereClause,
             );
 
             await selectSchema.array().length(1).parseAsync(existingRows);
 
             const updateResult = await db
                 .update(table)
-                .set(row)
-                .where(eq(opts.idColumn, parsedInput.id))
+                .set(mutationRow)
+                .where(whereClause)
                 .execute();
 
             // Ensure mutation actually affected one row.

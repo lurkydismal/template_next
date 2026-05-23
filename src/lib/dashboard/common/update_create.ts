@@ -91,6 +91,22 @@ function buildPrimaryKeyWhereClause(
 }
 
 /**
+ * Removes normalized primary-key fields from an update mutation payload.
+ */
+function removeIdColumnsFromMutation(
+    row: MutationRow,
+    idColumns: AnyColumn[],
+): MutationRow {
+    const mutation = { ...row };
+    for (const column of idColumns) {
+        delete mutation[column.keyAsName];
+        delete mutation[column.name];
+    }
+
+    return mutation;
+}
+
+/**
  * Fetches the current database row for an update so callers can validate it still exists.
  */
 async function getExistingRows(
@@ -138,6 +154,7 @@ export async function save(
             }
 
             const idColumns = normalizeIdColumns(opts.idColumn);
+            const mutationRow = removeIdColumnsFromMutation(row, idColumns);
             const whereClause = buildPrimaryKeyWhereClause(parsedInput, idColumns);
 
             const existingRows = await getExistingRows(
@@ -149,7 +166,7 @@ export async function save(
 
             const updateResult = await db
                 .update(table)
-                .set(row)
+                .set(mutationRow)
                 .where(whereClause)
                 .execute();
 

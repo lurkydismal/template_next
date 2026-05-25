@@ -159,12 +159,12 @@ export async function save(
 
             const idColumns = normalizeIdColumns(opts.idColumn);
             const mutationRow = removeIdColumnsFromMutation(row, idColumns);
-            const whereClause = buildPrimaryKeyWhereClause(parsedInput, idColumns);
-
-            const existingRows = await getExistingRows(
-                rawTarget,
-                whereClause,
+            const whereClause = buildPrimaryKeyWhereClause(
+                parsedInput,
+                idColumns,
             );
+
+            const existingRows = await getExistingRows(rawTarget, whereClause);
 
             await selectSchema.array().length(1).parseAsync(existingRows);
 
@@ -177,11 +177,11 @@ export async function save(
             // Ensure mutation actually affected one row.
             const affectedRows =
                 typeof (updateResult as { rowCount?: number }).rowCount ===
-                    "number"
+                "number"
                     ? (updateResult as { rowCount: number }).rowCount
                     : Array.isArray(updateResult)
-                        ? updateResult.length
-                        : undefined;
+                      ? updateResult.length
+                      : undefined;
 
             if (affectedRows === undefined) {
                 throw new Error(

@@ -212,7 +212,8 @@ export default function RowDialogContent<
      * Builds the localStorage key used to persist in-progress dialog values.
      */
     const getDraftStorageKey = useCallback(
-        (rowKey: string): string => `row-dialog-draft:${dashboardKey}:${rowKey}`,
+        (rowKey: string): string =>
+            `row-dialog-draft:${dashboardKey}:${rowKey}`,
         [dashboardKey],
     );
 

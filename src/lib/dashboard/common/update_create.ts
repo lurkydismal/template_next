@@ -15,6 +15,7 @@ import {
     createUpdateSchema,
 } from "drizzle-zod";
 import { z } from "zod";
+import { toCamelCase } from "@/utils/stdfunc";
 
 type MutationRow = Record<string, unknown>;
 
@@ -62,8 +63,8 @@ function getPrimaryKeyValue(
     parsedInput: MutationRow,
     idColumn: AnyColumn,
 ): unknown {
-    const camelKey = idColumn.keyAsName;
     const dbKey = idColumn.name;
+    const camelKey = toCamelCase(dbKey);
 
     return parsedInput[camelKey] ?? parsedInput[dbKey];
 }
@@ -103,8 +104,10 @@ function removeIdColumnsFromMutation(
 ): MutationRow {
     const mutation = { ...row };
     for (const column of idColumns) {
-        delete mutation[column.keyAsName];
-        delete mutation[column.name];
+        const dbKey = column.name;
+
+        delete mutation[toCamelCase(dbKey)];
+        delete mutation[dbKey];
     }
 
     return mutation;
@@ -177,11 +180,11 @@ export async function save(
             // Ensure mutation actually affected one row.
             const affectedRows =
                 typeof (updateResult as { rowCount?: number }).rowCount ===
-                "number"
+                    "number"
                     ? (updateResult as { rowCount: number }).rowCount
                     : Array.isArray(updateResult)
-                      ? updateResult.length
-                      : undefined;
+                        ? updateResult.length
+                        : undefined;
 
             if (affectedRows === undefined) {
                 throw new Error(

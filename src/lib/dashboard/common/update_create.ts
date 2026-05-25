@@ -81,7 +81,10 @@ function buildPrimaryKeyWhereClause(
     }
 
     const table = parseRawTarget(rawTarget);
-    const idColumns = getColumns(table) as Record<string, AnyColumn | undefined>;
+    const idColumns = getColumns(table) as Record<
+        string,
+        AnyColumn | undefined
+    >;
 
     const predicates = idColumnNames.map((columnName) => {
         const column = idColumns[columnName];
@@ -154,9 +157,7 @@ export async function save(
         throw new Error("Missing authenticated user");
     }
 
-    const row = await schema.parseAsync(
-        toDbMutation(parsedInput, actor, opts),
-    );
+    const row = await schema.parseAsync(toDbMutation(parsedInput, actor, opts));
 
     if (opts.isUpdate) {
         if (!opts.idColumnName) {
@@ -198,8 +199,7 @@ export async function save(
 
         // Ensure mutation actually affected one row.
         const affectedRows =
-            typeof (updateResult as { rowCount?: number }).rowCount ===
-                "number"
+            typeof (updateResult as { rowCount?: number }).rowCount === "number"
                 ? (updateResult as { rowCount: number }).rowCount
                 : Array.isArray(updateResult)
                     ? updateResult.length

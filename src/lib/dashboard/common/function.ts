@@ -4,7 +4,6 @@ import { create } from "@/lib/dashboard/common/create";
 import { getRows } from "@/lib/dashboard/common/get";
 import { updateAction } from "@/lib/dashboard/common/update";
 import { DbTarget } from "@/lib/types";
-import { AnyColumn } from "drizzle-orm";
 
 /**
  * Gets rows action.
@@ -43,10 +42,10 @@ export async function createRowAction<RI extends Record<string, unknown>>(
  */
 export async function updateRowAction(
     target: DbTarget,
-    id: AnyColumn | AnyColumn[],
+    idColumnName: string | string[],
     fd: FormData,
 ) {
-    const result = await updateAction(target, id, fd);
+    const result = await updateAction(target, idColumnName, fd);
 
     if (!result.ok) {
         const message = `Failed to update row in action: ${result.error}`;

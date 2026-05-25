@@ -25,5 +25,5 @@ export async function createRowAction(
 export async function updateRowAction(
     fd: FormData,
 ): ReturnType<typeof _updateRowAction> {
-    return _updateRowAction(target, idColumn, fd);
+    return _updateRowAction(target, idColumn.name, fd);
 }

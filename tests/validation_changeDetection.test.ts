@@ -37,7 +37,9 @@ function getSingleValidate(
 }
 
 /**
- * Runs a single-field validate function with a default empty form-value context.
+ * Runs a single-field validate function. The formValues parameter ({}) satisfies
+ * the react-hook-form type signature but is unused; the actual form state comes
+ * from the mocked form.getValues().
  */
 function runSingleValidate(rules: ReturnType<typeof getFieldRules>, value: unknown) {
   return getSingleValidate(rules)?.(value, {});

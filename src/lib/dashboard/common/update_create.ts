@@ -4,7 +4,7 @@ import { and, AnyColumn, eq, getColumns, SQL } from "drizzle-orm";
 
 import db from "@/db";
 import { getSessionData } from "@/lib/auth";
-import { cacheDbRequest, updateDbCacheTags } from "@/lib/cache";
+import { updateDbCacheTags } from "@/lib/cache";
 import { ActionResult, DbTarget, parseRawTarget } from "@/lib/types";
 import { emitDashboardChange } from "@/lib/dashboard/common/change-events";
 import log from "@/utils/stdlog";

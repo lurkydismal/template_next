@@ -9,7 +9,7 @@ import {
     RegisterOptions,
 } from "react-hook-form";
 
-type MarkdownToggleCorner = "top-left" | "top-right" | "bottom-left" | "bottom-right";
+type MarkdownToggleCorner = NonNullable<FieldConfig<unknown>['markdownToggleCorner']>;
 
 type MarkdownFieldInputProps = {
     fieldKey: string;

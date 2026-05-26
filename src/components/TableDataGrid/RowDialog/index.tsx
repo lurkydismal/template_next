@@ -1,6 +1,13 @@
 import log from "@/utils/stdlog";
-import { Dialog, DialogContent } from "@mui/material";
-import { Dispatch, SetStateAction, useRef } from "react";
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+} from "@mui/material";
+import { Dispatch, SetStateAction, useCallback, useRef, useState } from "react";
 import { CreateRowAction, FieldConfig, UpdateRowAction } from "./types";
 import RowDialogContent from "./Content";
 
@@ -36,6 +43,32 @@ export default function RowDialog<
     idKey?: keyof R;
 }) {
     const submitFnRef = useRef<(() => Promise<boolean>) | null>(null);
+    const validationFailureTimestampsRef = useRef<number[]>([]);
+    const [forceCloseDialogOpen, setForceCloseDialogOpen] = useState(false);
+
+    /**
+     * Registers a failed validation-close attempt and returns true
+     * when the user has failed to close 3 times inside 10 seconds.
+     */
+    const shouldShowForceCloseDialog = useCallback((): boolean => {
+        const now = Date.now();
+        const tenSecondsAgo = now - 10_000;
+        const recentFailures = validationFailureTimestampsRef.current.filter(
+            (timestamp) => timestamp >= tenSecondsAgo,
+        );
+
+        recentFailures.push(now);
+        validationFailureTimestampsRef.current = recentFailures;
+
+        return recentFailures.length >= 3;
+    }, []);
+
+    /**
+     * Resets the validation failure counter used for force-close prompting.
+     */
+    const clearValidationFailureCounter = useCallback(() => {
+        validationFailureTimestampsRef.current = [];
+    }, []);
 
     /**
      * Registers the row dialog submit callback exposed by the content form.
@@ -51,16 +84,39 @@ export default function RowDialog<
         try {
             if (submitFnRef.current) {
                 const ok = await submitFnRef.current();
-                if (!ok) return;
+                if (!ok) {
+                    if (shouldShowForceCloseDialog()) {
+                        setForceCloseDialogOpen(true);
+                    }
+                    return;
+                }
             }
 
+            clearValidationFailureCounter();
             handleClose();
         } catch (error) {
             log.error("Failed to close row dialog", error);
         }
     };
 
+    /**
+     * Closes both dialogs and discards pending validation errors.
+     */
+    const handleConfirmForceClose = useCallback(() => {
+        setForceCloseDialogOpen(false);
+        clearValidationFailureCounter();
+        handleClose();
+    }, [clearValidationFailureCounter, handleClose]);
+
+    /**
+     * Hides the force-close confirmation and keeps the row dialog open.
+     */
+    const handleCancelForceClose = useCallback(() => {
+        setForceCloseDialogOpen(false);
+    }, []);
+
     return (
+        <>
         <Dialog
             open={dialogOpen}
             onClose={onClose}
@@ -93,5 +149,37 @@ export default function RowDialog<
                 )}
             </DialogContent>
         </Dialog>
+
+        <Dialog
+            open={forceCloseDialogOpen}
+            onClose={handleCancelForceClose}
+            maxWidth="xs"
+            fullWidth
+        >
+            <DialogTitle>Leave dialog?</DialogTitle>
+            <DialogContent>
+                <DialogContentText>
+                    You still have invalid fields. Do you want to leave anyway and
+                    discard changes?
+                </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+                <Button
+                    onClick={handleCancelForceClose}
+                    variant="contained"
+                    color="error"
+                >
+                    No
+                </Button>
+                <Button
+                    onClick={handleConfirmForceClose}
+                    variant="contained"
+                    color="success"
+                >
+                    Yes
+                </Button>
+            </DialogActions>
+        </Dialog>
+        </>
     );
 }

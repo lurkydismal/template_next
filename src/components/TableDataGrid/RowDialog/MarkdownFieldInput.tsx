@@ -11,9 +11,10 @@ import {
     FieldError,
     RegisterOptions,
 } from "react-hook-form";
+import { FieldConfig } from "./types";
 
 type MarkdownToggleCorner = NonNullable<
-    FieldConfig<unknown>["markdownToggleCorner"]
+    FieldConfig<unknown, unknown>["markdownToggleCorner"]
 >;
 
 type MarkdownFieldInputProps = {

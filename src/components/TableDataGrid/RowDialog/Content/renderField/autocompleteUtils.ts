@@ -1,4 +1,4 @@
-import { AutocompleteOption, FieldConfig } from "../types";
+import { AutocompleteOption, FieldConfig } from "../../types";
 
 /**
  * Converts an autocomplete value into a stable primitive used for comparisons.

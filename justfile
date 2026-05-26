@@ -3,8 +3,8 @@
 default: run-debug
 
 # Start development server with hot reload and debug-friendly output.
-run-debug:
-    pnpm dev
+run-debug port='3000':
+    pnpm dev -p '{{ port }}'
 
 # Build the production-ready optimized application bundle.
 build-release:

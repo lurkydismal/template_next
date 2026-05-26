@@ -2,23 +2,23 @@
 
 import TableDataGrid from "@/components/TableDataGrid";
 import ExtraToolbarButtons from "@/components/dashboard/ExtraToolbarButtons";
-import fields from "@/data/dashboard/table/fields";
+import fields from "@/data/dashboard/tables/fields";
 import type {
-    TableRow as TableRow,
-    TableRowInsert as TableRowInsert,
+    TablesRow as TablesRow,
+    TablesRowInsert as TablesRowInsert,
 } from "@/db/types";
 import {
     createRowAction,
     getRowsAction,
     updateRowAction,
-} from "@/lib/dashboard/table/function";
+} from "@/lib/dashboard/tables/function";
 
 /**
  * Renders the protected bans dashboard page.
  */
 export default function Page() {
     return (
-        <TableDataGrid<TableRow, TableRowInsert>
+        <TableDataGrid<TablesRow, TablesRowInsert>
             createRowAction={createRowAction}
             fields={fields}
             getRowsAction={getRowsAction}

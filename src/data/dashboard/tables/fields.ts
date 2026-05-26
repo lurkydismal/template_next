@@ -1,8 +1,8 @@
 import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
-import { TableRow, TableRowInsert } from "@/db/types";
+import { TablesRow, TablesRowInsert } from "@/db/types";
 
 // simple fields for your schema (content is the only editable column)
-const fields: FieldConfig<TableRow, TableRowInsert>[] = [
+const fields: FieldConfig<TablesRow, TablesRowInsert>[] = [
     {
         key: "content",
         label: "Content",

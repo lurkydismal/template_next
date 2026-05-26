@@ -16,6 +16,7 @@ import {
 } from "drizzle-zod";
 import { z } from "zod";
 import { toCamelCase } from "@/utils/stdfunc";
+import { getUserId, requestUserId } from "@/lib/user";
 
 type MutationRow = Record<string, unknown>;
 
@@ -29,7 +30,7 @@ type SaveOptions = {
  */
 function toDbMutation(
     parsedRow: MutationRow,
-    actor: string,
+    actorId: number,
     opts: SaveOptions,
 ): MutationRow {
     const base = { ...parsedRow };
@@ -38,14 +39,14 @@ function toDbMutation(
         delete base.id;
         return {
             ...base,
-            last_editor: actor,
+            last_editor_id: actorId,
         };
     }
 
     return {
         ...base,
-        author: actor,
-        last_editor: actor,
+        author_id: actorId,
+        last_editor_id: actorId,
     };
 }
 
@@ -151,13 +152,21 @@ export async function save(
     const selectSchema = createSelectSchema(table);
 
     const sessionUser = await getSessionData();
-    const actor = sessionUser?.username;
+    const actor = sessionUser?.username_normalized;
 
     if (!actor) {
         throw new Error("Missing authenticated user");
     }
 
-    const row = await schema.parseAsync(toDbMutation(parsedInput, actor, opts));
+    const actorId = await getUserId(requestUserId(actor));
+
+    if (!actorId) {
+        throw new Error("Missing authenticated user");
+    }
+
+    const row = await schema.parseAsync(
+        toDbMutation(parsedInput, actorId, opts),
+    );
 
     if (opts.isUpdate) {
         if (!opts.idColumnName) {

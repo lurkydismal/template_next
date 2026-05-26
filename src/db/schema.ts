@@ -1,12 +1,20 @@
-import { pgTable, check, serial, varchar, text } from "drizzle-orm/pg-core";
+import {
+    pgTable,
+    check,
+    serial,
+    varchar,
+    text,
+    index,
+} from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { template_table } from "./templates";
 import { timestampsColumns } from "./helpers";
 
-export const table = pgTable("table", template_table, (t) => [
+export const tables = pgTable("tables", template_table, (t) => [
     check("content_not_blank", sql`length(trim(${t.content})) > 0`),
-    check("author_not_blank", sql`length(trim(${t.author})) > 0`),
-    check("last_editor_not_blank", sql`length(trim(${t.last_editor})) > 0`),
+
+    index().on(t.author_id),
+    index().on(t.last_editor_id),
 ]);
 
 export const users = pgTable(

@@ -1,7 +1,7 @@
-import { table, users } from "./schema";
+import { tables, users } from "./schema";
 
-export type TableRow = typeof table.$inferSelect;
-export type TableRowInsert = typeof table.$inferInsert;
+export type TablesRow = typeof tables.$inferSelect;
+export type TablesRowInsert = typeof tables.$inferInsert;
 
 export type UsersRow = typeof users.$inferSelect;
 export type UsersRowInsert = typeof users.$inferInsert;

@@ -14,6 +14,7 @@ import CustomToolbar from "./Toolbar";
 import { useGridApiRef, GridRowsProp, GridRowParams } from "@mui/x-data-grid";
 import { Box, CircularProgress } from "@mui/material";
 import { columnsFromFields } from "@/utils/columns";
+import log from "@/utils/stdlog";
 
 /**
  * Renders the table data grid component.
@@ -103,7 +104,9 @@ export default function TableDataGrid<
     // Getting rows
     const _getRows = useCallback(async () => {
         try {
-            setCurrentRows(await getRowsAction());
+            const rows = await getRowsAction();
+            setCurrentRows(rows);
+            log.info({ rows: rows });
         } catch (err) {
             showError(err);
         }

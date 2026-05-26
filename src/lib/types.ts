@@ -1,5 +1,7 @@
 import z from "zod";
 import * as schema from "@/db/schema";
+import { PgTableWithColumns } from "drizzle-orm/pg-core";
+import { AnyColumn } from "drizzle-orm";
 
 export const TABLES = schema;
 
@@ -12,7 +14,10 @@ export const DbTargetSchema = z.enum(
 /**
  * Parses raw target.
  */
-export function parseRawTarget(rawTarget: DbTarget) {
+export function parseRawTarget(rawTarget: DbTarget): PgTableWithColumns<any> & {
+    author_id: AnyColumn;
+    last_editor_id: AnyColumn;
+} {
     const target = DbTargetSchema.parse(rawTarget);
     const table = TABLES[target];
     if (!table) {

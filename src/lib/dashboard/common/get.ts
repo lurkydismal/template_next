@@ -1,7 +1,7 @@
 "use server";
 
 import { GridValidRowModel } from "@mui/x-data-grid";
-import { AnyColumn, desc, getColumns } from "drizzle-orm";
+import { AnyColumn, desc, eq, getColumns } from "drizzle-orm";
 import { createSelectSchema } from "drizzle-zod";
 
 import db from "@/db";
@@ -9,6 +9,9 @@ import { cacheDbRequest } from "@/lib/cache";
 import { ActionResult, DbTarget, parseRawTarget } from "@/lib/types";
 import log from "@/utils/stdlog";
 import { toCamelCase } from "@/utils/stdfunc";
+import { users } from "@/db/schema";
+import { alias } from "drizzle-orm/pg-core";
+import z from "zod";
 
 /**
  * Gets rows.
@@ -32,8 +35,26 @@ export async function getRows(
             return { ok: false, error: "Unknown id column" };
         }
 
-        const rows = await db.select().from(table).orderBy(desc(id)).execute();
-        const rowSchema = createSelectSchema(table).array();
+        const author = alias(users, "author");
+        const last_editor = alias(users, "last_editor");
+
+        const rows = await db
+            .select({
+                ...columns,
+                author: author.username,
+                last_editor: last_editor.username,
+            })
+            .from(table)
+            .leftJoin(author, eq(table.author_id, author.id))
+            .leftJoin(last_editor, eq(table.last_editor_id, last_editor.id))
+            .orderBy(desc(id))
+            .execute();
+        const rowSchema = createSelectSchema(table)
+            .extend({
+                author: z.string().nullable().optional(),
+                last_editor: z.string().nullable().optional(),
+            })
+            .array();
         const validRows = await rowSchema.parseAsync(rows);
 
         // If no rows, just return early

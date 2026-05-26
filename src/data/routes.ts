@@ -1,1 +1,3 @@
-export const afterLoginRoute = "/dashboard/table";
+import { items } from "@/data/navbar";
+
+export const afterLoginRoute = items[0].href;

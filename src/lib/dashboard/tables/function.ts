@@ -1,7 +1,7 @@
 "use server";
 
-import { table } from "@/db/schema";
-import { TableRowInsert as TableRowInsert } from "@/db/types";
+import { tables } from "@/db/schema";
+import { TablesRowInsert as TablesRowInsert } from "@/db/types";
 import { DbTarget } from "@/lib/types";
 import {
     createRowAction as _createRowAction,
@@ -9,15 +9,15 @@ import {
     updateRowAction as _updateRowAction,
 } from "@/lib/dashboard/common/function";
 
-const target: DbTarget = "table";
-const idColumn = table.id;
+const target: DbTarget = "tables";
+const idColumn = tables.id;
 
 export async function getRowsAction(): ReturnType<typeof _getRowsAction> {
     return _getRowsAction(target, idColumn.name);
 }
 
 export async function createRowAction(
-    row: TableRowInsert,
+    row: TablesRowInsert,
 ): ReturnType<typeof _createRowAction> {
     return _createRowAction(target, row);
 }

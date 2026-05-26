@@ -50,7 +50,7 @@ export const getFilteredAutocompleteOptions = <
  */
 export const getPackedValuesFromAutocomplete = (
     nextValue: unknown,
-): Record<string, unknown> => {
+): Record<string, unknown> | undefined => {
     if (
         nextValue &&
         typeof nextValue === "object" &&
@@ -61,5 +61,5 @@ export const getPackedValuesFromAutocomplete = (
         return nextValue.packedValues as Record<string, unknown>;
     }
 
-    return {};
+    return undefined;
 };

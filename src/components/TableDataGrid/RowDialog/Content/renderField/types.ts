@@ -1,5 +1,5 @@
 import { RegisterOptions, UseFormReturn } from "react-hook-form";
-import { FieldConfig } from "../types";
+import { FieldConfig } from "../../types";
 
 /**
  * Shared parameters required to render a single editable row field.

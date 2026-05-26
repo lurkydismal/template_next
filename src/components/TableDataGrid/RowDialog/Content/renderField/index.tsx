@@ -1,11 +1,11 @@
 import { FieldError, FieldErrors } from "react-hook-form";
-import CustomFieldInput from "../CustomFieldInput";
-import MarkdownFieldInput from "../MarkdownFieldInput";
-import MultilineFieldInput from "../MultilineFieldInput";
-import AutocompleteFieldInput from "../AutocompleteFieldInput";
-import DateTimeFieldInput from "../DateTimeFieldInput";
-import NumberFieldInput from "../NumberFieldInput";
-import TextFieldInput from "../TextFieldInput";
+import CustomFieldInput from "../../CustomFieldInput";
+import MarkdownFieldInput from "../../MarkdownFieldInput";
+import MultilineFieldInput from "../../MultilineFieldInput";
+import AutocompleteFieldInput from "../../AutocompleteFieldInput";
+import DateTimeFieldInput from "../../DateTimeFieldInput";
+import NumberFieldInput from "../../NumberFieldInput";
+import TextFieldInput from "../../TextFieldInput";
 import { isFieldReadOnly } from "../interconnected";
 import {
     getFilteredAutocompleteOptions,

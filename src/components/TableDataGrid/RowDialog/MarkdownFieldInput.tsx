@@ -90,19 +90,30 @@ export default function MarkdownFieldInput({
                         </Tooltip>
 
                         {isPreviewMode ? (
-                            <Box
-                                id={`${fieldKey}-markdown-preview`}
-                                sx={{
-                                    border: 1,
-                                    borderColor: error ? "error.main" : "divider",
-                                    borderRadius: 1,
-                                    minHeight: 120,
-                                    p: 2,
-                                    whiteSpace: "normal",
-                                }}
-                            >
-                                <Markdown>{String(field.value ?? "")}</Markdown>
-                            </Box>
+                            <>
+                                <Box
+                                    id={`${fieldKey}-markdown-preview`}
+                                    sx={{
+                                        border: 1,
+                                        borderColor: error ? "error.main" : "divider",
+                                        borderRadius: 1,
+                                        minHeight: 120,
+                                        p: 2,
+                                        whiteSpace: "normal",
+                                    }}
+                                >
+                                    <Markdown>{String(field.value ?? "")}</Markdown>
+                                </Box>
+                                {error?.message && (
+                                    <Typography
+                                        variant="caption"
+                                        color="error"
+                                        sx={{ mt: 0.5, display: "block" }}
+                                    >
+                                        {error.message}
+                                    </Typography>
+                                )}
+                            </>
                         ) : (
                             <TextField
                                 {...field}

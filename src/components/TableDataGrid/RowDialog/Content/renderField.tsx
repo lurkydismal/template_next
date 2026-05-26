@@ -7,6 +7,7 @@ import {
 import { FieldConfig } from "../types";
 import { AutocompleteOption } from "../types";
 import CustomFieldInput from "../CustomFieldInput";
+import MarkdownFieldInput from "../MarkdownFieldInput";
 import MultilineFieldInput from "../MultilineFieldInput";
 import AutocompleteFieldInput from "../AutocompleteFieldInput";
 import DateTimeFieldInput from "../DateTimeFieldInput";
@@ -126,6 +127,26 @@ export const renderField = <
                 required={!!field.required}
                 readOnly={readOnly}
                 value={value}
+                onValueChange={(nextValue) =>
+                    handleFieldValueChange(field, nextValue)
+                }
+                control={form.control}
+                error={error}
+                rules={rules}
+            />
+        );
+    }
+    if (field.type === "markdown") {
+        return (
+            <MarkdownFieldInput
+                key={`${key}-${idx}`}
+                fieldKey={key}
+                label={field.label}
+                name={name}
+                required={!!field.required}
+                readOnly={readOnly}
+                value={value}
+                toggleCorner={field.markdownToggleCorner}
                 onValueChange={(nextValue) =>
                     handleFieldValueChange(field, nextValue)
                 }

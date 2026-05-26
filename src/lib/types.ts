@@ -13,7 +13,9 @@ export const DbTargetSchema = z.enum(
 /**
  * Parses raw target.
  */
-export function parseRawTarget(rawTarget: DbTarget): (typeof TABLES)[DbTarget] & {
+export function parseRawTarget(
+    rawTarget: DbTarget,
+): (typeof TABLES)[DbTarget] & {
     author_id: AnyColumn;
     last_editor_id: AnyColumn;
 } {

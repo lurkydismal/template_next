@@ -117,69 +117,69 @@ export default function RowDialog<
 
     return (
         <>
-        <Dialog
-            open={dialogOpen}
-            onClose={onClose}
-            maxWidth="md"
-            fullWidth
-            keepMounted
-            slotProps={{
-                transition: {
-                    /**
-                     * Clears dialog state after the row dialog transition exits.
-                     */
-                    onExited: () => {
-                        setSelectedRow(null);
+            <Dialog
+                open={dialogOpen}
+                onClose={onClose}
+                maxWidth="md"
+                fullWidth
+                keepMounted
+                slotProps={{
+                    transition: {
+                        /**
+                         * Clears dialog state after the row dialog transition exits.
+                         */
+                        onExited: () => {
+                            setSelectedRow(null);
+                        },
                     },
-                },
-            }}
-        >
-            <DialogContent>
-                {selectedRow && (
-                    <RowDialogContent<R, RI>
-                        row={selectedRow}
-                        fields={fields}
-                        dashboardKey={dashboardKey}
-                        registerSubmit={registerSubmit}
-                        createRowAction={createRowAction}
-                        updateRowAction={updateRowAction}
-                        onUpdated={onUpdated}
-                        idKey={idKey}
-                    />
-                )}
-            </DialogContent>
-        </Dialog>
+                }}
+            >
+                <DialogContent>
+                    {selectedRow && (
+                        <RowDialogContent<R, RI>
+                            row={selectedRow}
+                            fields={fields}
+                            dashboardKey={dashboardKey}
+                            registerSubmit={registerSubmit}
+                            createRowAction={createRowAction}
+                            updateRowAction={updateRowAction}
+                            onUpdated={onUpdated}
+                            idKey={idKey}
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
 
-        <Dialog
-            open={forceCloseDialogOpen}
-            onClose={handleCancelForceClose}
-            maxWidth="xs"
-            fullWidth
-        >
-            <DialogTitle>Leave dialog?</DialogTitle>
-            <DialogContent>
-                <DialogContentText>
-                    You still have invalid fields. Do you want to leave anyway and
-                    discard changes?
-                </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-                <Button
-                    onClick={handleCancelForceClose}
-                    variant="contained"
-                    color="error"
-                >
-                    No
-                </Button>
-                <Button
-                    onClick={handleConfirmForceClose}
-                    variant="contained"
-                    color="success"
-                >
-                    Yes
-                </Button>
-            </DialogActions>
-        </Dialog>
+            <Dialog
+                open={forceCloseDialogOpen}
+                onClose={handleCancelForceClose}
+                maxWidth="xs"
+                fullWidth
+            >
+                <DialogTitle>Leave dialog?</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        You still have invalid fields. Do you want to leave
+                        anyway and discard changes?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={handleCancelForceClose}
+                        variant="contained"
+                        color="error"
+                    >
+                        No
+                    </Button>
+                    <Button
+                        onClick={handleConfirmForceClose}
+                        variant="contained"
+                        color="success"
+                    >
+                        Yes
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
 }

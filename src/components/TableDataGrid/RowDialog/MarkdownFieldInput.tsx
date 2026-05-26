@@ -1,5 +1,8 @@
 import { ChangeEvent, useMemo, useState } from "react";
-import { Preview as PreviewIcon, Subject as SubjectIcon } from "@mui/icons-material";
+import {
+    Preview as PreviewIcon,
+    Subject as SubjectIcon,
+} from "@mui/icons-material";
 import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
 import Markdown from "@/components/Markdown";
 import {
@@ -9,7 +12,9 @@ import {
     RegisterOptions,
 } from "react-hook-form";
 
-type MarkdownToggleCorner = NonNullable<FieldConfig<unknown>['markdownToggleCorner']>;
+type MarkdownToggleCorner = NonNullable<
+    FieldConfig<unknown>["markdownToggleCorner"]
+>;
 
 type MarkdownFieldInputProps = {
     fieldKey: string;
@@ -75,17 +80,29 @@ export default function MarkdownFieldInput({
                 render={({ field }) => (
                     <Box sx={{ position: "relative" }}>
                         <Tooltip
-                            title={isPreviewMode ? "Switch to edit" : "Preview markdown"}
+                            title={
+                                isPreviewMode
+                                    ? "Switch to edit"
+                                    : "Preview markdown"
+                            }
                         >
                             <IconButton
                                 size="small"
                                 aria-label={
-                                    isPreviewMode ? "Switch to text edit mode" : "Switch to markdown preview mode"
+                                    isPreviewMode
+                                        ? "Switch to text edit mode"
+                                        : "Switch to markdown preview mode"
                                 }
-                                onClick={() => setIsPreviewMode((prev) => !prev)}
+                                onClick={() =>
+                                    setIsPreviewMode((prev) => !prev)
+                                }
                                 sx={togglePositionStyles}
                             >
-                                {isPreviewMode ? <SubjectIcon fontSize="small" /> : <PreviewIcon fontSize="small" />}
+                                {isPreviewMode ? (
+                                    <SubjectIcon fontSize="small" />
+                                ) : (
+                                    <PreviewIcon fontSize="small" />
+                                )}
                             </IconButton>
                         </Tooltip>
 
@@ -95,14 +112,18 @@ export default function MarkdownFieldInput({
                                     id={`${fieldKey}-markdown-preview`}
                                     sx={{
                                         border: 1,
-                                        borderColor: error ? "error.main" : "divider",
+                                        borderColor: error
+                                            ? "error.main"
+                                            : "divider",
                                         borderRadius: 1,
                                         minHeight: 120,
                                         p: 2,
                                         whiteSpace: "normal",
                                     }}
                                 >
-                                    <Markdown>{String(field.value ?? "")}</Markdown>
+                                    <Markdown>
+                                        {String(field.value ?? "")}
+                                    </Markdown>
                                 </Box>
                                 {error?.message && (
                                     <Typography
@@ -121,7 +142,9 @@ export default function MarkdownFieldInput({
                                 slotProps={{ htmlInput: { readOnly } }}
                                 id={`${fieldKey}-markdown`}
                                 value={field.value ?? ""}
-                                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                onChange={(
+                                    e: ChangeEvent<HTMLInputElement>,
+                                ) => {
                                     if (readOnly) return;
                                     field.onChange(e.target.value);
                                     onValueChange(e.target.value);

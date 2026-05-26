@@ -110,7 +110,11 @@ export type FieldConfig<
     ) => boolean | Promise<boolean>;
     tableLookupErrorMessage?: string;
     inetAllowPort?: boolean;
-    markdownToggleCorner?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+    markdownToggleCorner?:
+        | "top-left"
+        | "top-right"
+        | "bottom-left"
+        | "bottom-right";
 };
 
 export type UpdateRowAction = (fd: FormData) => Promise<void>;

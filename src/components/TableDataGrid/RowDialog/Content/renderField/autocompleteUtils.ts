@@ -35,7 +35,10 @@ export const getFilteredAutocompleteOptions = <
             .map((excludedFieldKey) =>
                 getAutocompleteComparableValue(values[excludedFieldKey]),
             )
-            .filter((optionValue) => optionValue !== null && optionValue !== undefined),
+            .filter(
+                (optionValue) =>
+                    optionValue !== null && optionValue !== undefined,
+            ),
     );
 
     return options.filter((option) => {

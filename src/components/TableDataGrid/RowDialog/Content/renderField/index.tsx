@@ -1,11 +1,4 @@
-import {
-    FieldError,
-    FieldErrors,
-    RegisterOptions,
-    UseFormReturn,
-} from "react-hook-form";
-import { FieldConfig } from "../types";
-import { AutocompleteOption } from "../types";
+import { FieldError, FieldErrors } from "react-hook-form";
 import CustomFieldInput from "../CustomFieldInput";
 import MarkdownFieldInput from "../MarkdownFieldInput";
 import MultilineFieldInput from "../MultilineFieldInput";
@@ -13,74 +6,15 @@ import AutocompleteFieldInput from "../AutocompleteFieldInput";
 import DateTimeFieldInput from "../DateTimeFieldInput";
 import NumberFieldInput from "../NumberFieldInput";
 import TextFieldInput from "../TextFieldInput";
-import { isFieldReadOnly } from "./interconnected";
-
-type RenderFieldParams<
-    R extends Record<string, unknown>,
-    RI extends Record<string, unknown>,
-> = {
-    field: FieldConfig<R, RI>;
-    idx: number;
-    row: R;
-    values: Record<string, unknown>;
-    form: UseFormReturn<Record<string, unknown>>;
-    getRules: (
-        field: FieldConfig<R, RI>,
-    ) => RegisterOptions<Record<string, unknown>, string>;
-    handleFieldValueChange: (
-        field: FieldConfig<R, RI>,
-        value: unknown,
-        packedValues?: Record<string, unknown>,
-    ) => void;
-};
+import { isFieldReadOnly } from "../interconnected";
+import {
+    getFilteredAutocompleteOptions,
+    getPackedValuesFromAutocomplete,
+} from "./autocompleteUtils";
+import { RenderFieldParams } from "./types";
 
 /**
- * Returns the primitive value used to compare two autocomplete options.
- */
-const getAutocompleteComparableValue = (value: unknown): unknown => {
-    if (value && typeof value === "object" && "label" in value) {
-        return (value as { label?: unknown }).label;
-    }
-
-    return value;
-};
-
-/**
- * Filters autocomplete options by removing values currently selected by sibling fields.
- */
-const getFilteredAutocompleteOptions = <
-    R extends Record<string, unknown>,
-    RI extends Record<string, unknown>,
->(
-    field: FieldConfig<R, RI>,
-    values: Record<string, unknown>,
-): readonly AutocompleteOption[] => {
-    const options = field.autocompleteOptions ?? [];
-    const excludedFieldKeys = field.mutuallyExclusiveWith ?? [];
-
-    if (excludedFieldKeys.length === 0) return options;
-
-    const currentComparableValue = getAutocompleteComparableValue(
-        values[String(field.key)],
-    );
-
-    const excludedValues = new Set<unknown>(
-        excludedFieldKeys
-            .map((excludedFieldKey) =>
-                getAutocompleteComparableValue(values[excludedFieldKey]),
-            )
-            .filter((value) => value !== null && value !== undefined),
-    );
-
-    return options.filter((option) => {
-        const optionComparableValue = getAutocompleteComparableValue(option);
-        if (optionComparableValue === currentComparableValue) return true;
-        return !excludedValues.has(optionComparableValue);
-    }) as readonly AutocompleteOption[];
-};
-
-/**
- * Renders field.
+ * Renders a field input based on the configured field type and behavior.
  */
 export const renderField = <
     R extends Record<string, unknown>,
@@ -176,16 +110,7 @@ export const renderField = <
                 onClose={field.onAutocompleteClose}
                 onValueChange={(nextValue) => {
                     const packedValues =
-                        nextValue &&
-                        typeof nextValue === "object" &&
-                        "packedValues" in nextValue &&
-                        nextValue.packedValues &&
-                        typeof nextValue.packedValues === "object"
-                            ? (nextValue.packedValues as Record<
-                                  string,
-                                  unknown
-                              >)
-                            : {};
+                        getPackedValuesFromAutocomplete(nextValue);
 
                     handleFieldValueChange(field, nextValue, packedValues);
                 }}

@@ -113,10 +113,12 @@ export default function RowDialogContent<
         (
             field: FieldConfig<R, RI>,
             value: unknown,
-            packedValues: Record<string, unknown> = {},
+            packedValues?: Record<string, unknown>,
         ) => {
             const key = String(field.key);
-            const changedValues = { [key]: value, ...packedValues };
+            const changedValues = packedValues
+                ? { [key]: value, ...packedValues }
+                : { [key]: value };
             const nextValues = { ...values, ...changedValues };
             const requestEpoch = ++interconnectedRequestEpochRef.current;
 

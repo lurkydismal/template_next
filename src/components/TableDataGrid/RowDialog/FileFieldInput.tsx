@@ -1,6 +1,8 @@
 import { ChangeEvent, useMemo, useState } from "react";
 import {
+    Box,
     Button,
+    CircularProgress,
     Dialog,
     DialogContent,
     DialogTitle,
@@ -28,6 +30,84 @@ type FileFieldInputProps = {
 /**
  * Renders a file field with optional type filtering and image preview behavior.
  */
+/**
+ * Renders image preview dialog content with loading/error states and retry support.
+ */
+function ImagePreviewContent({ sourceValue, label }: { sourceValue: string; label: string }) {
+    const [isLoadingPreview, setIsLoadingPreview] = useState(true);
+    const [hasPreviewError, setHasPreviewError] = useState(false);
+    const [imageRetryKey, setImageRetryKey] = useState(0);
+
+    /**
+     * Marks the preview as successfully loaded.
+     */
+    function handlePreviewLoad(): void {
+        setIsLoadingPreview(false);
+    }
+
+    /**
+     * Marks the preview as failed to load.
+     */
+    function handlePreviewError(): void {
+        setIsLoadingPreview(false);
+        setHasPreviewError(true);
+    }
+
+    /**
+     * Retries loading the preview image.
+     */
+    function handleRetryPreview(): void {
+        setIsLoadingPreview(true);
+        setHasPreviewError(false);
+        setImageRetryKey((currentValue) => currentValue + 1);
+    }
+
+    return (
+        <DialogContent>
+            {isLoadingPreview ? (
+                <Box display="flex" justifyContent="center" py={4}>
+                    <CircularProgress aria-label="Loading image preview" />
+                </Box>
+            ) : null}
+            {!isLoadingPreview && hasPreviewError ? (
+                <Stack spacing={1} alignItems="flex-start" py={2}>
+                    <Typography variant="body2" color="text.secondary">
+                        We could not load this image preview.
+                    </Typography>
+                    <Stack direction="row" spacing={1}>
+                        <Button variant="outlined" onClick={handleRetryPreview}>
+                            Retry
+                        </Button>
+                        <Button
+                            variant="text"
+                            component="a"
+                            href={sourceValue}
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            Open in new tab
+                        </Button>
+                    </Stack>
+                </Stack>
+            ) : null}
+            {!hasPreviewError ? (
+                <img
+                    key={`${sourceValue}-${imageRetryKey}`}
+                    src={sourceValue}
+                    alt={label}
+                    onLoad={handlePreviewLoad}
+                    onError={handlePreviewError}
+                    style={{
+                        width: "100%",
+                        height: "auto",
+                        display: isLoadingPreview ? "none" : "block",
+                    }}
+                />
+            ) : null}
+        </DialogContent>
+    );
+}
+
 export default function FileFieldInput({
     fieldKey,
     label,
@@ -45,6 +125,13 @@ export default function FileFieldInput({
     const acceptValue = useMemo(() => toAcceptString(accept), [accept]);
     const sourceValue = typeof value === "string" ? value : "";
     const sourceIsImage = isImagePath(sourceValue);
+
+    /**
+     * Closes the image preview dialog.
+     */
+    function handleClosePreview(): void {
+        setImagePreviewOpen(false);
+    }
 
     return (
         <Stack spacing={1}>
@@ -87,8 +174,6 @@ export default function FileFieldInput({
                                 </Link>
                             ) : (
                                 <Link href={sourceValue} download rel="noreferrer">
-                                     Download file
-                                 </Link>
                                     Download file
                                 </Link>
                             )
@@ -106,14 +191,16 @@ export default function FileFieldInput({
             />
             <Dialog
                 open={imagePreviewOpen}
-                onClose={() => setImagePreviewOpen(false)}
+                onClose={handleClosePreview}
                 maxWidth="md"
                 fullWidth
             >
                 <DialogTitle>{label}</DialogTitle>
-                <DialogContent>
-                    <img src={sourceValue} alt={label} style={{ width: "100%", height: "auto" }} />
-                </DialogContent>
+                <ImagePreviewContent
+                    key={`${imagePreviewOpen ? "open" : "closed"}-${sourceValue}`}
+                    sourceValue={sourceValue}
+                    label={label}
+                />
             </Dialog>
         </Stack>
     );

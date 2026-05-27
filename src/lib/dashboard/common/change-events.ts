@@ -50,19 +50,6 @@ export async function emitDashboardChange(target: DbTarget): Promise<void> {
 }
 
 /**
- * Registers a listener and returns an unsubscribe callback.
- */
-export async function subscribeToDashboardChanges(
-    listener: DashboardListener,
-): Promise<() => void> {
-    listeners.add(listener);
-
-    return () => {
-        listeners.delete(listener);
-    };
-}
-
-/**
  * Registers a listener for all dashboard stream events and returns an unsubscribe callback.
  */
 export async function emitNotificationEvent(event: NotificationEvent): Promise<void> {
@@ -76,7 +63,7 @@ export async function emitNotificationEvent(event: NotificationEvent): Promise<v
 }
 
 /**
- * Registers a notification listener and returns an unsubscribe callback.
+ * Registers a dashboard stream listener and returns an unsubscribe callback.
  */
 export async function subscribeToDashboardEvents(
     listener: DashboardListener,

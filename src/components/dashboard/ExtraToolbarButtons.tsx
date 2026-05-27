@@ -1,6 +1,7 @@
 "use client";
 
 import CustomDivider from "@/components/TableDataGrid/CustomDivider";
+import { NotificationsRow } from "@/db/types";
 import { useSnackbar } from "@/providers/snackbar";
 import { isDev } from "@/utils/stdvar";
 import uuid from "@/utils/uuid";
@@ -29,7 +30,7 @@ type CreateRowAction<RI extends Record<string, unknown>> =
 
 type StoredNotification = {
     id: number;
-    type: "default" | "success" | "error" | "warning" | "info";
+    type: NotificationsRow["type"];
     message: string;
     is_read: boolean;
 };

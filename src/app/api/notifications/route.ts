@@ -1,9 +1,10 @@
 import db from "@/db";
 import { notifications } from "@/db/schema";
+import { NotificationsRow } from "@/db/types";
 import { emitNotificationEvent } from "@/lib/dashboard/common/change-events";
 import { and, asc, count, eq, inArray, sql } from "drizzle-orm";
 
-type NotificationType = "default" | "success" | "error" | "warning" | "info";
+type NotificationType = NotificationsRow["type"];
 
 /**
  * Reads notifications and unread count for toolbar center state.

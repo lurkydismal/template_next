@@ -2,6 +2,7 @@
 
 import { DbTarget } from "@/lib/types";
 import log from "@/utils/stdlog";
+import { NotificationsRow } from "@/db/types";
 
 type DashboardChangeEvent = {
     event: "dashboard-change";
@@ -9,7 +10,7 @@ type DashboardChangeEvent = {
     occurredAt: string;
 };
 
-type NotificationType = "default" | "success" | "error" | "warning" | "info";
+type NotificationType = NotificationsRow["type"];
 type NotificationEvent = {
     event: "notification";
     type: NotificationType;

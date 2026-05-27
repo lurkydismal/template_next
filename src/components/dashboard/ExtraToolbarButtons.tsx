@@ -46,6 +46,9 @@ function isDialogCreateAction<RI extends Record<string, unknown>>(
  */
 async function readNotifications(): Promise<{ rows: StoredNotification[]; unreadCount: number }> {
     const response = await fetch("/api/notifications", { cache: "no-store" });
+    if (!response.ok) {
+        throw new Error(`Failed to read notifications (${response.status})`);
+    }
     return response.json() as Promise<{ rows: StoredNotification[]; unreadCount: number }>;
 }
 
@@ -53,22 +56,28 @@ async function readNotifications(): Promise<{ rows: StoredNotification[]; unread
  * Marks notification IDs as read in the database.
  */
 async function markNotifications(ids: number[], isRead: boolean): Promise<void> {
-    await fetch("/api/notifications", {
+    const response = await fetch("/api/notifications", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ids, isRead }),
     });
+    if (!response.ok) {
+        throw new Error(`Failed to update notifications (${response.status})`);
+    }
 }
 
 /**
  * Persists one notification of a specific type for testing and SSE verification.
  */
 async function createNotification(type: StoredNotification["type"], message: string): Promise<void> {
-    await fetch("/api/notifications", {
+    const response = await fetch("/api/notifications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type, message }),
     });
+    if (!response.ok) {
+        throw new Error(`Failed to create notification (${response.status})`);
+    }
 }
 
 /**

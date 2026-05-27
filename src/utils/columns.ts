@@ -18,7 +18,7 @@ import {
     useImagePreview,
 } from "@/components/TableDataGrid/RowDialog/ImagePreviewDialog";
 import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
-import { isImagePath } from "`@/utils/fileHelpers`";
+import { isImagePath } from "@/utils/fileHelpers";
 import { toCamelCase } from "@/utils/stdfunc";
 import { Link } from "@mui/material";
 import { createElement, Fragment, MouseEvent } from "react";
@@ -145,15 +145,15 @@ export function columnsFromFields<
                 headerName: field.label,
                 ...(field.formatValue
                     ? {
-                          /**
-                           * Renders a data grid cell value from a normalized field definition.
-                           */
-                          renderCell: (params: GridRenderCellParams) =>
-                              String(field.formatValue!(params.value) ?? ""),
-                      }
+                        /**
+                         * Renders a data grid cell value from a normalized field definition.
+                         */
+                        renderCell: (params: GridRenderCellParams) =>
+                            String(field.formatValue!(params.value) ?? ""),
+                    }
                     : field.type === "file"
-                      ? { renderCell: renderFileCell }
-                      : {}),
+                        ? { renderCell: renderFileCell }
+                        : {}),
             })),
     );
 }

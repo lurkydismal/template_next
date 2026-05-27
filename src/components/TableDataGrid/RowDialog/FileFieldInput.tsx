@@ -7,7 +7,7 @@ import {
     RegisterOptions,
 } from "react-hook-form";
 import { ImagePreviewDialog, useImagePreview } from "./ImagePreviewDialog";
-import { isImagePath, toAcceptString } from "`@/utils/fileHelpers`";
+import { isImagePath, toAcceptString } from "@/utils/fileHelpers";
 
 type FileFieldInputProps = {
     fieldKey: string;

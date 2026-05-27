@@ -10,7 +10,14 @@ import {
     AddBoxOutlined as AddIcon,
     NotificationsOutlined as NotificationsIcon,
 } from "@mui/icons-material";
-import { Badge, List, ListItemButton, ListItemText, Popover, Tooltip } from "@mui/material";
+import {
+    Badge,
+    List,
+    ListItemButton,
+    ListItemText,
+    Popover,
+    Tooltip,
+} from "@mui/material";
 import { ToolbarButton } from "@mui/x-data-grid";
 import React, { useEffect, useState } from "react";
 
@@ -44,18 +51,27 @@ function isDialogCreateAction<RI extends Record<string, unknown>>(
 /**
  * Reads notifications from the API to restore UI state after reload.
  */
-async function readNotifications(): Promise<{ rows: StoredNotification[]; unreadCount: number }> {
+async function readNotifications(): Promise<{
+    rows: StoredNotification[];
+    unreadCount: number;
+}> {
     const response = await fetch("/api/notifications", { cache: "no-store" });
     if (!response.ok) {
         throw new Error(`Failed to read notifications (${response.status})`);
     }
-    return response.json() as Promise<{ rows: StoredNotification[]; unreadCount: number }>;
+    return response.json() as Promise<{
+        rows: StoredNotification[];
+        unreadCount: number;
+    }>;
 }
 
 /**
  * Marks notification IDs as read in the database.
  */
-async function markNotifications(ids: number[], isRead: boolean): Promise<void> {
+async function markNotifications(
+    ids: number[],
+    isRead: boolean,
+): Promise<void> {
     const response = await fetch("/api/notifications", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -69,7 +85,10 @@ async function markNotifications(ids: number[], isRead: boolean): Promise<void> 
 /**
  * Persists one notification of a specific type for testing and SSE verification.
  */
-async function createNotification(type: StoredNotification["type"], message: string): Promise<void> {
+async function createNotification(
+    type: StoredNotification["type"],
+    message: string,
+): Promise<void> {
     const response = await fetch("/api/notifications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -83,15 +102,20 @@ async function createNotification(type: StoredNotification["type"], message: str
 /**
  * Renders extra data-grid toolbar actions including notifications center.
  */
-export default function ExtraToolbarButtons<RI extends Record<string, unknown>>({
+export default function ExtraToolbarButtons<
+    RI extends Record<string, unknown>,
+>({
     emptyRow,
     createRowAction,
 }: Readonly<{
     emptyRow?: RI;
     createRowAction: CreateRowAction<RI>;
 }>) {
-    const { showError, showInfo } = useSnackbar();
-    const [notifications, setNotifications] = useState<StoredNotification[]>([]);
+    const { showError, showInfo, showMessage, showSuccess, showWarning } =
+        useSnackbar();
+    const [notifications, setNotifications] = useState<StoredNotification[]>(
+        [],
+    );
     const [unreadCount, setUnreadCount] = useState(0);
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
@@ -106,13 +130,16 @@ export default function ExtraToolbarButtons<RI extends Record<string, unknown>>(
         const source = new EventSource("/api/dashboard/changes");
         source.onmessage = (event) => {
             const payload = JSON.parse(event.data) as { type?: string };
-            if ((payload as { event?: string }).event !== "notification") return;
+            if ((payload as { event?: string }).event !== "notification")
+                return;
 
-            void readNotifications().then(({ rows, unreadCount: unread }) => {
-                setNotifications(rows);
-                setUnreadCount(unread);
-                showInfo("New notifications available");
-            }).catch(showError);;
+            void readNotifications()
+                .then(({ rows, unreadCount: unread }) => {
+                    setNotifications(rows);
+                    setUnreadCount(unread);
+                    showInfo("New notifications available");
+                })
+                .catch(showError);
         };
 
         return () => source.close();
@@ -121,21 +148,52 @@ export default function ExtraToolbarButtons<RI extends Record<string, unknown>>(
     return (
         <>
             {isDev ? (
-                <Tooltip title="Send mock notifications">
-                    <ToolbarButton
-                        onClick={() => {
-                            void Promise.all([
-                                createNotification("default", `default-${uuid()}`),
-                                createNotification("success", `success-${uuid()}`),
-                                createNotification("error", `error-${uuid()}`),
-                                createNotification("warning", `warning-${uuid()}`),
-                                createNotification("info", `info-${uuid()}`),
-                            ]).catch(showError);
-                        }}
-                    >
-                        <MockShowIcon fontSize="small" />
-                    </ToolbarButton>
-                </Tooltip>
+                <>
+                    <Tooltip title="Show nock snackbars">
+                        <ToolbarButton
+                            onClick={() => {
+                                showMessage(uuid());
+                                showSuccess(uuid());
+                                showError(uuid());
+                                showWarning(uuid());
+                                showInfo(uuid());
+                            }}
+                        >
+                            <MockShowIcon fontSize="small" />
+                        </ToolbarButton>
+                    </Tooltip>
+
+                    <Tooltip title="Send mock notifications">
+                        <ToolbarButton
+                            onClick={() => {
+                                void Promise.all([
+                                    createNotification(
+                                        "default",
+                                        `default-${uuid()}`,
+                                    ),
+                                    createNotification(
+                                        "success",
+                                        `success-${uuid()}`,
+                                    ),
+                                    createNotification(
+                                        "error",
+                                        `error-${uuid()}`,
+                                    ),
+                                    createNotification(
+                                        "warning",
+                                        `warning-${uuid()}`,
+                                    ),
+                                    createNotification(
+                                        "info",
+                                        `info-${uuid()}`,
+                                    ),
+                                ]).catch(showError);
+                            }}
+                        >
+                            <MockShowIcon fontSize="small" />
+                        </ToolbarButton>
+                    </Tooltip>
+                </>
             ) : undefined}
 
             <Tooltip title="Notifications">
@@ -157,7 +215,10 @@ export default function ExtraToolbarButtons<RI extends Record<string, unknown>>(
                         <ListItemButton
                             key={item.id}
                             onClick={() => {
-                                void markNotifications([item.id], item.is_read ? false : true)
+                                void markNotifications(
+                                    [item.id],
+                                    item.is_read ? false : true,
+                                )
                                     .then(() => readNotifications())
                                     .then(({ rows, unreadCount: unread }) => {
                                         setNotifications(rows);
@@ -182,7 +243,9 @@ export default function ExtraToolbarButtons<RI extends Record<string, unknown>>(
                             createRowAction.action();
                         } else if (emptyRow) {
                             createRowAction.action(emptyRow).catch((err) => {
-                                showError(`Failed to create row: ${err.message}`);
+                                showError(
+                                    `Failed to create row: ${err.message}`,
+                                );
                             });
                         }
                     }}

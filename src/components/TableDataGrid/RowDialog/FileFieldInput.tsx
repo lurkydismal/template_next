@@ -43,6 +43,17 @@ export default function FileFieldInput({
     const { imagePreviewOpen, openImagePreview, closeImagePreview } =
         useImagePreview();
     const acceptValue = useMemo(() => toAcceptString(accept), [accept]);
+    /**
+     * Applies a selected file to both form state and upstream row state.
+     */
+    function applySelectedFile(
+        file: File | null,
+        onChange: (value: File | null) => void,
+    ): void {
+        onChange(file);
+        onValueChange(file);
+    }
+
     const sourceValue = typeof value === "string" ? value : "";
     const sourceIsImage = isImagePath(sourceValue);
 
@@ -77,8 +88,7 @@ export default function FileFieldInput({
                                     if (readOnly) return;
 
                                     const file = e.target.files?.[0] ?? null;
-                                    field.onChange(file);
-                                    onValueChange(file);
+                                    applySelectedFile(file, field.onChange);
                                 }}
                             />
                         </Button>
@@ -112,14 +122,18 @@ export default function FileFieldInput({
                                 {error.message}
                             </Typography>
                         ) : null}
+                        <ImagePreviewDialog
+                            open={imagePreviewOpen}
+                            onClose={closeImagePreview}
+                            sourceValue={sourceValue}
+                            label={label}
+                            accept={acceptValue}
+                            onFileDrop={(file) => {
+                                applySelectedFile(file, field.onChange);
+                            }}
+                        />
                     </Stack>
                 )}
-            />
-            <ImagePreviewDialog
-                open={imagePreviewOpen}
-                onClose={closeImagePreview}
-                sourceValue={sourceValue}
-                label={label}
             />
         </Stack>
     );

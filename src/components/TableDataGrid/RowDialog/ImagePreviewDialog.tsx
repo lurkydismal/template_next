@@ -1,5 +1,5 @@
 import NextImage from "next/image";
-import { useState } from "react";
+import { DragEvent, useState } from "react";
 import {
     Box,
     Button,
@@ -16,6 +16,8 @@ type ImagePreviewDialogProps = {
     sourceValue: string;
     label: string;
     onClose: () => void;
+    onFileDrop?: (file: File) => void;
+    accept?: string;
 };
 
 type UseImagePreviewResult = {
@@ -155,9 +157,62 @@ export function ImagePreviewDialog({
     sourceValue,
     label,
     onClose,
+    onFileDrop,
+    accept,
 }: ImagePreviewDialogProps) {
+    /**
+     * Resolves whether a dropped file should be accepted for upload.
+     */
+    function isAcceptedFile(file: File): boolean {
+        if (!accept?.trim()) return true;
+
+        const acceptedTypes = accept
+            .split(",")
+            .map((part) => part.trim().toLowerCase())
+            .filter(Boolean);
+
+        if (acceptedTypes.length === 0) return true;
+
+        const fileName = file.name.toLowerCase();
+        const mimeType = file.type.toLowerCase();
+
+        return acceptedTypes.some((acceptedType) => {
+            if (acceptedType.startsWith(".")) {
+                return fileName.endsWith(acceptedType);
+            }
+
+            if (acceptedType.endsWith("/*")) {
+                const prefix = acceptedType.slice(0, -1);
+                return mimeType.startsWith(prefix);
+            }
+
+            return mimeType === acceptedType;
+        });
+    }
+
+    /**
+     * Handles files dropped onto the preview dialog as an upload shortcut.
+     */
+    function handleDrop(event: DragEvent<HTMLDivElement>): void {
+        event.preventDefault();
+
+        if (!onFileDrop) return;
+
+        const droppedFile = event.dataTransfer.files?.[0];
+        if (!droppedFile || !isAcceptedFile(droppedFile)) return;
+
+        onFileDrop(droppedFile);
+    }
+
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+        <Dialog
+            open={open}
+            onClose={onClose}
+            maxWidth="md"
+            fullWidth
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={handleDrop}
+        >
             <DialogTitle>{label}</DialogTitle>
             <ImagePreviewContent
                 key={`${open ? "open" : "closed"}-${sourceValue}`}

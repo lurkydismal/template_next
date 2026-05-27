@@ -23,7 +23,12 @@ export async function GET(): Promise<Response> {
  * Persists one notification and emits it through the shared SSE bus.
  */
 export async function POST(request: Request): Promise<Response> {
-    const payload = (await request.json()) as { type?: NotificationType; message?: string };
+    let payload: { type?: NotificationType; message?: string };
+    try {
+        payload = (await request.json()) as { type?: NotificationType; message?: string };
+    } catch {
+        return Response.json({ error: "Invalid JSON payload" }, { status: 400 });
+    }
     const type = payload.type ?? "default";
     const message = (payload.message ?? "").trim();
 
@@ -51,7 +56,12 @@ export async function POST(request: Request): Promise<Response> {
  * Marks a set of notifications as read/unread to keep badge state in sync.
  */
 export async function PATCH(request: Request): Promise<Response> {
-    const payload = (await request.json()) as { ids?: number[]; isRead?: boolean };
+    let payload: { ids?: number[]; isRead?: boolean };
+    try {
+        payload = (await request.json()) as { ids?: number[]; isRead?: boolean };
+    } catch {
+        return Response.json({ error: "Invalid JSON payload" }, { status: 400 });
+    }
     const ids = payload.ids ?? [];
 
     if (!ids.length) {

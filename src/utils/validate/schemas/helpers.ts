@@ -19,7 +19,9 @@ export function normalizePathSeparators(path: string): string {
  * @returns Whether traversal-like segments were found.
  */
 export function hasParentTraversal(path: string): boolean {
-    const decodedPath = safeDecodeURIComponent(path).toLowerCase();
+    const decodedPath = safeDecodeURIComponent(path)
+        .toLowerCase()
+        .replace(/\\+/g, "/");
 
     return decodedPath
         .split("/")

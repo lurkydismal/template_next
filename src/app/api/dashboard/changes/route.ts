@@ -1,4 +1,6 @@
-import { subscribeToDashboardChanges } from "@/lib/dashboard/common/change-events";
+import {
+    subscribeToDashboardEvents,
+} from "@/lib/dashboard/common/change-events";
 
 /**
  * Creates a server-sent events stream that emits dashboard mutation updates.
@@ -50,8 +52,8 @@ export async function GET(): Promise<Response> {
 
             send({ type: "connected" });
 
-            unsubscribe = await subscribeToDashboardChanges((event) => {
-                send({ type: "dashboard-change", ...event });
+            unsubscribe = await subscribeToDashboardEvents((event) => {
+                send(event);
             });
 
             keepAlive = setInterval(() => {

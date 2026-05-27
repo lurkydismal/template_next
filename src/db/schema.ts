@@ -5,6 +5,8 @@ import {
     varchar,
     text,
     index,
+    boolean,
+    timestamp,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { template_table } from "./templates";
@@ -37,4 +39,22 @@ export const users = pgTable(
             sql`${t.username_normalized} = lower(${t.username_normalized})`,
         ),
     ],
+);
+
+export const notifications = pgTable(
+    "notifications",
+    {
+        id: serial().primaryKey(),
+        type: varchar({
+            length: 16,
+            enum: ["default", "success", "error", "warning", "info"],
+        })
+            .notNull()
+            .default("default"),
+        message: text().notNull(),
+        is_read: boolean().notNull().default(false),
+        read_at: timestamp({ withTimezone: true }),
+        created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    },
+    (t) => [check("notification_message_not_blank", sql`length(trim(${t.message})) > 0`), index().on(t.is_read), index().on(t.created_at)],
 );

@@ -52,7 +52,9 @@ export async function emitDashboardChange(target: DbTarget): Promise<void> {
 /**
  * Registers a listener for all dashboard stream events and returns an unsubscribe callback.
  */
-export async function emitNotificationEvent(event: NotificationEvent): Promise<void> {
+export async function emitNotificationEvent(
+    event: NotificationEvent,
+): Promise<void> {
     listeners.forEach((listener) => {
         try {
             listener(event);

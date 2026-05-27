@@ -1,6 +1,4 @@
-import {
-    subscribeToDashboardEvents,
-} from "@/lib/dashboard/common/change-events";
+import { subscribeToDashboardEvents } from "@/lib/dashboard/common/change-events";
 
 /**
  * Creates a server-sent events stream that emits dashboard mutation updates.

@@ -10,7 +10,10 @@ type NotificationType = NotificationsRow["type"];
  * Reads notifications and unread count for toolbar center state.
  */
 export async function GET(): Promise<Response> {
-    const rows = await db.select().from(notifications).orderBy(asc(notifications.created_at));
+    const rows = await db
+        .select()
+        .from(notifications)
+        .orderBy(asc(notifications.created_at));
     const unreadResult = await db
         .select({ total: count() })
         .from(notifications)
@@ -25,9 +28,15 @@ export async function GET(): Promise<Response> {
 export async function POST(request: Request): Promise<Response> {
     let payload: { type?: NotificationType; message?: string };
     try {
-        payload = (await request.json()) as { type?: NotificationType; message?: string };
+        payload = (await request.json()) as {
+            type?: NotificationType;
+            message?: string;
+        };
     } catch {
-        return Response.json({ error: "Invalid JSON payload" }, { status: 400 });
+        return Response.json(
+            { error: "Invalid JSON payload" },
+            { status: 400 },
+        );
     }
     // FIX: Validate type
     const type = payload.type ?? "default";
@@ -59,9 +68,15 @@ export async function POST(request: Request): Promise<Response> {
 export async function PATCH(request: Request): Promise<Response> {
     let payload: { ids?: number[]; isRead?: boolean };
     try {
-        payload = (await request.json()) as { ids?: number[]; isRead?: boolean };
+        payload = (await request.json()) as {
+            ids?: number[];
+            isRead?: boolean;
+        };
     } catch {
-        return Response.json({ error: "Invalid JSON payload" }, { status: 400 });
+        return Response.json(
+            { error: "Invalid JSON payload" },
+            { status: 400 },
+        );
     }
     const ids = payload.ids ?? [];
 

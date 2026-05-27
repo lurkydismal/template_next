@@ -93,7 +93,9 @@ async function upload(
 
         const parsed = await uploadSchema.parseAsync({ path, filename, file });
 
-        const { contentType, extension } = getImageStorageMeta(parsed.file.type);
+        const { contentType, extension } = getImageStorageMeta(
+            parsed.file.type,
+        );
         const arrayBuffer = await parsed.file.arrayBuffer();
         const fullFilename = `${parsed.filename}${extension}`;
 

@@ -138,7 +138,10 @@ export default function TableDataGrid<
                 const payload = JSON.parse(event.data) as
                     | { type?: string }
                     | undefined;
-                if ((payload as { event?: string })?.event === "dashboard-change") {
+                if (
+                    (payload as { event?: string })?.event ===
+                    "dashboard-change"
+                ) {
                     scheduleRefresh();
                 }
             } catch {

@@ -56,5 +56,12 @@ export const notifications = pgTable(
         read_at: timestamp({ withTimezone: true }),
         created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
     },
-    (t) => [check("notification_message_not_blank", sql`length(trim(${t.message})) > 0`), index().on(t.is_read), index().on(t.created_at)],
+    (t) => [
+        check(
+            "notification_message_not_blank",
+            sql`length(trim(${t.message})) > 0`,
+        ),
+        index().on(t.is_read),
+        index().on(t.created_at),
+    ],
 );

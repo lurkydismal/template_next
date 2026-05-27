@@ -1,10 +1,14 @@
-import { subscribeToDashboardChanges } from "@/lib/dashboard/common/change-events";
+import {
+    subscribeToDashboardChanges,
+    subscribeToNotifications,
+} from "@/lib/dashboard/common/change-events";
 
 /**
  * Creates a server-sent events stream that emits dashboard mutation updates.
  */
 export async function GET(): Promise<Response> {
     let unsubscribe: (() => void) | null = null;
+    let unsubscribeNotifications: (() => void) | null = null;
     let keepAlive: ReturnType<typeof setInterval> | null = null;
 
     /**
@@ -19,6 +23,10 @@ export async function GET(): Promise<Response> {
         if (unsubscribe) {
             unsubscribe();
             unsubscribe = null;
+        }
+        if (unsubscribeNotifications) {
+            unsubscribeNotifications();
+            unsubscribeNotifications = null;
         }
     };
 
@@ -51,7 +59,10 @@ export async function GET(): Promise<Response> {
             send({ type: "connected" });
 
             unsubscribe = await subscribeToDashboardChanges((event) => {
-                send({ type: "dashboard-change", ...event });
+                send({ event: "dashboard-change", ...event });
+            });
+            unsubscribeNotifications = await subscribeToNotifications((event) => {
+                send({ event: "notification", ...event });
             });
 
             keepAlive = setInterval(() => {

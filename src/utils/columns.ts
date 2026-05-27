@@ -13,7 +13,10 @@
  * - Call `normalizeColumns(rawColumns, options)` where you need the final GridColDef[]
  */
 
-import { ImagePreviewDialog, useImagePreview } from "@/components/TableDataGrid/RowDialog/ImagePreviewDialog";
+import {
+    ImagePreviewDialog,
+    useImagePreview,
+} from "@/components/TableDataGrid/RowDialog/ImagePreviewDialog";
 import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
 import { isImagePath } from "`@/utils/fileHelpers`";
 import { toCamelCase } from "@/utils/stdfunc";
@@ -34,7 +37,8 @@ type NormalizeOptions = {
  * Renders an interactive file cell that reuses shared image preview behavior.
  */
 function FileCellLink({ value }: { value: string }) {
-    const { imagePreviewOpen, openImagePreview, closeImagePreview } = useImagePreview();
+    const { imagePreviewOpen, openImagePreview, closeImagePreview } =
+        useImagePreview();
 
     /**
      * Opens the preview dialog while preventing browser navigation.
@@ -48,7 +52,11 @@ function FileCellLink({ value }: { value: string }) {
         return createElement(
             Fragment,
             null,
-            createElement(Link, { href: value, underline: "hover", onClick: handleOpenPreview }, "Open image"),
+            createElement(
+                Link,
+                { href: value, underline: "hover", onClick: handleOpenPreview },
+                "Open image",
+            ),
             createElement(ImagePreviewDialog, {
                 open: imagePreviewOpen,
                 onClose: closeImagePreview,
@@ -60,7 +68,13 @@ function FileCellLink({ value }: { value: string }) {
 
     return createElement(
         Link,
-        { href: value, download: true, target: "_blank", rel: "noreferrer", underline: "hover" },
+        {
+            href: value,
+            download: true,
+            target: "_blank",
+            rel: "noreferrer",
+            underline: "hover",
+        },
         "Download file",
     );
 }

@@ -53,7 +53,13 @@ export function useImagePreview(): UseImagePreviewResult {
 /**
  * Renders image preview dialog content with loading/error states and retry support.
  */
-function ImagePreviewContent({ sourceValue, label }: { sourceValue: string; label: string }) {
+function ImagePreviewContent({
+    sourceValue,
+    label,
+}: {
+    sourceValue: string;
+    label: string;
+}) {
     const [isLoadingPreview, setIsLoadingPreview] = useState(true);
     const [hasPreviewError, setHasPreviewError] = useState(false);
     const [imageRetryKey, setImageRetryKey] = useState(0);
@@ -131,7 +137,12 @@ function ImagePreviewContent({ sourceValue, label }: { sourceValue: string; labe
 /**
  * Displays an image preview dialog with a shared UI across file renderers.
  */
-export function ImagePreviewDialog({ open, sourceValue, label, onClose }: ImagePreviewDialogProps) {
+export function ImagePreviewDialog({
+    open,
+    sourceValue,
+    label,
+    onClose,
+}: ImagePreviewDialogProps) {
     return (
         <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
             <DialogTitle>{label}</DialogTitle>

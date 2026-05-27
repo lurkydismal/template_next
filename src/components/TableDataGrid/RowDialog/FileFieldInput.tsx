@@ -1,11 +1,11 @@
 import { ChangeEvent, useMemo } from "react";
+import { Button, Link, Stack, Typography } from "@mui/material";
 import {
-    Button,
-    Link,
-    Stack,
-    Typography,
-} from "@mui/material";
-import { Control, Controller, FieldError, RegisterOptions } from "react-hook-form";
+    Control,
+    Controller,
+    FieldError,
+    RegisterOptions,
+} from "react-hook-form";
 import { ImagePreviewDialog, useImagePreview } from "./ImagePreviewDialog";
 import { isImagePath, toAcceptString } from "`@/utils/fileHelpers`";
 
@@ -27,7 +27,6 @@ type FileFieldInputProps = {
  * Renders a file field with optional type filtering and image preview behavior.
  */
 
-
 export default function FileFieldInput({
     fieldKey,
     label,
@@ -41,11 +40,11 @@ export default function FileFieldInput({
     rules,
     onValueChange,
 }: FileFieldInputProps) {
-    const { imagePreviewOpen, openImagePreview, closeImagePreview } = useImagePreview();
+    const { imagePreviewOpen, openImagePreview, closeImagePreview } =
+        useImagePreview();
     const acceptValue = useMemo(() => toAcceptString(accept), [accept]);
     const sourceValue = typeof value === "string" ? value : "";
     const sourceIsImage = isImagePath(sourceValue);
-
 
     return (
         <Stack spacing={1}>
@@ -60,14 +59,20 @@ export default function FileFieldInput({
                 disabled={readOnly}
                 render={({ field }) => (
                     <Stack spacing={1}>
-                        <Button component="label" variant="outlined" disabled={readOnly}>
+                        <Button
+                            component="label"
+                            variant="outlined"
+                            disabled={readOnly}
+                        >
                             Select file
                             <input
                                 id={`${fieldKey}-file`}
                                 type="file"
                                 hidden
                                 accept={acceptValue}
-                                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                onChange={(
+                                    e: ChangeEvent<HTMLInputElement>,
+                                ) => {
                                     if (readOnly) return;
 
                                     const file = e.target.files?.[0] ?? null;
@@ -87,13 +92,19 @@ export default function FileFieldInput({
                                     Open image
                                 </Link>
                             ) : (
-                                <Link href={sourceValue} download rel="noreferrer">
+                                <Link
+                                    href={sourceValue}
+                                    download
+                                    rel="noreferrer"
+                                >
                                     Download file
                                 </Link>
                             )
                         ) : null}
                         {field.value instanceof File ? (
-                            <Typography variant="body2">Selected: {field.value.name}</Typography>
+                            <Typography variant="body2">
+                                Selected: {field.value.name}
+                            </Typography>
                         ) : null}
                         {error?.message ? (
                             <Typography variant="caption" color="error">

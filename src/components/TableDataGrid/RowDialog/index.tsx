@@ -6,12 +6,25 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
+    Slide,
 } from "@mui/material";
-import { Dispatch, SetStateAction, useCallback, useRef, useState } from "react";
+import { Dispatch, forwardRef, SetStateAction, useCallback, useRef, useState } from "react";
 import { CreateRowAction, FieldConfig, UpdateRowAction } from "./types";
 import RowDialogContent from "./Content";
+import { TransitionProps } from "@mui/material/transitions";
 
 export type { FieldConfig } from "./types";
+
+const createSlideTransition = (direction: "up" | "down" | "left" | "right") =>
+    forwardRef(function Transition(
+        props: TransitionProps & { children: React.ReactElement },
+        ref: React.Ref<unknown>
+    ) {
+        return <Slide direction={direction} ref={ref} {...props} />;
+    });
+
+export const TransitionRight = createSlideTransition("right");
+export const TransitionUp = createSlideTransition("up");
 
 /**
  * Renders the row dialog component.
@@ -119,6 +132,9 @@ export default function RowDialog<
         <>
             <Dialog
                 open={dialogOpen}
+                slots={{
+                    transition: TransitionRight,
+                }}
                 onClose={onClose}
                 maxWidth="md"
                 fullWidth
@@ -152,6 +168,9 @@ export default function RowDialog<
 
             <Dialog
                 open={forceCloseDialogOpen}
+                slots={{
+                    transition: TransitionUp,
+                }}
                 onClose={handleCancelForceClose}
                 maxWidth="xs"
                 fullWidth
@@ -168,6 +187,7 @@ export default function RowDialog<
                         onClick={handleCancelForceClose}
                         variant="contained"
                         color="error"
+                        sx={promptButtonSx}
                     >
                         No
                     </Button>
@@ -175,6 +195,7 @@ export default function RowDialog<
                         onClick={handleConfirmForceClose}
                         variant="contained"
                         color="success"
+                        sx={promptButtonSx}
                     >
                         Yes
                     </Button>

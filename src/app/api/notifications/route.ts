@@ -29,6 +29,7 @@ export async function POST(request: Request): Promise<Response> {
     } catch {
         return Response.json({ error: "Invalid JSON payload" }, { status: 400 });
     }
+    // FIX: Validate type
     const type = payload.type ?? "default";
     const message = (payload.message ?? "").trim();
 

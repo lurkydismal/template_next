@@ -15,6 +15,14 @@ import { TransitionProps } from "@mui/material/transitions";
 
 export type { FieldConfig } from "./types";
 
+const promptButtonSx = {
+    transition: "all 0.2s ease",
+
+    "&:hover": {
+        transform: "translateY(-2px)",
+    },
+};
+
 const createSlideTransition = (direction: "up" | "down" | "left" | "right") =>
     forwardRef(function Transition(
         props: TransitionProps & { children: React.ReactElement },

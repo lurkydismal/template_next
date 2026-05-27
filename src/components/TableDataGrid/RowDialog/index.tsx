@@ -6,12 +6,22 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
+    Paper,
+    PaperProps,
     Slide,
 } from "@mui/material";
-import { Dispatch, forwardRef, SetStateAction, useCallback, useRef, useState } from "react";
+import {
+    Dispatch,
+    forwardRef,
+    SetStateAction,
+    useCallback,
+    useRef,
+    useState,
+} from "react";
 import { CreateRowAction, FieldConfig, UpdateRowAction } from "./types";
 import RowDialogContent from "./Content";
 import { TransitionProps } from "@mui/material/transitions";
+import Draggable from "react-draggable";
 
 export type { FieldConfig } from "./types";
 
@@ -26,13 +36,26 @@ const promptButtonSx = {
 const createSlideTransition = (direction: "up" | "down" | "left" | "right") =>
     forwardRef(function Transition(
         props: TransitionProps & { children: React.ReactElement },
-        ref: React.Ref<unknown>
+        ref: React.Ref<unknown>,
     ) {
         return <Slide direction={direction} ref={ref} {...props} />;
     });
 
 export const TransitionRight = createSlideTransition("right");
 export const TransitionUp = createSlideTransition("up");
+
+function PaperComponent(props: PaperProps) {
+    const nodeRef = useRef<HTMLDivElement>(null);
+    return (
+        <Draggable
+            nodeRef={nodeRef as React.RefObject<HTMLDivElement>}
+            handle="#draggable-dialog-title"
+            cancel={'[class*="MuiDialogContent-root"]'}
+        >
+            <Paper {...props} ref={nodeRef} />
+        </Draggable>
+    );
+}
 
 /**
  * Renders the row dialog component.
@@ -179,11 +202,18 @@ export default function RowDialog<
                 slots={{
                     transition: TransitionUp,
                 }}
+                PaperComponent={PaperComponent}
+                aria-labelledby="draggable-dialog-title"
                 onClose={handleCancelForceClose}
                 maxWidth="xs"
                 fullWidth
             >
-                <DialogTitle>Leave dialog?</DialogTitle>
+                <DialogTitle
+                    style={{ cursor: "move" }}
+                    id="draggable-dialog-title"
+                >
+                    Leave dialog?
+                </DialogTitle>
                 <DialogContent>
                     <DialogContentText>
                         You still have invalid fields. Do you want to leave

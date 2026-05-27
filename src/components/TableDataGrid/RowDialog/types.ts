@@ -17,7 +17,8 @@ export type DefaultFieldType =
     | "uuid"
     | "hex"
     | "inet"
-    | "tableLookup";
+    | "tableLookup"
+    | "file";
 
 export type FieldValueChangeResult =
     | void
@@ -115,6 +116,7 @@ export type FieldConfig<
         | "top-right"
         | "bottom-left"
         | "bottom-right";
+    fileAccept?: string | string[];
 };
 
 export type UpdateRowAction = (fd: FormData) => Promise<void>;

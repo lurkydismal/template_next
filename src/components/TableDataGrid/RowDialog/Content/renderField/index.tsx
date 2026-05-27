@@ -6,6 +6,7 @@ import AutocompleteFieldInput from "../../AutocompleteFieldInput";
 import DateTimeFieldInput from "../../DateTimeFieldInput";
 import NumberFieldInput from "../../NumberFieldInput";
 import TextFieldInput from "../../TextFieldInput";
+import FileFieldInput from "../../FileFieldInput";
 import { isFieldReadOnly } from "../interconnected";
 import {
     getFilteredAutocompleteOptions,
@@ -131,6 +132,27 @@ export const renderField = <
                 required={!!field.required}
                 readOnly={readOnly}
                 value={value}
+                onValueChange={(nextValue) =>
+                    handleFieldValueChange(field, nextValue)
+                }
+                control={form.control}
+                error={error}
+                rules={rules}
+            />
+        );
+    }
+
+    if (field.type === "file") {
+        return (
+            <FileFieldInput
+                key={`${key}-${idx}`}
+                fieldKey={key}
+                label={field.label}
+                name={name}
+                required={!!field.required}
+                readOnly={readOnly}
+                value={value}
+                accept={field.fileAccept}
                 onValueChange={(nextValue) =>
                     handleFieldValueChange(field, nextValue)
                 }

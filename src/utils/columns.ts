@@ -13,8 +13,12 @@
  * - Call `normalizeColumns(rawColumns, options)` where you need the final GridColDef[]
  */
 
+import { ImagePreviewDialog, useImagePreview } from "@/components/TableDataGrid/RowDialog/ImagePreviewDialog";
 import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
+import { isImagePath } from "`@/utils/fileHelpers`";
 import { toCamelCase } from "@/utils/stdfunc";
+import { Link } from "@mui/material";
+import { createElement, Fragment, MouseEvent } from "react";
 import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 
 type NormalizeOptions = {
@@ -25,6 +29,51 @@ type NormalizeOptions = {
     defaultRenderCell?: GridColDef["renderCell"]; // use when a column has no renderCell
     deriveField?: (headerName: GridColDef["headerName"]) => string; // how to derive missing `field`
 };
+
+/**
+ * Renders an interactive file cell that reuses shared image preview behavior.
+ */
+function FileCellLink({ value }: { value: string }) {
+    const { imagePreviewOpen, openImagePreview, closeImagePreview } = useImagePreview();
+
+    /**
+     * Opens the preview dialog while preventing browser navigation.
+     */
+    function handleOpenPreview(event: MouseEvent<HTMLAnchorElement>): void {
+        event.preventDefault();
+        openImagePreview();
+    }
+
+    if (isImagePath(value)) {
+        return createElement(
+            Fragment,
+            null,
+            createElement(Link, { href: value, underline: "hover", onClick: handleOpenPreview }, "Open image"),
+            createElement(ImagePreviewDialog, {
+                open: imagePreviewOpen,
+                onClose: closeImagePreview,
+                sourceValue: value,
+                label: "Image preview",
+            }),
+        );
+    }
+
+    return createElement(
+        Link,
+        { href: value, download: true, target: "_blank", rel: "noreferrer", underline: "hover" },
+        "Download file",
+    );
+}
+
+/**
+ * Renders file-like values as action links with image-preview semantics.
+ */
+function renderFileCell(params: GridRenderCellParams) {
+    const value = typeof params.value === "string" ? params.value : "";
+    if (!value) return "";
+
+    return createElement(FileCellLink, { value });
+}
 
 /**
  * Normalize and enrich all column definitions:
@@ -88,7 +137,9 @@ export function columnsFromFields<
                           renderCell: (params: GridRenderCellParams) =>
                               String(field.formatValue!(params.value) ?? ""),
                       }
-                    : {}),
+                    : field.type === "file"
+                      ? { renderCell: renderFileCell }
+                      : {}),
             })),
     );
 }

@@ -70,6 +70,7 @@ export default function FileFieldInput({
                                 type="file"
                                 hidden
                                 accept={acceptValue}
+                                required={required}
                                 onChange={(
                                     e: ChangeEvent<HTMLInputElement>,
                                 ) => {

@@ -18,6 +18,7 @@ import { toCamelCase } from "@/utils/stdfunc";
 import { Link } from "@mui/material";
 import { createElement } from "react";
 import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import { isImagePath } from "`@/utils/fileHelpers`";
 
 type NormalizeOptions = {
     defaultFlex?: number; // fallback flex when column.flex is missing
@@ -27,13 +28,6 @@ type NormalizeOptions = {
     defaultRenderCell?: GridColDef["renderCell"]; // use when a column has no renderCell
     deriveField?: (headerName: GridColDef["headerName"]) => string; // how to derive missing `field`
 };
-
-/**
- * Detects whether a file URL appears to reference an image.
- */
-function isImagePath(path: string): boolean {
-    return /\.(png|jpe?g|gif|webp|bmp|svg|avif)(\?.*)?$/i.test(path);
-}
 
 /**
  * Renders file-like values as action links with image-preview semantics.

@@ -15,6 +15,8 @@
 
 import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
 import { toCamelCase } from "@/utils/stdfunc";
+import { Link } from "@mui/material";
+import { createElement } from "react";
 import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 
 type NormalizeOptions = {
@@ -25,6 +27,35 @@ type NormalizeOptions = {
     defaultRenderCell?: GridColDef["renderCell"]; // use when a column has no renderCell
     deriveField?: (headerName: GridColDef["headerName"]) => string; // how to derive missing `field`
 };
+
+/**
+ * Detects whether a file URL appears to reference an image.
+ */
+function isImagePath(path: string): boolean {
+    return /\.(png|jpe?g|gif|webp|bmp|svg|avif)(\?.*)?$/i.test(path);
+}
+
+/**
+ * Renders file-like values as action links with image-preview semantics.
+ */
+function renderFileCell(params: GridRenderCellParams) {
+    const value = typeof params.value === "string" ? params.value : "";
+    if (!value) return "";
+
+    if (isImagePath(value)) {
+        return createElement(
+            Link,
+            { href: value, target: "_blank", rel: "noreferrer", underline: "hover" },
+            "Open image",
+        );
+    }
+
+    return createElement(
+        Link,
+        { href: value, download: true, target: "_blank", rel: "noreferrer", underline: "hover" },
+        "Download file",
+    );
+}
 
 /**
  * Normalize and enrich all column definitions:
@@ -88,7 +119,9 @@ export function columnsFromFields<
                           renderCell: (params: GridRenderCellParams) =>
                               String(field.formatValue!(params.value) ?? ""),
                       }
-                    : {}),
+                    : field.type === "file"
+                      ? { renderCell: renderFileCell }
+                      : {}),
             })),
     );
 }

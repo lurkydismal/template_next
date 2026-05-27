@@ -92,7 +92,7 @@ export default function RowDialog<
 
     /**
      * Registers a failed validation-close attempt and returns true
-     * when the user has failed to close 3 times inside 10 seconds.
+     * when the user has failed to close 2 times inside 10 seconds.
      */
     const shouldShowForceCloseDialog = useCallback((): boolean => {
         const now = Date.now();
@@ -104,7 +104,7 @@ export default function RowDialog<
         recentFailures.push(now);
         validationFailureTimestampsRef.current = recentFailures;
 
-        return recentFailures.length >= 3;
+        return recentFailures.length >= 2;
     }, []);
 
     /**

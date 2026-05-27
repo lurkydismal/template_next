@@ -1,4 +1,4 @@
-import NextImage from 'next/image';
+import NextImage from "next/image";
 import { useState } from "react";
 import {
     Box,
@@ -92,20 +92,24 @@ function ImagePreviewContent({
     return (
         <DialogContent>
             {isLoadingPreview ? (
-                <Box sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    py: 4,
-                }}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        py: 4,
+                    }}
+                >
                     <CircularProgress aria-label="Loading image preview" />
                 </Box>
             ) : null}
             {!isLoadingPreview && hasPreviewError ? (
-                <Stack sx={{
-                    spacing: 1,
-                    alignItems: "flex-start",
-                    py: 2,
-                }}>
+                <Stack
+                    sx={{
+                        spacing: 1,
+                        alignItems: "flex-start",
+                        py: 2,
+                    }}
+                >
                     <Typography variant="body2" color="text.secondary">
                         We could not load this image preview.
                     </Typography>

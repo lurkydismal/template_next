@@ -145,15 +145,15 @@ export function columnsFromFields<
                 headerName: field.label,
                 ...(field.formatValue
                     ? {
-                        /**
-                         * Renders a data grid cell value from a normalized field definition.
-                         */
-                        renderCell: (params: GridRenderCellParams) =>
-                            String(field.formatValue!(params.value) ?? ""),
-                    }
+                          /**
+                           * Renders a data grid cell value from a normalized field definition.
+                           */
+                          renderCell: (params: GridRenderCellParams) =>
+                              String(field.formatValue!(params.value) ?? ""),
+                      }
                     : field.type === "file"
-                        ? { renderCell: renderFileCell }
-                        : {}),
+                      ? { renderCell: renderFileCell }
+                      : {}),
             })),
     );
 }

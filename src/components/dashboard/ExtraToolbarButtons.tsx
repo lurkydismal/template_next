@@ -116,7 +116,7 @@ export default function ExtraToolbarButtons<RI extends Record<string, unknown>>(
         };
 
         return () => source.close();
-    }, [showInfo]);
+    }, [showInfo, showError]);
 
     return (
         <>

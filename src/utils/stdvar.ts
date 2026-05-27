@@ -124,10 +124,15 @@ export const maxImageSize = 1 * 1024 * 1024; // 1 MB
 
 /**
  * Allowed MIME types for image uploads.
- * - Currently only supports JPEG images.
+ * - Includes common browser image formats (JPEG, PNG, WebP, GIF).
  * - Used in validation to reject unsupported formats.
  */
-export const allowedImageTypes = ["image/jpeg"];
+export const allowedImageTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+];
 
 /**
  * Maximum number of retry attempts for network requests or operations.

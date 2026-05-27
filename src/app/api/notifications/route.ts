@@ -64,14 +64,13 @@ export async function PATCH(request: Request): Promise<Response> {
         return Response.json({ error: "Invalid JSON payload" }, { status: 400 });
     }
     const ids = payload.ids ?? [];
-    if (!ids.length) {
-        return Response.json({ error: "ids are required" }, { status: 400 });
-    }
 
     const normalizedIds = ids.filter(
         (id): id is number => Number.isInteger(id) && Number.isFinite(id),
     );
     if (!normalizedIds.length) {
+        return Response.json({ error: "ids are required" }, { status: 400 });
+    }
 
     const isRead = payload.isRead ?? true;
     await db

@@ -63,7 +63,7 @@ export async function subscribeToDashboardChanges(
 }
 
 /**
- * Broadcasts a persisted notification event to all active listeners.
+ * Registers a listener for all dashboard stream events and returns an unsubscribe callback.
  */
 export async function emitNotificationEvent(event: NotificationEvent): Promise<void> {
     listeners.forEach((listener) => {

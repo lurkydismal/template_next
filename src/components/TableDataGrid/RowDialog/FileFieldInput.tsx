@@ -100,7 +100,9 @@ export default function FileFieldInput({
                                     Open image
                                 </Link>
                             ) : (
-                                <Link href={sourceValue} download target="_blank" rel="noreferrer">
+                                <Link href={sourceValue} download rel="noreferrer">
+                                     Download file
+                                 </Link>
                                     Download file
                                 </Link>
                             )

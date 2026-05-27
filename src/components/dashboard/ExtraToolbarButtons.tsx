@@ -2,6 +2,7 @@
 
 import CustomDivider from "@/components/TableDataGrid/CustomDivider";
 import { useSnackbar } from "@/providers/snackbar";
+import { isDev } from "@/utils/stdvar";
 import uuid from "@/utils/uuid";
 import {
     Queue as MockShowIcon,
@@ -51,19 +52,21 @@ export default function ExtraToolbarButtons<
 
     return (
         <>
-            <Tooltip title="Show nock snackbars">
-                <ToolbarButton
-                    onClick={() => {
-                        showMessage(uuid());
-                        showSuccess(uuid());
-                        showError(uuid());
-                        showWarning(uuid());
-                        showInfo(uuid());
-                    }}
-                >
-                    <MockShowIcon fontSize="small" />
-                </ToolbarButton>
-            </Tooltip>
+            {isDev ? (
+                <Tooltip title="Show nock snackbars">
+                    <ToolbarButton
+                        onClick={() => {
+                            showMessage(uuid());
+                            showSuccess(uuid());
+                            showError(uuid());
+                            showWarning(uuid());
+                            showInfo(uuid());
+                        }}
+                    >
+                        <MockShowIcon fontSize="small" />
+                    </ToolbarButton>
+                </Tooltip>
+            ) : undefined}
 
             <Tooltip title="Add new row">
                 <ToolbarButton

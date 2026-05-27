@@ -87,10 +87,12 @@ export default function ExtraToolbarButtons<RI extends Record<string, unknown>>(
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
     useEffect(() => {
-        void readNotifications().then(({ rows, unreadCount: unread }) => {
-            setNotifications(rows);
-            setUnreadCount(unread);
-        });
+        void readNotifications()
+            .then(({ rows, unreadCount: unread }) => {
+                setNotifications(rows);
+                setUnreadCount(unread);
+            })
+            .catch(showError);
 
         const source = new EventSource("/api/dashboard/changes");
         source.onmessage = (event) => {
@@ -101,7 +103,7 @@ export default function ExtraToolbarButtons<RI extends Record<string, unknown>>(
                 setNotifications(rows);
                 setUnreadCount(unread);
                 showInfo("New notifications available");
-            });
+            }).catch(showError);;
         };
 
         return () => source.close();

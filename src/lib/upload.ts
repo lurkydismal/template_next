@@ -37,6 +37,39 @@ const UploadTargetSchema = z.enum(
 );
 
 /**
+ * Resolves storage metadata for validated image MIME types.
+ *
+ * Ensures the stored object extension and Content-Type stay in sync
+ * with the upload validation result. Unknown values fall back to a
+ * safe binary representation.
+ *
+ * @param mimeType - MIME type from validated file input
+ * @returns Object containing normalized content type and extension
+ */
+function getImageStorageMeta(mimeType: string): {
+    contentType: string;
+    extension: string;
+} {
+    const normalizedType = mimeType.trim().toLowerCase();
+
+    switch (normalizedType) {
+        case "image/jpeg":
+            return { contentType: "image/jpeg", extension: ".jpg" };
+        case "image/png":
+            return { contentType: "image/png", extension: ".png" };
+        case "image/webp":
+            return { contentType: "image/webp", extension: ".webp" };
+        case "image/gif":
+            return { contentType: "image/gif", extension: ".gif" };
+        default:
+            return {
+                contentType: "application/octet-stream",
+                extension: ".bin",
+            };
+    }
+}
+
+/**
  * Uploads a file to a MinIO bucket under the specified target directory.
  *
  * @param rawTarget - Logical upload target (must match one of UPLOAD_DIRS keys)
@@ -60,16 +93,16 @@ async function upload(
 
         const parsed = await uploadSchema.parseAsync({ path, filename, file });
 
-        // already validated as JPEG + size + mime
+        const { contentType, extension } = getImageStorageMeta(parsed.file.type);
         const arrayBuffer = await parsed.file.arrayBuffer();
-        const fullFilename = `${parsed.filename}.jpg`;
+        const fullFilename = `${parsed.filename}${extension}`;
 
         await uploadToMinio(
             bucket,
             fullFilename,
             Buffer.from(arrayBuffer),
             path,
-            "image/jpeg",
+            contentType,
         );
 
         return { ok: true };

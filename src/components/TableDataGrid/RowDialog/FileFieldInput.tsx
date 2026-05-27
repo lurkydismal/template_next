@@ -9,6 +9,7 @@ import {
     Typography,
 } from "@mui/material";
 import { Control, Controller, FieldError, RegisterOptions } from "react-hook-form";
+import { isImagePath, toAcceptString } from "`@/utils/fileHelpers`";
 
 type FileFieldInputProps = {
     fieldKey: string;
@@ -23,21 +24,6 @@ type FileFieldInputProps = {
     rules?: RegisterOptions<Record<string, unknown>, string>;
     onValueChange: (value: File | null) => void;
 };
-
-/**
- * Determines whether a URL/path points to an image based on common extension patterns.
- */
-function isImagePath(value: string): boolean {
-    return /\.(png|jpe?g|gif|webp|bmp|svg|avif)(\?.*)?$/i.test(value);
-}
-
-/**
- * Converts configured accept filters into a valid <input type="file"> accept string.
- */
-function toAcceptString(accept?: string | string[]): string | undefined {
-    if (!accept) return undefined;
-    return Array.isArray(accept) ? accept.join(",") : accept;
-}
 
 /**
  * Renders a file field with optional type filtering and image preview behavior.

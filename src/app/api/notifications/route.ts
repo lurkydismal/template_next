@@ -36,6 +36,7 @@ export async function POST(request: Request): Promise<Response> {
         .returning();
 
     await emitNotificationEvent({
+        event: "notification",
         notificationId: created.id,
         type: created.type,
         message: created.message,

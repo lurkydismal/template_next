@@ -4,38 +4,37 @@ import { DbTarget } from "@/lib/types";
 import log from "@/utils/stdlog";
 
 type DashboardChangeEvent = {
+    event: "dashboard-change";
     target: DbTarget;
     occurredAt: string;
 };
 
-type DashboardListener = (event: DashboardChangeEvent) => void;
 type NotificationType = "default" | "success" | "error" | "warning" | "info";
 type NotificationEvent = {
+    event: "notification";
     type: NotificationType;
     message: string;
     notificationId: number;
     occurredAt: string;
 };
-type NotificationListener = (event: NotificationEvent) => void;
+type DashboardStreamEvent = DashboardChangeEvent | NotificationEvent;
+type DashboardListener = (event: DashboardStreamEvent) => void;
 
 declare global {
     var __dashboardListeners: Set<DashboardListener> | undefined;
-    var __notificationListeners: Set<NotificationListener> | undefined;
 }
 
 const listeners =
     globalThis.__dashboardListeners ?? new Set<DashboardListener>();
 
 globalThis.__dashboardListeners = listeners;
-const notificationListeners =
-    globalThis.__notificationListeners ?? new Set<NotificationListener>();
-globalThis.__notificationListeners = notificationListeners;
 
 /**
  * Broadcasts a dashboard table mutation event to all active listeners.
  */
 export async function emitDashboardChange(target: DbTarget): Promise<void> {
     const event: DashboardChangeEvent = {
+        event: "dashboard-change",
         target,
         occurredAt: new Date().toISOString(),
     };
@@ -66,7 +65,7 @@ export async function subscribeToDashboardChanges(
  * Broadcasts a persisted notification event to all active listeners.
  */
 export async function emitNotificationEvent(event: NotificationEvent): Promise<void> {
-    notificationListeners.forEach((listener) => {
+    listeners.forEach((listener) => {
         try {
             listener(event);
         } catch (error) {
@@ -78,12 +77,12 @@ export async function emitNotificationEvent(event: NotificationEvent): Promise<v
 /**
  * Registers a notification listener and returns an unsubscribe callback.
  */
-export async function subscribeToNotifications(
-    listener: NotificationListener,
+export async function subscribeToDashboardEvents(
+    listener: DashboardListener,
 ): Promise<() => void> {
-    notificationListeners.add(listener);
+    listeners.add(listener);
 
     return () => {
-        notificationListeners.delete(listener);
+        listeners.delete(listener);
     };
 }

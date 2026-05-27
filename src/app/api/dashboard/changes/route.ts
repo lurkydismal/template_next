@@ -1,6 +1,5 @@
 import {
-    subscribeToDashboardChanges,
-    subscribeToNotifications,
+    subscribeToDashboardEvents,
 } from "@/lib/dashboard/common/change-events";
 
 /**
@@ -8,7 +7,6 @@ import {
  */
 export async function GET(): Promise<Response> {
     let unsubscribe: (() => void) | null = null;
-    let unsubscribeNotifications: (() => void) | null = null;
     let keepAlive: ReturnType<typeof setInterval> | null = null;
 
     /**
@@ -23,10 +21,6 @@ export async function GET(): Promise<Response> {
         if (unsubscribe) {
             unsubscribe();
             unsubscribe = null;
-        }
-        if (unsubscribeNotifications) {
-            unsubscribeNotifications();
-            unsubscribeNotifications = null;
         }
     };
 
@@ -58,11 +52,8 @@ export async function GET(): Promise<Response> {
 
             send({ type: "connected" });
 
-            unsubscribe = await subscribeToDashboardChanges((event) => {
-                send({ event: "dashboard-change", ...event });
-            });
-            unsubscribeNotifications = await subscribeToNotifications((event) => {
-                send({ event: "notification", ...event });
+            unsubscribe = await subscribeToDashboardEvents((event) => {
+                send(event);
             });
 
             keepAlive = setInterval(() => {

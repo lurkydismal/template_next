@@ -1,7 +1,7 @@
 "use server";
 
 import { tables } from "@/db/schema";
-import { TablesRowInsert as TablesRowInsert } from "@/db/types";
+import { TablesRowInsert as TableRowInsert } from "@/db/types";
 import { DbTarget } from "@/lib/types";
 import {
     createRowAction as _createRowAction,
@@ -17,7 +17,7 @@ export async function getRowsAction(): ReturnType<typeof _getRowsAction> {
 }
 
 export async function createRowAction(
-    row: TablesRowInsert,
+    row: TableRowInsert,
 ): ReturnType<typeof _createRowAction> {
     return _createRowAction(target, row);
 }

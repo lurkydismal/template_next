@@ -4,8 +4,8 @@ import TableDataGrid from "@/components/TableDataGrid";
 import ExtraToolbarButtons from "@/components/dashboard/ExtraToolbarButtons";
 import fields from "@/data/dashboard/tables/fields";
 import type {
-    TablesRow as TablesRow,
-    TablesRowInsert as TablesRowInsert,
+    TablesRow as TableRow,
+    TablesRowInsert as TableRowInsert,
 } from "@/db/types";
 import {
     createRowAction,
@@ -18,7 +18,7 @@ import {
  */
 export default function Page() {
     return (
-        <TableDataGrid<TablesRow, TablesRowInsert>
+        <TableDataGrid<TableRow, TableRowInsert>
             createRowAction={createRowAction}
             fields={fields}
             getRowsAction={getRowsAction}

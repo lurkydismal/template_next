@@ -128,9 +128,13 @@ export default function FileFieldInput({
                             sourceValue={sourceValue}
                             label={label}
                             accept={acceptValue}
-                            onFileDrop={(file) => {
-                                applySelectedFile(file, field.onChange);
-                            }}
+                            onFileDrop={
+                                readOnly
+                                    ? undefined
+                                    : (file) => {
+                                          applySelectedFile(file, field.onChange);
+                                      }
+                            }
                         />
                     </Stack>
                 )}

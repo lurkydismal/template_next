@@ -27,7 +27,7 @@ function renderCustomField(
  */
 function fileNameToFormValue(value: unknown): string | undefined {
     if (value instanceof File) return value.name;
-    if (value == null) return "";
+    if (value == null || value === "") return undefined;
 
     return String(value);
 }

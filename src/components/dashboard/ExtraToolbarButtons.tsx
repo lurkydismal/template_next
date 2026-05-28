@@ -200,7 +200,7 @@ export default function ExtraToolbarButtons<
 
             <Tooltip title="Notifications">
                 <ToolbarButton onClick={(e) => setAnchorEl(e.currentTarget)}>
-                    <Badge badgeContent={unreadCount} color="error">
+                    <Badge badgeContent={unreadCount} color="info">
                         <NotificationsIcon fontSize="small" />
                     </Badge>
                 </ToolbarButton>

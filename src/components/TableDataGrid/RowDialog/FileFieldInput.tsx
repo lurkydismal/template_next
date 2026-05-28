@@ -132,7 +132,10 @@ export default function FileFieldInput({
                                 readOnly
                                     ? undefined
                                     : (file) => {
-                                          applySelectedFile(file, field.onChange);
+                                          applySelectedFile(
+                                              file,
+                                              field.onChange,
+                                          );
                                       }
                             }
                         />

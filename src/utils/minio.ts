@@ -13,6 +13,7 @@
  * - Logs actionable errors using `log` but rethrows on final failure so callers can decide how to handle startup failure.
  */
 
+import "server-only";
 import { Client } from "minio";
 import log from "@/utils/stdlog";
 import { encodePath, getEnv, parseBool } from "@/utils/stdfunc";

@@ -14,7 +14,6 @@ import CustomToolbar from "./Toolbar";
 import { useGridApiRef, GridRowsProp, GridRowParams } from "@mui/x-data-grid";
 import { Box, CircularProgress } from "@mui/material";
 import { columnsFromFields } from "@/utils/columns";
-import log from "@/utils/stdlog";
 
 /**
  * Renders the table data grid component.
@@ -246,15 +245,15 @@ export default function TableDataGrid<
     // If extraButtons is a React element, clone it and inject createRowAction + emptyRow
     const injectedExtraButtons = isValidElement(extraButtons)
         ? cloneElement(
-              extraButtons as React.ReactElement<Record<string, unknown>>,
-              {
-                  createRowAction: {
-                      type: "dialog",
-                      action: openCreateDialog,
-                  },
-                  emptyRow,
-              },
-          )
+            extraButtons as React.ReactElement<Record<string, unknown>>,
+            {
+                createRowAction: {
+                    type: "dialog",
+                    action: openCreateDialog,
+                },
+                emptyRow,
+            },
+        )
         : extraButtons;
 
     const columns = columnsFromFields(resolvedFields);

@@ -14,17 +14,20 @@ import { IconButton } from "@mui/material";
 import {
     SnackbarProvider,
     VariantType,
+    type OptionsObject,
     enqueueSnackbar,
     closeSnackbar,
 } from "notistack";
 import { createContext, useContext } from "react";
 
+type SnackbarOptions = Pick<OptionsObject, "persist">;
+
 const SnackbarContext = createContext<{
-    showMessage: (message: string) => void;
-    showSuccess: (message: string) => void;
-    showError: (err: unknown) => void;
-    showWarning: (warn: unknown) => void;
-    showInfo: (message: string) => void;
+    showMessage: (message: string, options?: SnackbarOptions) => void;
+    showSuccess: (message: string, options?: SnackbarOptions) => void;
+    showError: (err: unknown, options?: SnackbarOptions) => void;
+    showWarning: (warn: unknown, options?: SnackbarOptions) => void;
+    showInfo: (message: string, options?: SnackbarOptions) => void;
 } | null>(null);
 
 /**
@@ -66,7 +69,11 @@ export default function CustomSnackbarProvider({
     /**
      * Handles show message behavior.
      */
-    const _showMessage = (err: unknown, variant?: VariantType) => {
+    const _showMessage = (
+        err: unknown,
+        variant?: VariantType,
+        options?: SnackbarOptions,
+    ) => {
         const message = errorToMessage(err);
 
         let logVariant: LogFn;
@@ -89,42 +96,42 @@ export default function CustomSnackbarProvider({
 
         logVariant(message);
 
-        enqueueSnackbar(message, { variant });
+        enqueueSnackbar(message, { variant, ...options });
     };
 
     /**
      * Handles show message behavior.
      */
-    const showMessage = (message: string) => {
-        _showMessage(message, "default");
+    const showMessage = (message: string, options?: SnackbarOptions) => {
+        _showMessage(message, "default", options);
     };
 
     /**
      * Handles show success behavior.
      */
-    const showSuccess = (message: string) => {
-        _showMessage(message, "success");
+    const showSuccess = (message: string, options?: SnackbarOptions) => {
+        _showMessage(message, "success", options);
     };
 
     /**
      * Handles show error behavior.
      */
-    const showError = (err: unknown) => {
-        _showMessage(err, "error");
+    const showError = (err: unknown, options?: SnackbarOptions) => {
+        _showMessage(err, "error", options);
     };
 
     /**
      * Handles show warning behavior.
      */
-    const showWarning = (warn: unknown) => {
-        _showMessage(warn, "warning");
+    const showWarning = (warn: unknown, options?: SnackbarOptions) => {
+        _showMessage(warn, "warning", options);
     };
 
     /**
      * Handles show info behavior.
      */
-    const showInfo = (message: string) => {
-        _showMessage(message, "info");
+    const showInfo = (message: string, options?: SnackbarOptions) => {
+        _showMessage(message, "info", options);
     };
 
     return (

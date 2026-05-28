@@ -10,14 +10,7 @@ import {
     AddBoxOutlined as AddIcon,
     NotificationsOutlined as NotificationsIcon,
 } from "@mui/icons-material";
-import {
-    Badge,
-    List,
-    ListItemButton,
-    ListItemText,
-    Popover,
-    Tooltip,
-} from "@mui/material";
+import { Badge, Tooltip } from "@mui/material";
 import { ToolbarButton } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 
@@ -100,6 +93,46 @@ async function createNotification(
 }
 
 /**
+ * Returns only notifications that have not already been read.
+ */
+function getUnreadNotifications(notifications: StoredNotification[]) {
+    return notifications.filter((item) => !item.is_read);
+}
+
+/**
+ * Sends one stored notification through the snackbar variant matching its type.
+ */
+function showStoredNotification(
+    notification: StoredNotification,
+    snackbar: ReturnType<typeof useSnackbar>,
+) {
+    const options = { persist: true };
+
+    switch (notification.type) {
+        case "success":
+            snackbar.showSuccess(notification.message, options);
+            break;
+
+        case "error":
+            snackbar.showError(notification.message, options);
+            break;
+
+        case "warning":
+            snackbar.showWarning(notification.message, options);
+            break;
+
+        case "info":
+            snackbar.showInfo(notification.message, options);
+            break;
+
+        case "default":
+        default:
+            snackbar.showMessage(notification.message, options);
+            break;
+    }
+}
+
+/**
  * Renders extra data-grid toolbar actions including notifications center.
  */
 export default function ExtraToolbarButtons<
@@ -111,13 +144,13 @@ export default function ExtraToolbarButtons<
     emptyRow?: RI;
     createRowAction: CreateRowAction<RI>;
 }>) {
+    const snackbar = useSnackbar();
     const { showError, showInfo, showMessage, showSuccess, showWarning } =
-        useSnackbar();
+        snackbar;
     const [notifications, setNotifications] = useState<StoredNotification[]>(
         [],
     );
     const [unreadCount, setUnreadCount] = useState(0);
-    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
     useEffect(() => {
         void readNotifications()
@@ -199,7 +232,29 @@ export default function ExtraToolbarButtons<
             ) : undefined}
 
             <Tooltip title="Notifications">
-                <ToolbarButton onClick={(e) => setAnchorEl(e.currentTarget)}>
+                <ToolbarButton
+                    onClick={() => {
+                        const unreadNotifications =
+                            getUnreadNotifications(notifications);
+
+                        unreadNotifications.forEach((item) =>
+                            showStoredNotification(item, snackbar),
+                        );
+
+                        if (unreadNotifications.length > 0) {
+                            void markNotifications(
+                                unreadNotifications.map((item) => item.id),
+                                true,
+                            )
+                                .then(() => readNotifications())
+                                .then(({ rows, unreadCount: unread }) => {
+                                    setNotifications(rows);
+                                    setUnreadCount(unread);
+                                })
+                                .catch(showError);
+                        }
+                    }}
+                >
                     <Badge
                         badgeContent={unreadCount}
                         color="info"
@@ -209,38 +264,6 @@ export default function ExtraToolbarButtons<
                     </Badge>
                 </ToolbarButton>
             </Tooltip>
-
-            <Popover
-                open={Boolean(anchorEl)}
-                anchorEl={anchorEl}
-                onClose={() => setAnchorEl(null)}
-                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-            >
-                <List dense sx={{ minWidth: 360 }}>
-                    {notifications.map((item) => (
-                        <ListItemButton
-                            key={item.id}
-                            onClick={() => {
-                                void markNotifications(
-                                    [item.id],
-                                    item.is_read ? false : true,
-                                )
-                                    .then(() => readNotifications())
-                                    .then(({ rows, unreadCount: unread }) => {
-                                        setNotifications(rows);
-                                        setUnreadCount(unread);
-                                    })
-                                    .catch(showError);
-                            }}
-                        >
-                            <ListItemText
-                                primary={`[${item.type}] ${item.message}`}
-                                secondary={item.is_read ? "read" : "unread"}
-                            />
-                        </ListItemButton>
-                    ))}
-                </List>
-            </Popover>
 
             <Tooltip title="Add new row">
                 <ToolbarButton

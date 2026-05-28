@@ -12,7 +12,8 @@ import {
 } from "@mui/icons-material";
 import { Badge, Tooltip } from "@mui/material";
 import { ToolbarButton } from "@mui/x-data-grid";
-import { useEffect, useState } from "react";
+import type { CloseReason, SnackbarKey } from "notistack";
+import { useCallback, useEffect, useState } from "react";
 
 type DialogCreateRowAction = {
     type: "dialog";
@@ -105,8 +106,25 @@ function getUnreadNotifications(notifications: StoredNotification[]) {
 function showStoredNotification(
     notification: StoredNotification,
     snackbar: ReturnType<typeof useSnackbar>,
+    onDismiss: (notificationId: number) => void,
 ) {
-    const options = { persist: true };
+    /**
+     * Marks the notification as read only when notistack reports an explicit close.
+     */
+    const handleSnackbarClose = (
+        _event: unknown,
+        reason: CloseReason,
+        key?: SnackbarKey,
+    ) => {
+        if (reason === "instructed" && key !== undefined) {
+            onDismiss(notification.id);
+        }
+    };
+
+    const options = {
+        persist: true,
+        onClose: handleSnackbarClose,
+    };
 
     switch (notification.type) {
         case "success":
@@ -151,6 +169,22 @@ export default function ExtraToolbarButtons<
         [],
     );
     const [unreadCount, setUnreadCount] = useState(0);
+
+    /**
+     * Marks one notification as read after the user explicitly dismisses it.
+     */
+    const handleNotificationDismiss = useCallback(
+        (notificationId: number) => {
+            void markNotifications([notificationId], true)
+                .then(() => readNotifications())
+                .then(({ rows, unreadCount: unread }) => {
+                    setNotifications(rows);
+                    setUnreadCount(unread);
+                })
+                .catch(showError);
+        },
+        [showError],
+    );
 
     useEffect(() => {
         void readNotifications()
@@ -238,21 +272,12 @@ export default function ExtraToolbarButtons<
                             getUnreadNotifications(notifications);
 
                         unreadNotifications.forEach((item) =>
-                            showStoredNotification(item, snackbar),
+                            showStoredNotification(
+                                item,
+                                snackbar,
+                                handleNotificationDismiss,
+                            ),
                         );
-
-                        if (unreadNotifications.length > 0) {
-                            void markNotifications(
-                                unreadNotifications.map((item) => item.id),
-                                true,
-                            )
-                                .then(() => readNotifications())
-                                .then(({ rows, unreadCount: unread }) => {
-                                    setNotifications(rows);
-                                    setUnreadCount(unread);
-                                })
-                                .catch(showError);
-                        }
                     }}
                 >
                     <Badge

@@ -20,7 +20,7 @@ import {
 } from "notistack";
 import { createContext, useContext } from "react";
 
-type SnackbarOptions = Pick<OptionsObject, "persist">;
+type SnackbarOptions = Pick<OptionsObject, "persist" | "onClose">;
 
 const SnackbarContext = createContext<{
     showMessage: (message: string, options?: SnackbarOptions) => void;

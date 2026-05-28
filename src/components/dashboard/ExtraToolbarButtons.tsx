@@ -193,6 +193,8 @@ export default function ExtraToolbarButtons<
                             <MockShowIcon fontSize="small" />
                         </ToolbarButton>
                     </Tooltip>
+
+                    <CustomDivider />
                 </>
             ) : undefined}
 

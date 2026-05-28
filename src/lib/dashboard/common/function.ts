@@ -1,6 +1,6 @@
 "use server";
 
-import { create } from "@/lib/dashboard/common/create";
+import { createAction } from "@/lib/dashboard/common/create";
 import { getRows } from "@/lib/dashboard/common/get";
 import { updateAction } from "@/lib/dashboard/common/update";
 import { DbTarget } from "@/lib/types";
@@ -29,7 +29,7 @@ export async function createRowAction<RI extends Record<string, unknown>>(
     target: DbTarget,
     row: RI,
 ) {
-    const result = await create(target, row);
+    const result = await createAction(target, row);
 
     if (!result.ok) {
         const message = `Failed to create row in action: ${result.error}`;

@@ -8,3 +8,4 @@ Implement image field preview
 Remove "download file" from file field
 Implement SpeedDial with context based on if row dialog is open or not
 Drop saved dialog state when forcefully closing it via Yes
+Enable upload for filed when draggin to field in form

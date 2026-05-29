@@ -7,3 +7,4 @@ Fix file upload and image showing
 Implement image field preview
 Remove "download file" from file field
 Implement SpeedDial with context based on if row dialog is open or not
+Drop saved dialog state when forcefully closing it via Yes

@@ -4,7 +4,7 @@ import MarkdownFieldInput from "../../MarkdownFieldInput";
 import MultilineFieldInput from "../../MultilineFieldInput";
 import AutocompleteFieldInput from "../../AutocompleteFieldInput";
 import DateTimeFieldInput from "../../DateTimeFieldInput";
-import NumberFieldInput from "../../NumberFieldInput";
+import NumberSpinnerInput from "../../NumberSpinnerInput";
 import TextFieldInput from "../../TextFieldInput";
 import FileFieldInput from "../../FileFieldInput";
 import { isFieldReadOnly } from "../interconnected";
@@ -124,7 +124,7 @@ export const renderField = <
 
     if (field.type === "number") {
         return (
-            <NumberFieldInput
+            <NumberSpinnerInput
                 key={`${key}-${idx}`}
                 fieldKey={key}
                 label={field.label}

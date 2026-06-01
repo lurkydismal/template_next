@@ -37,8 +37,8 @@ export default function NumberSpinner({
             id={id}
             render={(props, state) => (
                 <FormControl
+                    {...props}
                     size={size}
-                    ref={props.ref}
                     disabled={state.disabled}
                     required={state.required}
                     error={error}

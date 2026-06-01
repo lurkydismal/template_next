@@ -133,6 +133,8 @@ export default function NumberSpinner({
                                         Math.max(
                                             (other.min?.toString() || "")
                                                 .length,
+                                            (other.max?.toString() || "")
+                                                .length,
                                             state.inputValue.length || 1,
                                         ) + 1,
                                     sx: {

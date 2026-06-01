@@ -132,6 +132,8 @@ export const renderField = <
                 required={!!field.required}
                 readOnly={readOnly}
                 value={value}
+                min={field.min}
+                max={field.max}
                 onValueChange={(nextValue) =>
                     handleFieldValueChange(field, nextValue)
                 }

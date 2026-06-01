@@ -119,6 +119,8 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         type: "number",
         size: 4,
         placeholder: 42,
+        min: 0,
+        max: 100,
     },
     {
         key: "uuidField",

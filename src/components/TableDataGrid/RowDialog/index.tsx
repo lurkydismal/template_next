@@ -15,6 +15,7 @@ import {
     forwardRef,
     SetStateAction,
     useCallback,
+    useEffect,
     useRef,
     useState,
 } from "react";
@@ -89,7 +90,15 @@ export default function RowDialog<
     const submitFnRef = useRef<(() => Promise<boolean>) | null>(null);
     const discardDraftFnRef = useRef<(() => void) | null>(null);
     const validationFailureTimestampsRef = useRef<number[]>([]);
+    const closeSubmissionInProgressRef = useRef(false);
     const [forceCloseDialogOpen, setForceCloseDialogOpen] = useState(false);
+
+    useEffect(() => {
+        // Reset the close-submit lock for each newly opened row dialog session.
+        if (dialogOpen) {
+            closeSubmissionInProgressRef.current = false;
+        }
+    }, [dialogOpen]);
 
     /**
      * Registers a failed validation-close attempt and returns true
@@ -133,10 +142,14 @@ export default function RowDialog<
      * Attempts to submit the dialog before closing it.
      */
     const onClose = async () => {
+        if (closeSubmissionInProgressRef.current) return;
+
         try {
             if (submitFnRef.current) {
+                closeSubmissionInProgressRef.current = true;
                 const ok = await submitFnRef.current();
                 if (!ok) {
+                    closeSubmissionInProgressRef.current = false;
                     if (shouldShowForceCloseDialog()) {
                         setForceCloseDialogOpen(true);
                     }
@@ -147,6 +160,7 @@ export default function RowDialog<
             clearValidationFailureCounter();
             handleClose();
         } catch (error) {
+            closeSubmissionInProgressRef.current = false;
             log.error("Failed to close row dialog", error);
         }
     };

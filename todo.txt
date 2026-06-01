@@ -1,4 +1,3 @@
-Change NumberField to NumberSpinner
 NumberSpinner: implement min and max
 fields: pass min and max to NumberSpinner
 Notificaitons button: hide badge when all unread notifications are shown on screen

@@ -1,5 +1,4 @@
 Notificaitons button: hide badge when all unread notifications are shown on screen
-Saving: fix saving new row multiple times if user tried to close multiple times
 Fix file upload and image showing
 Implement image field preview
 Remove "download file" from file field

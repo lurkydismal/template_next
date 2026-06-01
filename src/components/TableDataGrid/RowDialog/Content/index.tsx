@@ -16,6 +16,7 @@ type RowDialogContentProps<R, RI> = {
     fields: FieldConfig<R, RI>[];
     dashboardKey: string;
     registerSubmit: (fn: (() => Promise<boolean>) | null) => void;
+    registerDiscardDraft: (fn: (() => void) | null) => void;
     createRowAction: CreateRowAction<RI>;
     updateRowAction: UpdateRowAction;
     onUpdated?: () => Promise<void> | void;
@@ -33,6 +34,7 @@ export default function RowDialogContent<
     fields,
     dashboardKey,
     registerSubmit,
+    registerDiscardDraft,
     createRowAction,
     updateRowAction,
     onUpdated,
@@ -209,6 +211,7 @@ export default function RowDialogContent<
     const initialRunRef = useRef<string | null>(null);
     const createSessionCounterRef = useRef(0);
     const unsavedRowKeyRef = useRef<string | null>(null);
+    const draftDiscardedRef = useRef(false);
 
     /**
      * Builds the localStorage key used to persist in-progress dialog values.
@@ -281,8 +284,12 @@ export default function RowDialogContent<
     const activeRowKey = getRowKey();
 
     useEffect(() => {
+        if (draftDiscardedRef.current) return;
+
         const timeout = setTimeout(() => {
-            saveDraftValues(activeRowKey, values);
+            if (!draftDiscardedRef.current) {
+                saveDraftValues(activeRowKey, values);
+            }
         }, 700);
 
         return () => clearTimeout(timeout);
@@ -292,6 +299,7 @@ export default function RowDialogContent<
         const rowKey = getRowKey();
         if (initialRunRef.current === rowKey) return;
         initialRunRef.current = rowKey;
+        draftDiscardedRef.current = false;
 
         const initialValues = buildInitialValues(row, fields);
         const restoredValues = loadDraftValues(rowKey);
@@ -341,10 +349,23 @@ export default function RowDialogContent<
         return ok;
     }, [activeRowKey, clearDraftValues, submit]);
 
+    /**
+     * Clears the active draft and prevents pending save timers from restoring it.
+     */
+    const discardActiveDraft = useCallback(() => {
+        draftDiscardedRef.current = true;
+        clearDraftValues(activeRowKey);
+    }, [activeRowKey, clearDraftValues]);
+
     useEffect(() => {
         registerSubmit(submitWithDraftCleanup);
         return () => registerSubmit(null);
     }, [registerSubmit, submitWithDraftCleanup]);
+
+    useEffect(() => {
+        registerDiscardDraft(discardActiveDraft);
+        return () => registerDiscardDraft(null);
+    }, [discardActiveDraft, registerDiscardDraft]);
 
     return (
         <form

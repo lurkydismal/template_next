@@ -87,6 +87,7 @@ export default function RowDialog<
     idKey?: keyof R;
 }) {
     const submitFnRef = useRef<(() => Promise<boolean>) | null>(null);
+    const discardDraftFnRef = useRef<(() => void) | null>(null);
     const validationFailureTimestampsRef = useRef<number[]>([]);
     const [forceCloseDialogOpen, setForceCloseDialogOpen] = useState(false);
 
@@ -122,6 +123,13 @@ export default function RowDialog<
     };
 
     /**
+     * Registers the content callback that permanently drops the active saved draft.
+     */
+    const registerDiscardDraft = (fn: (() => void) | null) => {
+        discardDraftFnRef.current = fn;
+    };
+
+    /**
      * Attempts to submit the dialog before closing it.
      */
     const onClose = async () => {
@@ -148,6 +156,7 @@ export default function RowDialog<
      */
     const handleConfirmForceClose = useCallback(() => {
         setForceCloseDialogOpen(false);
+        discardDraftFnRef.current?.();
         clearValidationFailureCounter();
         handleClose();
     }, [clearValidationFailureCounter, handleClose]);
@@ -188,6 +197,7 @@ export default function RowDialog<
                             fields={fields}
                             dashboardKey={dashboardKey}
                             registerSubmit={registerSubmit}
+                            registerDiscardDraft={registerDiscardDraft}
                             createRowAction={createRowAction}
                             updateRowAction={updateRowAction}
                             onUpdated={onUpdated}

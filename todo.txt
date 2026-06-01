@@ -1,5 +1,3 @@
-NumberSpinner: implement min and max
-fields: pass min and max to NumberSpinner
 Notificaitons button: hide badge when all unread notifications are shown on screen
 Saving: fix saving new row multiple times if user tried to close multiple times
 Fix file upload and image showing

@@ -34,19 +34,42 @@ function validateHexValue(value: unknown) {
 }
 
 /**
- * Validates that a number field contains a finite numeric value.
+ * Converts validated number field input into a finite number.
  */
-function validateNumberValue(value: unknown) {
-    if (isEmptyValue(value)) return true;
-
+function parseFiniteNumber(value: unknown) {
     if (typeof value === "number") {
-        return Number.isFinite(value) || "Enter a valid number";
+        return Number.isFinite(value) ? value : null;
     }
+
     if (typeof value === "string") {
         const parsed = Number(value);
-        return Number.isFinite(parsed) || "Enter a valid number";
+        return Number.isFinite(parsed) ? parsed : null;
     }
-    return "Enter a valid number";
+
+    return null;
+}
+
+/**
+ * Validates that a number field contains a finite numeric value within any bounds.
+ */
+function validateNumberValue<
+    R extends Record<string, unknown>,
+    RI extends Record<string, unknown>,
+>(value: unknown, field: FieldConfig<R, RI>) {
+    if (isEmptyValue(value)) return true;
+
+    const parsed = parseFiniteNumber(value);
+    if (parsed === null) return "Enter a valid number";
+
+    if (field.min !== undefined && parsed < field.min) {
+        return `${field.label} must be greater than or equal to ${field.min}`;
+    }
+
+    if (field.max !== undefined && parsed > field.max) {
+        return `${field.label} must be less than or equal to ${field.max}`;
+    }
+
+    return true;
 }
 
 /**
@@ -213,7 +236,7 @@ async function validateByFieldType<
     row: R,
     allValues: Record<string, unknown>,
 ) {
-    if (field.type === "number") return validateNumberValue(value);
+    if (field.type === "number") return validateNumberValue(value, field);
     if (field.type === "uuid") return validateUuidValue(value);
     if (field.type === "hex") return validateHexValue(value);
     if (field.type === "inet")

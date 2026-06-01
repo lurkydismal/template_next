@@ -64,6 +64,8 @@ export type FieldConfig<
     required?: boolean;
     readOnly?: boolean;
     hidden?: boolean; // hides this field from dashboard table columns only
+    min?: number; // minimum accepted value for number fields
+    max?: number; // maximum accepted value for number fields
     requiredGroup?: string;
     requiredGroupMin?: number;
     placeholder?: unknown;

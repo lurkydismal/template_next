@@ -13,6 +13,8 @@ type NumberSpinnerInputProps = {
     required: boolean;
     readOnly?: boolean;
     value: unknown;
+    min?: number;
+    max?: number;
     control: Control<Record<string, unknown>>;
     error?: FieldError;
     rules?: RegisterOptions<Record<string, unknown>, string>;
@@ -40,6 +42,8 @@ export default function NumberSpinnerInput({
     required,
     readOnly = false,
     value,
+    min,
+    max,
     control,
     error,
     rules,
@@ -64,6 +68,8 @@ export default function NumberSpinnerInput({
                         readOnly={readOnly}
                         disabled={field.disabled}
                         value={numericValue}
+                        min={min}
+                        max={max}
                         error={!!error}
                         helperText={error?.message}
                         inputRef={field.ref}

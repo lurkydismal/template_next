@@ -14,6 +14,7 @@ toggle for some field
 Consider NextAuth
 Save diff for all text field changes and store it in some format that takes
 less size
+Restore SSE connection on crash
 
 Implement dashboard with graphs, administration, messaging as sending
 notifications

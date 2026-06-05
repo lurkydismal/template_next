@@ -1,5 +1,10 @@
 packages:
   - .
+allowBuilds:
+  argon2: false
+  esbuild: false
+  sharp: false
+  unrs-resolver: false
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver

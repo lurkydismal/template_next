@@ -49,6 +49,8 @@
         "zod": "^4.4.3"
     },
     "devDependencies": {
+        "@emotion/cache": "^11.14.0",
+        "@emotion/styled": "^11.14.1",
         "@tailwindcss/postcss": "^4",
         "@trivago/prettier-plugin-sort-imports": "^6.0.2",
         "@types/autosuggest-highlight": "^3.2.3",
@@ -69,9 +71,15 @@
         "eslint-plugin-drizzle": "^0.2.3",
         "eslint-plugin-perfectionist": "^5.9.0",
         "fallow": "^2.88.3",
+        "pg": "^8.21.0",
         "prettier": "^3.8.3",
         "tailwindcss": "^4",
         "typescript": "^6",
         "vitest": "^4.1.8"
+    },
+    "peerDependencies": {
+        "@emotion/cache": "^11.14.0",
+        "@emotion/styled": "^11.14.1",
+        "pg": "^8.21.0"
     }
 }

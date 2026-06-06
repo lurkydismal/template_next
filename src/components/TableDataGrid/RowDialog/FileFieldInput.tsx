@@ -86,42 +86,31 @@ export default function FileFieldInput({
 
                     return (
                         <Stack spacing={1}>
-                            <Button
-                                component="label"
-                                variant="outlined"
-                                disabled={readOnly}
-                            >
-                                Select file
-                                <input
-                                    id={`${fieldKey}-file`}
-                                    type="file"
-                                    hidden
-                                    accept={acceptValue}
-                                    required={required}
-                                    onChange={handleFileChange}
-                                />
-                            </Button>
-
-                            {sourceValue ? (
-                                sourceIsImage ? (
-                                    <Link
-                                        component="button"
-                                        type="button"
-                                        underline="hover"
-                                        onClick={openImagePreview}
-                                    >
-                                        Open image
-                                    </Link>
-                                ) : (
-                                    <Link
-                                        href={sourceValue}
-                                        download
-                                        rel="noreferrer"
-                                    >
-                                        Download file
-                                    </Link>
-                                )
-                            ) : null}
+                            {sourceValue && sourceIsImage ? (
+                                <Button
+                                    component="label"
+                                    variant="outlined"
+                                    disabled={readOnly}
+                                >
+                                    Open image
+                                </Button>
+                            ) : (
+                                <Button
+                                    component="label"
+                                    variant="outlined"
+                                    disabled={readOnly}
+                                >
+                                    Select file
+                                    <input
+                                        id={`${fieldKey}-file`}
+                                        type="file"
+                                        hidden
+                                        accept={acceptValue}
+                                        required={required}
+                                        onChange={handleFileChange}
+                                    />
+                                </Button>
+                            )}
 
                             {field.value instanceof File ? (
                                 <Typography variant="body2">

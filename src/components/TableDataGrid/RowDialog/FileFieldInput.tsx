@@ -8,6 +8,7 @@ import {
 } from "react-hook-form";
 import { ImagePreviewDialog, useImagePreview } from "./ImagePreviewDialog";
 import { isImagePath, toAcceptString } from "@/utils/fileHelpers";
+import NextLink from "@/components/Link";
 
 type FileFieldInputProps = {
     fieldKey: string;
@@ -78,28 +79,29 @@ export default function FileFieldInput({
 
                     const imagePreviewProps = !readOnly
                         ? {
-                            onFileDrop: (file: File | null) => {
-                                applySelectedFile(file, field.onChange);
-                            },
-                        }
+                              onFileDrop: (file: File | null) => {
+                                  applySelectedFile(file, field.onChange);
+                              },
+                          }
                         : {};
 
                     return (
                         <Stack spacing={1}>
-                            {sourceValue ? (sourceIsImage
-                                ? (
+                            {sourceValue ? (
+                                sourceIsImage ? (
                                     <Button
                                         component="label"
                                         variant="outlined"
-                                        disabled={readOnly}
+                                        onClick={openImagePreview}
                                     >
                                         Open image
                                     </Button>
                                 ) : (
                                     <Button
-                                        component="label"
+                                        component={NextLink}
                                         variant="outlined"
-                                        disabled={readOnly}
+                                        href={sourceValue}
+                                        download
                                     >
                                         Download file
                                     </Button>
@@ -139,7 +141,9 @@ export default function FileFieldInput({
                                 onClose={closeImagePreview}
                                 sourceValue={sourceValue}
                                 label={label}
-                                {...(acceptValue ? { accept: acceptValue } : {})}
+                                {...(acceptValue
+                                    ? { accept: acceptValue }
+                                    : {})}
                                 {...imagePreviewProps}
                             />
                         </Stack>

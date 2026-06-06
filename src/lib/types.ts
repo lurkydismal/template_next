@@ -31,7 +31,7 @@ export function parseRawTarget(
     };
 }
 
-type SuccessResult<T> = { ok: true; data?: T };
+type SuccessResult<T> = { ok: true; data: T };
 type FailureResult = { ok: false; error: string };
 
 export type ActionResult<T = void> = SuccessResult<T> | FailureResult;

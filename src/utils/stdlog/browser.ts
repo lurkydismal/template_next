@@ -58,7 +58,6 @@ function makeBrowserLogger(): CommonLogger {
             // If first arg is a string, include it in the formatted line; otherwise show label + object(s)
             if (isSingleObject) {
                 method.call(console, label, style, args[0]);
-
             } else {
                 // If first arg is a string, show label and the rest of args inline
                 method.call(console, label, style, ...args);
@@ -67,8 +66,8 @@ function makeBrowserLogger(): CommonLogger {
     };
 
     return {
-        trace: needTrace ? makeLevel("TRACE") : () => { },
-        debug: isDev ? makeLevel("DEBUG") : () => { },
+        trace: needTrace ? makeLevel("TRACE") : () => {},
+        debug: isDev ? makeLevel("DEBUG") : () => {},
         info: makeLevel("INFO"),
         warn: makeLevel("WARN"),
         error: makeLevel("ERROR"),

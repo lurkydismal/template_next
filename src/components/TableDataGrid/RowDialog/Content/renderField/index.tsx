@@ -37,7 +37,10 @@ export const renderField = <
     )[name] as FieldError | undefined;
     const rules = getRules(field);
 
-    const handleChange = (nextValue: unknown, packedValues?: Record<string, unknown>) => {
+    const handleChange = (
+        nextValue: unknown,
+        packedValues?: Record<string, unknown>,
+    ) => {
         handleFieldValueChange(field, nextValue, packedValues);
     };
 
@@ -85,7 +88,10 @@ export const renderField = <
             );
 
         case "autocomplete": {
-            const filteredOptions = getFilteredAutocompleteOptions(field, values);
+            const filteredOptions = getFilteredAutocompleteOptions(
+                field,
+                values,
+            );
 
             return (
                 <AutocompleteFieldInput

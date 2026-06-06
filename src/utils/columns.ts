@@ -113,12 +113,14 @@ export function normalizeColumns(
         const flex = item.flex ?? defaultFlex;
         const minWidth = item.minWidth ?? flex * minWidthMultiplier;
 
-        const field = (item.field == null && item.headerName != null
-            ? { field: deriveField(item.headerName) }
-            : {});
-        const renderCell = (item.renderCell == null && defaultRenderCell != null
-            ? { renderCell: defaultRenderCell }
-            : {});
+        const field =
+            item.field == null && item.headerName != null
+                ? { field: deriveField(item.headerName) }
+                : {};
+        const renderCell =
+            item.renderCell == null && defaultRenderCell != null
+                ? { renderCell: defaultRenderCell }
+                : {};
 
         return {
             ...item,
@@ -148,15 +150,15 @@ export function columnsFromFields<
                 headerName: field.label,
                 ...(field.formatValue
                     ? {
-                        /**
-                         * Renders a data grid cell value from a normalized field definition.
-                         */
-                        renderCell: (params: GridRenderCellParams) =>
-                            String(field.formatValue!(params.value) ?? ""),
-                    }
+                          /**
+                           * Renders a data grid cell value from a normalized field definition.
+                           */
+                          renderCell: (params: GridRenderCellParams) =>
+                              String(field.formatValue!(params.value) ?? ""),
+                      }
                     : field.type === "file"
-                        ? { renderCell: renderFileCell }
-                        : {}),
+                      ? { renderCell: renderFileCell }
+                      : {}),
             })),
     );
 }

@@ -131,7 +131,12 @@ function validateInetValue(value: unknown, allowPort = false) {
 async function validateTableLookupValue<
     R extends Record<string, unknown>,
     RI extends Record<string, unknown>,
->(value: unknown, field: FieldConfig<R, RI>, row: R, allValues: Record<string, unknown>) {
+>(
+    value: unknown,
+    field: FieldConfig<R, RI>,
+    row: R,
+    allValues: Record<string, unknown>,
+) {
     if (!field.tableLookup || isEmptyValue(value)) return true;
 
     try {
@@ -142,7 +147,6 @@ async function validateTableLookupValue<
             field.tableLookupErrorMessage ||
             `${field.label} does not exist in the selected table`
         );
-
     } catch {
         return (
             field.tableLookupErrorMessage ||

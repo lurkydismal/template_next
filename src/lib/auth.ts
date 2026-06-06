@@ -194,8 +194,8 @@ async function verifyJwt(token: string): Promise<null | UsersRowPublic> {
 
         // build a minimal object and validate it with Zod
         const parsed = publicSchema.parse({
-            username: payload.username,
-            username_normalized: payload.username_normalized,
+            username: payload["username"],
+            username_normalized: payload["username_normalized"],
         });
 
         // parsed is now a UsersRowPublic-like object (only the fields from publicSchema)

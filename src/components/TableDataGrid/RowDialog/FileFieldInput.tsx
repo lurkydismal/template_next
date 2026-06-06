@@ -127,18 +127,16 @@ export default function FileFieldInput({
                             onClose={closeImagePreview}
                             sourceValue={sourceValue}
                             label={label}
-                            {...(acceptValue
-                                ? { accept: acceptValue }
-                                : {})}
+                            {...(acceptValue ? { accept: acceptValue } : {})}
                             {...(!readOnly
                                 ? {
-                                    onFileDrop: (file) => {
-                                        applySelectedFile(
-                                            file,
-                                            field.onChange,
-                                        );
-                                    },
-                                }
+                                      onFileDrop: (file) => {
+                                          applySelectedFile(
+                                              file,
+                                              field.onChange,
+                                          );
+                                      },
+                                  }
                                 : {})}
                         />
                     </Stack>

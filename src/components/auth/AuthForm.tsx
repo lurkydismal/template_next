@@ -26,13 +26,13 @@ type Values = SignInValues | SignUpValues;
 
 type Props =
     | {
-        mode: "signin";
-        onSubmit: (data: SignInValues) => Promise<void> | void;
-    }
+          mode: "signin";
+          onSubmit: (data: SignInValues) => Promise<void> | void;
+      }
     | {
-        mode: "signup";
-        onSubmit: (data: SignUpValues) => Promise<void> | void;
-    };
+          mode: "signup";
+          onSubmit: (data: SignUpValues) => Promise<void> | void;
+      };
 
 /**
  * Renders the auth form component.
@@ -105,7 +105,12 @@ export default function AuthForm(props: Props) {
                 rules={{
                     required: "Password is required",
                     ...(props.mode === "signup"
-                        ? { minLength: { value: 8, message: "Min 8 characters" } }
+                        ? {
+                              minLength: {
+                                  value: 8,
+                                  message: "Min 8 characters",
+                              },
+                          }
                         : {}),
                     maxLength: 32,
                 }}

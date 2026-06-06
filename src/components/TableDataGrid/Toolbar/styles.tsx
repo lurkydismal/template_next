@@ -1,5 +1,9 @@
 import { TextField, styled } from "@mui/material";
-import { QuickFilter, ToolbarButton, type ToolbarButtonProps } from "@mui/x-data-grid";
+import {
+    QuickFilter,
+    ToolbarButton,
+    type ToolbarButtonProps,
+} from "@mui/x-data-grid";
 import { forwardRef } from "react";
 
 export type OwnerState = {
@@ -9,7 +13,7 @@ export type OwnerState = {
 const ToolbarButtonBase = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
     function ToolbarButtonBase(props, ref) {
         return <ToolbarButton ref={ref} {...props} />;
-    }
+    },
 );
 
 /**

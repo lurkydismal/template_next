@@ -63,7 +63,6 @@ export async function POST(request: Request): Promise<Response> {
         });
 
         return Response.json(created, { status: 201 });
-
     } else {
         return invalidResponse;
     }

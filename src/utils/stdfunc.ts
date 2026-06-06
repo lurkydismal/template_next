@@ -248,7 +248,7 @@ export function paginate<T>(
  * normalizeArrayOrValue(5); // Returns: 5
  */
 export function normalizeArrayOrValue<T>(item: T | T[]): T {
-    return Array.isArray(item) ? item[0] ?? [] as T : item;
+    return Array.isArray(item) ? (item[0] ?? ([] as T)) : item;
 }
 
 /**

@@ -198,13 +198,13 @@ export const maxSnackbarCount = 5;
 export const storageKeys = {
     client: isBrowser
         ? {
-            authStorageKey: "user", // FIX: Not found
-        }
+              authStorageKey: "user", // FIX: Not found
+          }
         : null,
 
     server: isServer
         ? {
-            accessToken: getEnv("COOKIE_NAME"),
-        }
+              accessToken: getEnv("COOKIE_NAME"),
+          }
         : null,
 };

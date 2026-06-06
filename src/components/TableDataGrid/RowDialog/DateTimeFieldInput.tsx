@@ -124,9 +124,9 @@ export default function DateTimeFieldInput({
                             value={
                                 field.value
                                     ? dayjs(
-                                        field.value as PickerInputValue,
-                                        "HH:mm:ss",
-                                    )
+                                          field.value as PickerInputValue,
+                                          "HH:mm:ss",
+                                      )
                                     : null
                             }
                             onChange={(next) => {

@@ -153,13 +153,19 @@ export default function ExtraToolbarButtons<
     createRowAction: CreateRowAction<RI>;
 }>) {
     const snackbar = useSnackbar();
-    const { showError, showInfo, showMessage, showSuccess, showWarning } = snackbar;
+    const { showError, showInfo, showMessage, showSuccess, showWarning } =
+        snackbar;
 
-    const [notifications, setNotifications] = useState<StoredNotification[]>([]);
+    const [notifications, setNotifications] = useState<StoredNotification[]>(
+        [],
+    );
     const [unreadCount, setUnreadCount] = useState(0);
     const [visibleUnreadIds, setVisibleUnreadIds] = useState<number[]>([]);
 
-    const hiddenUnreadCount = Math.max(unreadCount - visibleUnreadIds.length, 0);
+    const hiddenUnreadCount = Math.max(
+        unreadCount - visibleUnreadIds.length,
+        0,
+    );
 
     const syncNotifications = useCallback(async (dismissedId?: number) => {
         const { rows, unreadCount: unread } = await readNotifications();
@@ -208,12 +214,7 @@ export default function ExtraToolbarButtons<
                 ...toShow.map((item) => item.id),
             ]);
         }
-    }, [
-        notifications,
-        visibleUnreadIds,
-        snackbar,
-        handleNotificationDismiss,
-    ]);
+    }, [notifications, visibleUnreadIds, snackbar, handleNotificationDismiss]);
 
     useEffect(() => {
         void syncNotifications().catch(showError);
@@ -289,9 +290,7 @@ export default function ExtraToolbarButtons<
             ) : undefined}
 
             <Tooltip title="Notifications">
-                <ToolbarButton
-                    onClick={handleShowUnreadNotifications}
-                >
+                <ToolbarButton onClick={handleShowUnreadNotifications}>
                     <Badge
                         badgeContent={hiddenUnreadCount}
                         color="info"

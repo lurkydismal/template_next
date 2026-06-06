@@ -24,6 +24,7 @@ import RowDialogContent from "./Content";
 import { TransitionProps } from "@mui/material/transitions";
 import Draggable from "react-draggable";
 
+
 export type { FieldConfig } from "./types";
 
 const promptButtonSx = {
@@ -72,6 +73,7 @@ export default function RowDialog<
     dashboardKey,
     createRowAction,
     updateRowAction,
+    getFileAction,
     onUpdated,
     fields,
     idKey = "id" as keyof R,
@@ -83,6 +85,7 @@ export default function RowDialog<
     dashboardKey: string;
     createRowAction: CreateRowAction<RI>;
     updateRowAction: UpdateRowAction;
+    getFileAction: (filename: string) => Promise<string>;
     onUpdated?: () => Promise<void> | void;
     fields: FieldConfig<R, RI>[];
     idKey?: keyof R;
@@ -214,6 +217,7 @@ export default function RowDialog<
                             registerDiscardDraft={registerDiscardDraft}
                             createRowAction={createRowAction}
                             updateRowAction={updateRowAction}
+                            getFileAction={getFileAction}
                             onUpdated={onUpdated}
                             idKey={idKey}
                         />

@@ -11,6 +11,7 @@ import { renderField } from "./renderField";
 import { resolveInterconnectedFieldUpdates } from "./interconnected";
 import { getFieldRules } from "./validation";
 
+
 type RowDialogContentProps<R, RI> = {
     row: R;
     fields: FieldConfig<R, RI>[];
@@ -19,6 +20,7 @@ type RowDialogContentProps<R, RI> = {
     registerDiscardDraft: (fn: (() => void) | null) => void;
     createRowAction: CreateRowAction<RI>;
     updateRowAction: UpdateRowAction;
+    getFileAction: (filename: string) => Promise<string>;
     onUpdated?: (() => Promise<void> | void) | undefined;
     idKey?: keyof R;
 };
@@ -37,6 +39,7 @@ export default function RowDialogContent<
     registerDiscardDraft,
     createRowAction,
     updateRowAction,
+    getFileAction,
     onUpdated,
     idKey = "id" as keyof R,
 }: RowDialogContentProps<R, RI>) {
@@ -399,6 +402,7 @@ export default function RowDialogContent<
                             form,
                             getRules,
                             handleFieldValueChange,
+                            getFileAction,
                         })}
                     </Grid>
                 ))}

@@ -8,6 +8,7 @@ import {
 } from "react-hook-form";
 import { ImagePreviewDialog, useImagePreview } from "./ImagePreviewDialog";
 import { isImagePath, toAcceptString } from "@/utils/fileHelpers";
+
 import NextLink from "@/components/Link";
 
 type FileFieldInputProps = {
@@ -22,6 +23,7 @@ type FileFieldInputProps = {
     error?: FieldError | undefined;
     rules?: RegisterOptions<Record<string, unknown>, string>;
     onValueChange: (value: File | null) => void;
+    getFileAction: (filename: string) => Promise<string>;
 };
 
 /**
@@ -39,6 +41,7 @@ export default function FileFieldInput({
     error,
     rules,
     onValueChange,
+    getFileAction,
 }: FileFieldInputProps) {
     const { imagePreviewOpen, openImagePreview, closeImagePreview } =
         useImagePreview();
@@ -79,10 +82,10 @@ export default function FileFieldInput({
 
                     const imagePreviewProps = !readOnly
                         ? {
-                              onFileDrop: (file: File | null) => {
-                                  applySelectedFile(file, field.onChange);
-                              },
-                          }
+                            onFileDrop: (file: File | null) => {
+                                applySelectedFile(file, field.onChange);
+                            },
+                        }
                         : {};
 
                     return (
@@ -141,6 +144,7 @@ export default function FileFieldInput({
                                 onClose={closeImagePreview}
                                 sourceValue={sourceValue}
                                 label={label}
+                                getFileAction={getFileAction}
                                 {...(acceptValue
                                     ? { accept: acceptValue }
                                     : {})}

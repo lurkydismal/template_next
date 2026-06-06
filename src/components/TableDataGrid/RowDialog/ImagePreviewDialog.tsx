@@ -6,11 +6,10 @@ import {
     CircularProgress,
     Dialog,
     DialogContent,
-    DialogTitle,
     Stack,
     Typography,
 } from "@mui/material";
-import { getFileAction } from "@/lib/getFile";
+
 import log from "@/utils/stdlog";
 
 type ImagePreviewDialogProps = {
@@ -20,6 +19,7 @@ type ImagePreviewDialogProps = {
     onClose: () => void;
     onFileDrop?: (file: File) => void;
     accept?: string;
+    getFileAction: (filename: string) => Promise<string>;
 };
 
 type UseImagePreviewResult = {
@@ -61,9 +61,11 @@ export function useImagePreview(): UseImagePreviewResult {
 function ImagePreviewContent({
     sourceValue,
     label,
+    getFileAction,
 }: {
     sourceValue: string;
     label: string;
+    getFileAction: (filename: string) => Promise<string>;
 }) {
     const [isLoadingPreview, setIsLoadingPreview] = useState(true);
     const [hasPreviewError, setHasPreviewError] = useState(false);
@@ -76,13 +78,10 @@ function ImagePreviewContent({
     useEffect(() => {
         startTransition(async () => {
             const value = await getFileAction(
-                "tables",
                 sourceValue,
             );
 
-            if (value.ok) {
-                setResolvedSourceValue(value.data);
-            }
+            setResolvedSourceValue(value);
         });
     }, [sourceValue]);
 
@@ -176,12 +175,14 @@ function ImagePreviewContent({
  * Displays an image preview dialog with a shared UI across file renderers.
  */
 export function ImagePreviewDialog({
+
     open,
     sourceValue,
     label,
     onClose,
     onFileDrop,
     accept,
+    getFileAction,
 }: ImagePreviewDialogProps) {
     /**
      * Resolves whether a dropped file should be accepted for upload.
@@ -240,6 +241,7 @@ export function ImagePreviewDialog({
                 key={`${open ? "open" : "closed"}-${sourceValue}`}
                 sourceValue={sourceValue}
                 label={label}
+                getFileAction={getFileAction}
             />
         </Dialog>
     );

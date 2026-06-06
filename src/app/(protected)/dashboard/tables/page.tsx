@@ -11,6 +11,7 @@ import {
     createRowAction,
     getRowsAction,
     updateRowAction,
+    getFileAction,
 } from "@/lib/dashboard/tables/function";
 
 /**
@@ -23,6 +24,7 @@ export default function Page() {
             fields={fields}
             getRowsAction={getRowsAction}
             updateRowAction={updateRowAction}
+            getFileAction={getFileAction}
             dashboardKey="table"
             extraButtons={
                 <ExtraToolbarButtons

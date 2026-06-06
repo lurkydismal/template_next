@@ -4,6 +4,7 @@ import { createAction } from "@/lib/dashboard/common/create";
 import { getRows } from "@/lib/dashboard/common/get";
 import { updateAction } from "@/lib/dashboard/common/update";
 import { DbTarget } from "@/lib/types";
+import { getFileAction as _getFileAction } from "@/lib/getFile";
 
 /**
  * Gets rows action.
@@ -51,4 +52,21 @@ export async function updateRowAction(
         const message = `Failed to update row in action: ${result.error}`;
         throw new Error(message);
     }
+}
+
+/**
+ * Get file action.
+ */
+export async function getFileAction(
+    target: DbTarget,
+    filename: string,
+) {
+    const result = await _getFileAction(target, filename);
+
+    if (!result.ok) {
+        const message = `Failed to get file in action: ${result.error}`;
+        throw new Error(message);
+    }
+
+    return result.data;
 }

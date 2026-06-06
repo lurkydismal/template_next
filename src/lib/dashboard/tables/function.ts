@@ -7,6 +7,7 @@ import {
     createRowAction as _createRowAction,
     getRowsAction as _getRowsAction,
     updateRowAction as _updateRowAction,
+    getFileAction as _getFileAction,
 } from "@/lib/dashboard/common/function";
 
 const target: DbTarget = "tables";
@@ -26,4 +27,8 @@ export async function updateRowAction(
     fd: FormData,
 ): ReturnType<typeof _updateRowAction> {
     return _updateRowAction(target, idColumn.name, fd);
+}
+
+export async function getFileAction(filename: string): ReturnType<typeof _getFileAction> {
+    return _getFileAction(target, filename);
 }

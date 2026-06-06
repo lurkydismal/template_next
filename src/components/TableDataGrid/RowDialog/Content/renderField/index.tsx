@@ -27,6 +27,7 @@ export const renderField = <
     form,
     getRules,
     handleFieldValueChange,
+    getFileAction,
 }: RenderFieldParams<R, RI>) => {
     const key = String(field.key);
     const name = field.name ?? key;
@@ -131,6 +132,7 @@ export const renderField = <
                     key={`${key}-${idx}`}
                     accept={field.fileAccept}
                     onValueChange={(nextValue) => handleChange(nextValue)}
+                    getFileAction={getFileAction}
                 />
             );
 

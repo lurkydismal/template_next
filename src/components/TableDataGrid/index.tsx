@@ -25,6 +25,7 @@ export default function TableDataGrid<
     getRowsAction,
     createRowAction,
     updateRowAction,
+    getFileAction,
     extraButtons,
     fields,
     dashboardKey,
@@ -32,6 +33,7 @@ export default function TableDataGrid<
     getRowsAction: () => Promise<Readonly<GridRowsProp>>;
     createRowAction: (row: RI) => Promise<void>;
     updateRowAction: (fd: FormData) => Promise<void>;
+    getFileAction: (filename: string) => Promise<string>;
     extraButtons?: React.ReactNode; // optionally a ReactElement expecting props
     fields: FieldConfig<R, RI>[];
     dashboardKey: string;
@@ -245,15 +247,15 @@ export default function TableDataGrid<
     // If extraButtons is a React element, clone it and inject createRowAction + emptyRow
     const injectedExtraButtons = isValidElement(extraButtons)
         ? cloneElement(
-              extraButtons as React.ReactElement<Record<string, unknown>>,
-              {
-                  createRowAction: {
-                      type: "dialog",
-                      action: openCreateDialog,
-                  },
-                  emptyRow,
-              },
-          )
+            extraButtons as React.ReactElement<Record<string, unknown>>,
+            {
+                createRowAction: {
+                    type: "dialog",
+                    action: openCreateDialog,
+                },
+                emptyRow,
+            },
+        )
         : extraButtons;
 
     const columns = columnsFromFields(resolvedFields);
@@ -302,6 +304,7 @@ export default function TableDataGrid<
                 dashboardKey={dashboardKey}
                 createRowAction={createAndRefresh}
                 updateRowAction={updateRowAction}
+                getFileAction={getFileAction}
                 onUpdated={_getRows}
             />
         </>

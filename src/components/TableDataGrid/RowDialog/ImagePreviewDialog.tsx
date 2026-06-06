@@ -1,5 +1,5 @@
 import NextImage from "next/image";
-import { DragEvent, useState } from "react";
+import { DragEvent, useEffect, useState, useTransition } from "react";
 import {
     Box,
     Button,
@@ -10,6 +10,8 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
+import { getFileAction } from "@/lib/getFile";
+import log from "@/utils/stdlog";
 
 type ImagePreviewDialogProps = {
     open: boolean;
@@ -66,6 +68,23 @@ function ImagePreviewContent({
     const [isLoadingPreview, setIsLoadingPreview] = useState(true);
     const [hasPreviewError, setHasPreviewError] = useState(false);
     const [imageRetryKey, setImageRetryKey] = useState(0);
+    const [resolvedSourceValue, setResolvedSourceValue] = useState<
+        string | null
+    >(null);
+    const [isPending, startTransition] = useTransition();
+
+    useEffect(() => {
+        startTransition(async () => {
+            const value = await getFileAction(
+                "tables",
+                sourceValue,
+            );
+
+            if (value.ok) {
+                setResolvedSourceValue(value.data);
+            }
+        });
+    }, [sourceValue]);
 
     /**
      * Marks the preview as successfully loaded.
@@ -91,9 +110,11 @@ function ImagePreviewContent({
         setImageRetryKey((currentValue) => currentValue + 1);
     }
 
+    log.debug({ isLoadingPreview, hasPreviewError, imageRetryKey, resolvedSourceValue, isPending });
+
     return (
         <DialogContent>
-            {isLoadingPreview ? (
+            {isLoadingPreview || isPending ? (
                 <Box
                     sx={{
                         display: "flex",
@@ -104,7 +125,7 @@ function ImagePreviewContent({
                     <CircularProgress aria-label="Loading image preview" />
                 </Box>
             ) : null}
-            {!isLoadingPreview && hasPreviewError ? (
+            {!isLoadingPreview && hasPreviewError && resolvedSourceValue ? (
                 <Stack
                     sx={{
                         spacing: 1,
@@ -122,7 +143,7 @@ function ImagePreviewContent({
                         <Button
                             variant="text"
                             component="a"
-                            href={sourceValue}
+                            href={resolvedSourceValue}
                             target="_blank"
                             rel="noreferrer"
                         >
@@ -131,17 +152,19 @@ function ImagePreviewContent({
                     </Stack>
                 </Stack>
             ) : null}
-            {!hasPreviewError ? (
+            {!hasPreviewError && resolvedSourceValue && !isPending ? (
                 <NextImage
                     key={`${sourceValue}-${imageRetryKey}`}
-                    src={sourceValue}
+                    src={resolvedSourceValue}
                     alt={label}
                     onLoad={handlePreviewLoad}
                     onError={handlePreviewError}
+                    width={800}
+                    height={600}
                     style={{
                         width: "100%",
                         height: "auto",
-                        display: isLoadingPreview ? "none" : "block",
+                        display: false ? "none" : "block",
                     }}
                 />
             ) : null}
@@ -213,7 +236,6 @@ export function ImagePreviewDialog({
             onDragOver={(event) => event.preventDefault()}
             onDrop={handleDrop}
         >
-            <DialogTitle>{label}</DialogTitle>
             <ImagePreviewContent
                 key={`${open ? "open" : "closed"}-${sourceValue}`}
                 sourceValue={sourceValue}

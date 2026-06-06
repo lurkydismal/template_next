@@ -4,6 +4,8 @@ Enable upload for filed when dragging to field in form
 
 Do not open row dialog when clicking "Open image" in table
 
+Fix image preview not closing on Escape key
+
 Implement SpeedDial with context based on if row dialog is open or not
 
 Implement option "multiple"(change) to auto-add new field when its filled to

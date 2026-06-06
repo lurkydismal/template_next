@@ -159,7 +159,6 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         label: "File",
         type: "file",
         size: 4,
-        placeholder: "demo.txt",
         fileAccept: [".txt", "image/jpeg"],
         toFormValue: fileNameToFormValue,
         onValueChange: syncSelectedFileName,

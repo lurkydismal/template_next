@@ -1,6 +1,18 @@
 import dayjs from "dayjs";
 import { FieldConfig } from "../types";
 
+const toFormattedValue = (value: unknown, format: string): unknown => {
+    if (dayjs.isDayjs(value)) return value.format(format);
+    if (value instanceof Date) return dayjs(value).format(format);
+    return value;
+};
+
+const toIsoValue = (value: unknown): unknown => {
+    if (dayjs.isDayjs(value)) return value.toISOString();
+    if (value instanceof Date) return value.toISOString();
+    return value;
+};
+
 /**
  * Converts input into field value.
  */
@@ -10,28 +22,15 @@ export const toFieldValue = (
 ): unknown => {
     if (value === null || value === undefined) return value;
 
-    if (field.type === "datetime") {
-        if (dayjs.isDayjs(value)) return value.toISOString();
-        if (value instanceof Date) return value.toISOString();
-        return value;
+    switch (field.type) {
+        case "date":
+            return toFormattedValue(value, "YYYY-MM-DD");
+        case "time":
+            return toFormattedValue(value, "HH:mm:ss");
+        case "datetime":
+        default:
+            return toIsoValue(value);
     }
-
-    if (field.type === "date") {
-        if (dayjs.isDayjs(value)) return value.format("YYYY-MM-DD");
-        if (value instanceof Date) return dayjs(value).format("YYYY-MM-DD");
-        return value;
-    }
-
-    if (field.type === "time") {
-        if (dayjs.isDayjs(value)) return value.format("HH:mm:ss");
-        if (value instanceof Date) return dayjs(value).format("HH:mm:ss");
-        return value;
-    }
-
-    if (dayjs.isDayjs(value)) return value.toISOString();
-    if (value instanceof Date) return value.toISOString();
-
-    return value;
 };
 
 /**

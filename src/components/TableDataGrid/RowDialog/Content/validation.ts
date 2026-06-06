@@ -1,5 +1,6 @@
 import { RegisterOptions, UseFormReturn } from "react-hook-form";
 import { FieldConfig } from "../types";
+import z from "zod";
 
 /**
  * Checks whether a value is considered empty for row dialog validation.
@@ -72,76 +73,28 @@ function validateNumberValue<
     return true;
 }
 
-/**
- * Validates IPv4 addresses in dotted-decimal notation.
- */
-function isValidIpv4Address(value: string) {
-    const octets = value.split(".");
+// TODO: Move to schemas
+const ipSchema = z.union([z.ipv4(), z.ipv6()]);
 
-    if (octets.length !== 4) return false;
+const portSchema = z.number().int().min(0).max(65535);
 
-    return octets.every((octet) => {
-        if (!/^\d{1,3}$/.test(octet)) return false;
+const normalizedString = z.preprocess(
+    (value) => (value == null ? value : String(value).trim()),
+    z.string(),
+);
 
-        const parsed = Number(octet);
-        return parsed >= 0 && parsed <= 255;
-    });
-}
+function hasValidHostPort(
+    value: string,
+    regex: RegExp,
+    hostSchema: z.ZodTypeAny,
+): boolean {
+    const groups = value.match(regex)?.groups;
+    if (!groups) return false;
 
-/**
- * Validates IPv6 addresses, including compressed forms and IPv4-mapped endings.
- */
-function isValidIpv6Address(value: string) {
-    if (!value.includes(":")) return false;
-
-    const hasDoubleColon = value.includes("::");
-    if (value.indexOf("::") !== value.lastIndexOf("::")) return false;
-
-    const [leftSide, rightSide = ""] = value.split("::");
-    const leftGroups = leftSide ? leftSide.split(":") : [];
-    const rightGroups = rightSide ? rightSide.split(":") : [];
-
-    /**
-     * Checks whether an IPv6 segment is a valid hexadecimal group.
-     */
-    function isHexGroup(group: string) {
-        return /^[0-9a-f]{1,4}$/i.test(group);
-    }
-
-    /**
-     * Converts an IPv4 tail to its two-group IPv6 equivalent for counting/validation.
-     */
-    function normalizeIpv4Tail(groups: string[]) {
-        if (groups.length === 0) return { groups, ipv4Tail: false };
-        const tail = groups[groups.length - 1];
-        if (!tail.includes(".")) return { groups, ipv4Tail: false };
-
-        if (!isValidIpv4Address(tail)) return { groups: [], ipv4Tail: true };
-
-        return {
-            groups: groups.slice(0, -1).concat(["ffff", "ffff"]),
-            ipv4Tail: true,
-        };
-    }
-
-    const leftNormalized = normalizeIpv4Tail(leftGroups);
-    if (leftNormalized.ipv4Tail && leftNormalized.groups.length === 0)
-        return false;
-    const rightNormalized = normalizeIpv4Tail(rightGroups);
-    if (rightNormalized.ipv4Tail && rightNormalized.groups.length === 0)
-        return false;
-
-    const normalizedLeft = leftNormalized.groups;
-    const normalizedRight = rightNormalized.groups;
-    const normalizedCount = normalizedLeft.length + normalizedRight.length;
-
-    if (hasDoubleColon) {
-        if (normalizedCount >= 8) return false;
-    } else if (normalizedCount !== 8) {
-        return false;
-    }
-
-    return normalizedLeft.concat(normalizedRight).every(isHexGroup);
+    return (
+        hostSchema.safeParse(groups.host).success &&
+        portSchema.safeParse(Number(groups.port)).success
+    );
 }
 
 /**
@@ -150,44 +103,52 @@ function isValidIpv6Address(value: string) {
 function validateInetValue(value: unknown, allowPort = false) {
     if (isEmptyValue(value)) return true;
 
-    const rawValue = String(value).trim();
+    const rawValue = normalizedString.parse(value);
 
-    if (allowPort) {
-        const ipv4WithPort = rawValue.match(
+    if (
+        allowPort &&
+        (hasValidHostPort(
+            rawValue,
             /^(?<host>(?:\d{1,3}\.){3}\d{1,3}):(?<port>\d{1,5})$/,
-        );
-        if (ipv4WithPort?.groups) {
-            const port = Number(ipv4WithPort.groups.port);
-            if (
-                isValidIpv4Address(ipv4WithPort.groups.host) &&
-                port >= 0 &&
-                port <= 65535
-            ) {
-                return true;
-            }
-        }
-
-        const ipv6WithPort = rawValue.match(
-            /^\[(?<host>.+)\]:(?<port>\d{1,5})$/,
-        );
-        if (ipv6WithPort?.groups) {
-            const port = Number(ipv6WithPort.groups.port);
-            if (
-                isValidIpv6Address(ipv6WithPort.groups.host) &&
-                port >= 0 &&
-                port <= 65535
-            ) {
-                return true;
-            }
-        }
+            z.ipv4(),
+        ) ||
+            hasValidHostPort(
+                rawValue,
+                /^\[(?<host>.+)\]:(?<port>\d{1,5})$/,
+                z.ipv6(),
+            ))
+    ) {
+        return true;
     }
 
-    if (isValidIpv4Address(rawValue) || isValidIpv6Address(rawValue))
-        return true;
+    if (ipSchema.safeParse(rawValue).success) return true;
 
     return allowPort
         ? "Enter a valid IPv4/IPv6 value. For ports use IPv4:port or [IPv6]:port"
         : "Enter a valid IPv4 or IPv6 value";
+}
+
+async function validateTableLookupValue<
+    R extends Record<string, unknown>,
+    RI extends Record<string, unknown>,
+>(value: unknown, field: FieldConfig<R, RI>, row: R, allValues: Record<string, unknown>) {
+    if (!field.tableLookup || isEmptyValue(value)) return true;
+
+    try {
+        const exists = await field.tableLookup(value, row, allValues);
+
+        return (
+            exists ||
+            field.tableLookupErrorMessage ||
+            `${field.label} does not exist in the selected table`
+        );
+
+    } catch {
+        return (
+            field.tableLookupErrorMessage ||
+            `${field.label} could not be verified against the selected table`
+        );
+    }
 }
 
 /**
@@ -236,31 +197,25 @@ async function validateByFieldType<
     row: R,
     allValues: Record<string, unknown>,
 ) {
-    if (field.type === "number") return validateNumberValue(value, field);
-    if (field.type === "uuid") return validateUuidValue(value);
-    if (field.type === "hex") return validateHexValue(value);
-    if (field.type === "inet")
-        return validateInetValue(value, field.inetAllowPort);
+    switch (field.type) {
+        case "number":
+            return validateNumberValue(value, field);
 
-    if (field.type === "tableLookup") {
-        if (!field.tableLookup || isEmptyValue(value)) return true;
+        case "uuid":
+            return validateUuidValue(value);
 
-        try {
-            const exists = await field.tableLookup(value, row, allValues);
-            return (
-                exists ||
-                field.tableLookupErrorMessage ||
-                `${field.label} does not exist in the selected table`
-            );
-        } catch {
-            return (
-                field.tableLookupErrorMessage ||
-                `${field.label} could not be verified against the selected table`
-            );
-        }
+        case "hex":
+            return validateHexValue(value);
+
+        case "inet":
+            return validateInetValue(value, field.inetAllowPort);
+
+        case "tableLookup":
+            return validateTableLookupValue(value, field, row, allValues);
+
+        default:
+            return true;
     }
-
-    return true;
 }
 
 /**

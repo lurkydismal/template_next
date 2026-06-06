@@ -7,7 +7,7 @@ import {
     RegisterOptions,
 } from "react-hook-form";
 
-type TextFieldInputProps = {
+type FieldInputProps = {
     fieldKey: string;
     label: string;
     name: string;
@@ -20,10 +20,15 @@ type TextFieldInputProps = {
     onValueChange: (value: string) => void;
 };
 
+type BaseFieldInputProps = FieldInputProps & {
+    idSuffix: string;
+    extraTextFieldProps?: Partial<React.ComponentProps<typeof TextField>>;
+};
+
 /**
- * Renders the text field input component.
+ * Shared field input implementation.
  */
-export default function TextFieldInput({
+function BaseFieldInput({
     fieldKey,
     label,
     name,
@@ -34,7 +39,9 @@ export default function TextFieldInput({
     error,
     rules,
     onValueChange,
-}: TextFieldInputProps) {
+    idSuffix,
+    extraTextFieldProps,
+}: BaseFieldInputProps) {
     return (
         <div>
             <Typography variant="subtitle1" color="text.secondary">
@@ -49,9 +56,10 @@ export default function TextFieldInput({
                 render={({ field }) => (
                     <TextField
                         {...field}
+                        {...extraTextFieldProps}
                         required={required}
                         slotProps={{ htmlInput: { readOnly } }}
-                        id={`${fieldKey}-text`}
+                        id={`${fieldKey}-${idSuffix}`}
                         value={field.value ?? ""}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => {
                             if (readOnly) return;
@@ -66,5 +74,29 @@ export default function TextFieldInput({
                 )}
             />
         </div>
+    );
+}
+
+/**
+ * Renders the text field input component.
+ */
+export function TextFieldInput(props: FieldInputProps) {
+    return <BaseFieldInput {...props} idSuffix="text" />;
+}
+
+/**
+ * Renders the multiline field input component.
+ */
+export function MultilineFieldInput(props: FieldInputProps) {
+    return (
+        <BaseFieldInput
+            {...props}
+            idSuffix="text"
+            extraTextFieldProps={{
+                multiline: true,
+                minRows: 4,
+                maxRows: 8,
+            }}
+        />
     );
 }

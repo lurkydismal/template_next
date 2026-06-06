@@ -1,11 +1,10 @@
 import { FieldError, FieldErrors } from "react-hook-form";
 import CustomFieldInput from "../../CustomFieldInput";
 import MarkdownFieldInput from "../../MarkdownFieldInput";
-import MultilineFieldInput from "../../MultilineFieldInput";
 import AutocompleteFieldInput from "../../AutocompleteFieldInput";
 import DateTimeFieldInput from "../../DateTimeFieldInput";
 import NumberSpinnerInput from "../../NumberSpinnerInput";
-import TextFieldInput from "../../TextFieldInput";
+import { MultilineFieldInput, TextFieldInput } from "../../TextFieldInput";
 import FileFieldInput from "../../FileFieldInput";
 import { isFieldReadOnly } from "../interconnected";
 import {
@@ -71,6 +70,7 @@ export const renderField = <
             />
         );
     }
+
     if (field.type === "markdown") {
         return (
             <MarkdownFieldInput

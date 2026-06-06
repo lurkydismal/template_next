@@ -16,13 +16,13 @@ type AutocompleteFieldInputProps = {
     readOnly?: boolean;
     value: unknown;
     options: readonly AutocompleteOption[];
-    loading?: boolean;
+    loading?: boolean | undefined;
     control: Control<Record<string, unknown>>;
-    error?: FieldError;
+    error?: FieldError | undefined;
     rules?: RegisterOptions<Record<string, unknown>, string>;
-    open?: boolean;
-    onOpen?: () => void;
-    onClose?: () => void;
+    open?: boolean | undefined;
+    onOpen?: (() => void) | undefined;
+    onClose?: (() => void) | undefined;
     onValueChange: (value: AutocompleteOption | null) => void;
 };
 
@@ -55,7 +55,7 @@ export default function AutocompleteFieldInput({
                 name={name}
                 control={control}
                 defaultValue={value ?? null}
-                rules={rules}
+                rules={{ ...(rules ? rules : {}) }}
                 render={({ field }) => (
                     <AutocompleteWithHighlight
                         value={field.value ?? null}

@@ -16,9 +16,9 @@ type FileFieldInputProps = {
     required: boolean;
     readOnly?: boolean;
     value: unknown;
-    accept?: string | string[];
+    accept?: string | string[] | undefined;
     control: Control<Record<string, unknown>>;
-    error?: FieldError;
+    error?: FieldError | undefined;
     rules?: RegisterOptions<Record<string, unknown>, string>;
     onValueChange: (value: File | null) => void;
 };
@@ -66,7 +66,7 @@ export default function FileFieldInput({
                 name={name}
                 control={control}
                 defaultValue={value ?? null}
-                rules={rules}
+                rules={{ ...(rules ? rules : {}) }}
                 disabled={readOnly}
                 render={({ field }) => (
                     <Stack spacing={1}>
@@ -127,17 +127,19 @@ export default function FileFieldInput({
                             onClose={closeImagePreview}
                             sourceValue={sourceValue}
                             label={label}
-                            accept={acceptValue}
-                            onFileDrop={
-                                readOnly
-                                    ? undefined
-                                    : (file) => {
-                                          applySelectedFile(
-                                              file,
-                                              field.onChange,
-                                          );
-                                      }
-                            }
+                            {...(acceptValue
+                                ? { accept: acceptValue }
+                                : {})}
+                            {...(!readOnly
+                                ? {
+                                    onFileDrop: (file) => {
+                                        applySelectedFile(
+                                            file,
+                                            field.onChange,
+                                        );
+                                    },
+                                }
+                                : {})}
                         />
                     </Stack>
                 )}

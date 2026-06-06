@@ -21,7 +21,7 @@ type DateTimeFieldInputProps = {
     type: "date" | "time" | "datetime";
     value: unknown;
     control: Control<Record<string, unknown>>;
-    error?: FieldError;
+    error?: FieldError | undefined;
     rules?: RegisterOptions<Record<string, unknown>, string>;
     onValueChange: (value: string | null) => void;
 };
@@ -77,7 +77,7 @@ export default function DateTimeFieldInput({
                     name={name}
                     control={control}
                     defaultValue={value ?? null}
-                    rules={rules}
+                    rules={{ ...(rules ? rules : {}) }}
                     render={({ field }) => (
                         <DatePicker
                             readOnly={readOnly}
@@ -117,16 +117,16 @@ export default function DateTimeFieldInput({
                     name={name}
                     control={control}
                     defaultValue={value ?? null}
-                    rules={rules}
+                    rules={{ ...(rules ? rules : {}) }}
                     render={({ field }) => (
                         <TimePicker
                             readOnly={readOnly}
                             value={
                                 field.value
                                     ? dayjs(
-                                          field.value as PickerInputValue,
-                                          "HH:mm:ss",
-                                      )
+                                        field.value as PickerInputValue,
+                                        "HH:mm:ss",
+                                    )
                                     : null
                             }
                             onChange={(next) => {
@@ -160,7 +160,7 @@ export default function DateTimeFieldInput({
                     name={name}
                     control={control}
                     defaultValue={value ?? null}
-                    rules={rules}
+                    rules={{ ...(rules ? rules : {}) }}
                     render={({ field }) => (
                         <DateTimePicker
                             readOnly={readOnly}

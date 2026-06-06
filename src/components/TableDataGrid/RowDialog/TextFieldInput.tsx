@@ -15,7 +15,7 @@ type FieldInputProps = {
     readOnly?: boolean;
     value: unknown;
     control: Control<Record<string, unknown>>;
-    error?: FieldError;
+    error?: FieldError | undefined;
     rules?: RegisterOptions<Record<string, unknown>, string>;
     onValueChange: (value: string) => void;
 };
@@ -51,7 +51,7 @@ function BaseFieldInput({
                 name={name}
                 control={control}
                 defaultValue={value ?? ""}
-                rules={rules}
+                rules={{ ...(rules ? rules : {}) }}
                 disabled={readOnly}
                 render={({ field }) => (
                     <TextField

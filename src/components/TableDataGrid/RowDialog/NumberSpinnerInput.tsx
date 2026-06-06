@@ -13,10 +13,10 @@ type NumberSpinnerInputProps = {
     required: boolean;
     readOnly?: boolean;
     value: unknown;
-    min?: number;
-    max?: number;
+    min?: number | undefined;
+    max?: number | undefined;
     control: Control<Record<string, unknown>>;
-    error?: FieldError;
+    error?: FieldError | undefined;
     rules?: RegisterOptions<Record<string, unknown>, string>;
     onValueChange: (value: number | null) => void;
 };
@@ -54,7 +54,7 @@ export default function NumberSpinnerInput({
             name={name}
             control={control}
             defaultValue={toNullableNumber(value)}
-            rules={rules}
+            rules={{ ...(rules ? rules : {}) }}
             disabled={readOnly}
             render={({ field }) => {
                 const numericValue = toNullableNumber(field.value);

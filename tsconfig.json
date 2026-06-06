@@ -6,7 +6,7 @@
             "dom.iterable",
             "esnext"
         ],
-        "allowJs": true,
+        // "allowJs": true,
         "skipLibCheck": true,
         "strict": true,
         "noEmit": true,
@@ -26,7 +26,18 @@
             "@/*": [
                 "./src/*"
             ]
-        }
+        },
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "allowUnusedLabels": false,
+        "noUncheckedSideEffectImports": true,
+        "noFallthroughCasesInSwitch": true,
+        "allowUnreachableCode": false,
+        "noUncheckedIndexedAccess": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "erasableSyntaxOnly": true,
+        "noImplicitOverride": true,
+        "exactOptionalPropertyTypes": true
     },
     "include": [
         "next-env.d.ts",
@@ -37,6 +48,7 @@
         "**/*.mts"
     ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+        ".next"
     ]
 }

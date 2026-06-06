@@ -126,28 +126,21 @@ function showStoredNotification(
         onClose: handleSnackbarClose,
     };
 
-    switch (notification.type) {
-        case "success":
-            snackbar.showSuccess(notification.message, options);
-            break;
+    const actions: Record<
+        StoredNotification["type"],
+        (msg: string, opts: typeof options) => void
+    > = {
+        success: snackbar.showSuccess,
+        error: snackbar.showError,
+        warning: snackbar.showWarning,
+        info: snackbar.showInfo,
+        default: snackbar.showMessage,
+    };
 
-        case "error":
-            snackbar.showError(notification.message, options);
-            break;
-
-        case "warning":
-            snackbar.showWarning(notification.message, options);
-            break;
-
-        case "info":
-            snackbar.showInfo(notification.message, options);
-            break;
-
-        case "default":
-        default:
-            snackbar.showMessage(notification.message, options);
-            break;
-    }
+    (actions[notification.type] ?? snackbar.showMessage)(
+        notification.message,
+        options,
+    );
 }
 
 /**

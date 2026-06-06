@@ -2,6 +2,7 @@
 
 import log from "@/utils/stdlog";
 import { LogFn } from "@/utils/stdlog/types";
+import { maxSnackbarCount } from "@/utils/stdvar";
 import {
     NotificationsNone as DefaultIcon,
     CheckCircleOutlined as SuccessIcon,
@@ -147,7 +148,7 @@ export default function CustomSnackbarProvider({
             {children}
 
             <SnackbarProvider
-                maxSnack={5}
+                maxSnack={maxSnackbarCount}
                 iconVariant={{
                     default: <DefaultIcon sx={{ mr: 1.5 }} />,
                     success: <SuccessIcon sx={{ mr: 1.5 }} />,

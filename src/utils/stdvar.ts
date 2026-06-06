@@ -177,6 +177,17 @@ export const fileTypeSignatures = [
 export const maxRetries = 3;
 
 /**
+ * Maximum number of snackbar notifications allowed to be visible at the same time.
+ *
+ * This value is used to cap concurrent on-screen notifications in the UI.
+ * When the limit is reached, additional notifications are either queued,
+ * ignored, or handled according to the snackbar implementation behavior.
+ *
+ * Intended to prevent visual clutter and avoid snackbar overflow/replacement issues.
+ */
+export const maxSnackbarCount = 5;
+
+/**
  * Keys used for localStorage, sessionStorage or cookies.
  * - Example: storing auth tokens, theme preferences, etc.
  *
@@ -187,13 +198,13 @@ export const maxRetries = 3;
 export const storageKeys = {
     client: isBrowser
         ? {
-              authStorageKey: "user", // FIX: Not found
-          }
+            authStorageKey: "user", // FIX: Not found
+        }
         : null,
 
     server: isServer
         ? {
-              accessToken: getEnv("COOKIE_NAME"),
-          }
+            accessToken: getEnv("COOKIE_NAME"),
+        }
         : null,
 };

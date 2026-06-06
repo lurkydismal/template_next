@@ -26,7 +26,6 @@ type FileFieldInputProps = {
 /**
  * Renders a file field with optional type filtering and image preview behavior.
  */
-
 export default function FileFieldInput({
     fieldKey,
     label,
@@ -42,10 +41,11 @@ export default function FileFieldInput({
 }: FileFieldInputProps) {
     const { imagePreviewOpen, openImagePreview, closeImagePreview } =
         useImagePreview();
+
     const acceptValue = useMemo(() => toAcceptString(accept), [accept]);
-    /**
-     * Applies a selected file to both form state and upstream row state.
-     */
+    const sourceValue = typeof value === "string" ? value : "";
+    const sourceIsImage = isImagePath(sourceValue);
+
     function applySelectedFile(
         file: File | null,
         onChange: (value: File | null) => void,
@@ -54,93 +54,98 @@ export default function FileFieldInput({
         onValueChange(file);
     }
 
-    const sourceValue = typeof value === "string" ? value : "";
-    const sourceIsImage = isImagePath(sourceValue);
-
     return (
         <Stack spacing={1}>
             <Typography variant="subtitle1" color="text.secondary">
                 {label}
             </Typography>
+
             <Controller
                 name={name}
                 control={control}
                 defaultValue={value ?? null}
-                rules={{ ...(rules ? rules : {}) }}
+                rules={rules ?? {}}
                 disabled={readOnly}
-                render={({ field }) => (
-                    <Stack spacing={1}>
-                        <Button
-                            component="label"
-                            variant="outlined"
-                            disabled={readOnly}
-                        >
-                            Select file
-                            <input
-                                id={`${fieldKey}-file`}
-                                type="file"
-                                hidden
-                                accept={acceptValue}
-                                required={required}
-                                onChange={(
-                                    e: ChangeEvent<HTMLInputElement>,
-                                ) => {
-                                    if (readOnly) return;
+                render={({ field }) => {
+                    const handleFileChange = (
+                        e: ChangeEvent<HTMLInputElement>,
+                    ): void => {
+                        if (readOnly) return;
 
-                                    const file = e.target.files?.[0] ?? null;
-                                    applySelectedFile(file, field.onChange);
-                                }}
+                        const file = e.target.files?.[0] ?? null;
+                        applySelectedFile(file, field.onChange);
+                    };
+
+                    const imagePreviewProps = !readOnly
+                        ? {
+                            onFileDrop: (file: File | null) => {
+                                applySelectedFile(file, field.onChange);
+                            },
+                        }
+                        : {};
+
+                    return (
+                        <Stack spacing={1}>
+                            <Button
+                                component="label"
+                                variant="outlined"
+                                disabled={readOnly}
+                            >
+                                Select file
+                                <input
+                                    id={`${fieldKey}-file`}
+                                    type="file"
+                                    hidden
+                                    accept={acceptValue}
+                                    required={required}
+                                    onChange={handleFileChange}
+                                />
+                            </Button>
+
+                            {sourceValue ? (
+                                sourceIsImage ? (
+                                    <Link
+                                        component="button"
+                                        type="button"
+                                        underline="hover"
+                                        onClick={openImagePreview}
+                                    >
+                                        Open image
+                                    </Link>
+                                ) : (
+                                    <Link
+                                        href={sourceValue}
+                                        download
+                                        rel="noreferrer"
+                                    >
+                                        Download file
+                                    </Link>
+                                )
+                            ) : null}
+
+                            {field.value instanceof File ? (
+                                <Typography variant="body2">
+                                    Selected: {field.value.name}
+                                </Typography>
+                            ) : null}
+
+                            {error?.message ? (
+                                <Typography variant="caption" color="error">
+                                    {error.message}
+                                </Typography>
+                            ) : null}
+
+                            <ImagePreviewDialog
+                                open={imagePreviewOpen}
+                                onClose={closeImagePreview}
+                                sourceValue={sourceValue}
+                                label={label}
+                                {...(acceptValue ? { accept: acceptValue } : {})}
+                                {...imagePreviewProps}
                             />
-                        </Button>
-                        {sourceValue ? (
-                            sourceIsImage ? (
-                                <Link
-                                    component="button"
-                                    type="button"
-                                    underline="hover"
-                                    onClick={openImagePreview}
-                                >
-                                    Open image
-                                </Link>
-                            ) : (
-                                <Link
-                                    href={sourceValue}
-                                    download
-                                    rel="noreferrer"
-                                >
-                                    Download file
-                                </Link>
-                            )
-                        ) : null}
-                        {field.value instanceof File ? (
-                            <Typography variant="body2">
-                                Selected: {field.value.name}
-                            </Typography>
-                        ) : null}
-                        {error?.message ? (
-                            <Typography variant="caption" color="error">
-                                {error.message}
-                            </Typography>
-                        ) : null}
-                        <ImagePreviewDialog
-                            open={imagePreviewOpen}
-                            onClose={closeImagePreview}
-                            sourceValue={sourceValue}
-                            label={label}
-                            {...(acceptValue ? { accept: acceptValue } : {})}
-                            {...(!readOnly
-                                ? {
-                                      onFileDrop: (file) => {
-                                          applySelectedFile(
-                                              file,
-                                              field.onChange,
-                                          );
-                                      },
-                                  }
-                                : {})}
-                        />
-                    </Stack>
-                )}
+                        </Stack>
+                    );
+                }}
             />
         </Stack>
     );

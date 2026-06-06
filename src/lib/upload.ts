@@ -20,21 +20,26 @@ import { uploadSchema } from "@/utils/validate/schemas";
 import { uploadToMinio } from "@/utils/minio";
 import { getEnv } from "@/utils/stdfunc";
 import { ActionResult } from "@/lib/types";
-import z from "zod";
+import {
+    UPLOAD_DIRS,
+    UploadTarget,
+    UploadTargetSchema,
+} from "@/data/minioTargets";
 
-/**
- * Mapping of logical upload targets to MinIO directory paths.
- * Used to determine where each file should be uploaded.
- */
-const UPLOAD_DIRS = {
-    table: "/path/to/folder",
+const IMAGE_STORAGE_META: Record<
+    string,
+    { contentType: string; extension: string }
+> = {
+    "image/jpeg": { contentType: "image/jpeg", extension: ".jpg" },
+    "image/png": { contentType: "image/png", extension: ".png" },
+    "image/webp": { contentType: "image/webp", extension: ".webp" },
+    "image/gif": { contentType: "image/gif", extension: ".gif" },
+};
+
+const DEFAULT_IMAGE_STORAGE_META = {
+    contentType: "application/octet-stream",
+    extension: ".bin",
 } as const;
-
-type UploadTarget = keyof typeof UPLOAD_DIRS;
-
-const UploadTargetSchema = z.enum(
-    Object.keys(UPLOAD_DIRS) as [UploadTarget, ...UploadTarget[]],
-);
 
 /**
  * Resolves storage metadata for validated image MIME types.
@@ -52,21 +57,7 @@ function getImageStorageMeta(mimeType: string): {
 } {
     const normalizedType = mimeType.trim().toLowerCase();
 
-    switch (normalizedType) {
-        case "image/jpeg":
-            return { contentType: "image/jpeg", extension: ".jpg" };
-        case "image/png":
-            return { contentType: "image/png", extension: ".png" };
-        case "image/webp":
-            return { contentType: "image/webp", extension: ".webp" };
-        case "image/gif":
-            return { contentType: "image/gif", extension: ".gif" };
-        default:
-            return {
-                contentType: "application/octet-stream",
-                extension: ".bin",
-            };
-    }
+    return IMAGE_STORAGE_META[normalizedType] ?? DEFAULT_IMAGE_STORAGE_META;
 }
 
 /**
@@ -91,7 +82,7 @@ async function upload(
             throw new Error("Invalid upload target");
         }
 
-        const parsed = await uploadSchema.parseAsync({ path, filename, file });
+        const parsed = uploadSchema.parse({ path, filename, file });
 
         const { contentType, extension } = getImageStorageMeta(
             parsed.file.type,

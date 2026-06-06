@@ -28,6 +28,8 @@ export const renderField = <
     getRules,
     handleFieldValueChange,
     getFileAction,
+    width,
+    height,
 }: RenderFieldParams<R, RI>) => {
     const key = String(field.key);
     const name = field.name ?? key;
@@ -133,6 +135,8 @@ export const renderField = <
                     accept={field.fileAccept}
                     onValueChange={(nextValue) => handleChange(nextValue)}
                     getFileAction={getFileAction}
+                    width={width}
+                    height={height}
                 />
             );
 

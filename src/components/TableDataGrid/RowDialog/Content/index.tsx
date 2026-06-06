@@ -402,6 +402,8 @@ export default function RowDialogContent<
                             getRules,
                             handleFieldValueChange,
                             getFileAction,
+                            width: field.width!,
+                            height: field.height!,
                         })}
                     </Grid>
                 ))}

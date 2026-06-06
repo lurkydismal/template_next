@@ -1,6 +1,5 @@
 import { RegisterOptions, UseFormReturn } from "react-hook-form";
 import { FieldConfig } from "../../types";
-import { getFileAction as getFileActionMinio } from "@/lib/getFile";
 
 /**
  * Shared parameters required to render a single editable row field.
@@ -22,5 +21,7 @@ export type RenderFieldParams<
         value: unknown,
         packedValues?: Record<string, unknown>,
     ) => void;
-    getFileAction: (filename: string) => ReturnType<typeof getFileActionMinio>;
+    getFileAction: (filename: string) => Promise<string>;
+    width: number | `${number}`;
+    height: number | `${number}`;
 };

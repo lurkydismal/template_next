@@ -119,6 +119,8 @@ export type FieldConfig<
         | "bottom-left"
         | "bottom-right";
     fileAccept?: string | string[];
+    width?: number | `${number}`;
+    height?: number | `${number}`;
 };
 
 export type UpdateRowAction = (fd: FormData) => Promise<void>;

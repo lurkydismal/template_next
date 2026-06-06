@@ -24,6 +24,8 @@ type FileFieldInputProps = {
     rules?: RegisterOptions<Record<string, unknown>, string>;
     onValueChange: (value: File | null) => void;
     getFileAction: (filename: string) => Promise<string>;
+    width: number | `${number}`;
+    height: number | `${number}`;
 };
 
 /**
@@ -42,6 +44,8 @@ export default function FileFieldInput({
     rules,
     onValueChange,
     getFileAction,
+    width,
+    height,
 }: FileFieldInputProps) {
     const { imagePreviewOpen, openImagePreview, closeImagePreview } =
         useImagePreview();
@@ -144,6 +148,8 @@ export default function FileFieldInput({
                                 onClose={closeImagePreview}
                                 sourceValue={sourceValue}
                                 label={label}
+                                width={width}
+                                height={height}
                                 getFileAction={getFileAction}
                                 {...(acceptValue
                                     ? { accept: acceptValue }

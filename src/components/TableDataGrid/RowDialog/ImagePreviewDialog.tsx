@@ -19,6 +19,8 @@ type ImagePreviewDialogProps = {
     onClose: () => void;
     onFileDrop?: (file: File) => void;
     accept?: string;
+    width: number | `${number}`;
+    height: number | `${number}`;
     getFileAction: (filename: string) => Promise<string>;
 };
 
@@ -61,10 +63,14 @@ export function useImagePreview(): UseImagePreviewResult {
 function ImagePreviewContent({
     sourceValue,
     label,
+    width,
+    height,
     getFileAction,
 }: {
     sourceValue: string;
     label: string;
+    width: number | `${number}`;
+    height: number | `${number}`;
     getFileAction: (filename: string) => Promise<string>;
 }) {
     const [isLoadingPreview, setIsLoadingPreview] = useState(true);
@@ -109,10 +115,8 @@ function ImagePreviewContent({
 
     log.debug({
         isLoadingPreview,
-        hasPreviewError,
-        imageRetryKey,
-        resolvedSourceValue,
-        isPending,
+        width,
+        height,
     });
 
     return (
@@ -162,12 +166,11 @@ function ImagePreviewContent({
                     alt={label}
                     onLoad={handlePreviewLoad}
                     onError={handlePreviewError}
-                    width={800}
-                    height={600}
+                    width={width}
+                    height={height}
                     style={{
-                        width: "100%",
-                        height: "auto",
-                        display: false ? "none" : "block",
+                        display: isPending ? "none" : "block",
+                        margin: "auto",
                     }}
                 />
             ) : null}
@@ -185,6 +188,8 @@ export function ImagePreviewDialog({
     onClose,
     onFileDrop,
     accept,
+    width,
+    height,
     getFileAction,
 }: ImagePreviewDialogProps) {
     /**
@@ -236,7 +241,6 @@ export function ImagePreviewDialog({
             open={open}
             onClose={onClose}
             maxWidth="md"
-            fullWidth
             onDragOver={(event) => event.preventDefault()}
             onDrop={handleDrop}
         >
@@ -244,6 +248,8 @@ export function ImagePreviewDialog({
                 key={`${open ? "open" : "closed"}-${sourceValue}`}
                 sourceValue={sourceValue}
                 label={label}
+                width={width}
+                height={height}
                 getFileAction={getFileAction}
             />
         </Dialog>

@@ -3,6 +3,8 @@ Implement image field preview
 
 Enable upload for filed when draggin to field in form
 
+Pass width and height down to field's NextImage for FileInput
+
 Implement SpeedDial with context based on if row dialog is open or not
 
 Implement option "multiple"(change) to auto-add new field when its filled to

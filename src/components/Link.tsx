@@ -28,6 +28,7 @@ type NextLinkProps = MuiLinkProps & {
  * </Link>
  */
 export function Link({ href, children, ...props }: Readonly<NextLinkProps>) {
+    // TODO: Fix unused
     const { onClick, onMouseEnter, onTouchStart, ...rest } = props;
 
     return (

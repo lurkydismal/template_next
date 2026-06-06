@@ -92,8 +92,8 @@ function hasValidHostPort(
     if (!groups) return false;
 
     return (
-        hostSchema.safeParse(groups.host).success &&
-        portSchema.safeParse(Number(groups.port)).success
+        hostSchema.safeParse(groups["host"]).success &&
+        portSchema.safeParse(Number(groups["port"])).success
     );
 }
 

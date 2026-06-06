@@ -259,7 +259,7 @@ export default function TableDataGrid<
           )
         : extraButtons;
 
-    const columns = columnsFromFields(resolvedFields);
+    const columns = columnsFromFields(resolvedFields, getFileAction);
 
     if (currentRows === null || fieldsResolving) {
         return (

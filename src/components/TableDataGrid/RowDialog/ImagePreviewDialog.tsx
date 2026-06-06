@@ -19,8 +19,8 @@ type ImagePreviewDialogProps = {
     onClose: () => void;
     onFileDrop?: (file: File) => void;
     accept?: string;
-    width: number | `${number}`;
-    height: number | `${number}`;
+    width?: number | `${number}` | undefined;
+    height?: number | `${number}` | undefined;
     getFileAction: (filename: string) => Promise<string>;
 };
 
@@ -69,8 +69,8 @@ function ImagePreviewContent({
 }: {
     sourceValue: string;
     label: string;
-    width: number | `${number}`;
-    height: number | `${number}`;
+    width?: number | `${number}` | undefined;
+    height?: number | `${number}` | undefined;
     getFileAction: (filename: string) => Promise<string>;
 }) {
     const [isLoadingPreview, setIsLoadingPreview] = useState(true);
@@ -87,7 +87,7 @@ function ImagePreviewContent({
 
             setResolvedSourceValue(value);
         });
-    }, [sourceValue]);
+    }, [sourceValue, getFileAction]);
 
     /**
      * Marks the preview as successfully loaded.
@@ -166,8 +166,8 @@ function ImagePreviewContent({
                     alt={label}
                     onLoad={handlePreviewLoad}
                     onError={handlePreviewError}
-                    width={width}
-                    height={height}
+                    {...(width ? { width } : {})}
+                    {...(height ? { height } : {})}
                     style={{
                         display: isPending ? "none" : "block",
                         margin: "auto",

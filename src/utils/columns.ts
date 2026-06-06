@@ -36,7 +36,17 @@ type NormalizeOptions = {
 /**
  * Renders an interactive file cell that reuses shared image preview behavior.
  */
-function FileCellLink({ value }: { value: string }) {
+function FileCellLink({
+    value,
+    getFileAction,
+    width,
+    height,
+}: {
+    value: string;
+    getFileAction: (filename: string) => Promise<string>;
+    width?: number | `${number}` | undefined;
+    height?: number | `${number}` | undefined;
+}) {
     const { imagePreviewOpen, openImagePreview, closeImagePreview } =
         useImagePreview();
 
@@ -62,6 +72,9 @@ function FileCellLink({ value }: { value: string }) {
                 onClose: closeImagePreview,
                 sourceValue: value,
                 label: "Image preview",
+                getFileAction,
+                width,
+                height,
             }),
         );
     }
@@ -82,11 +95,16 @@ function FileCellLink({ value }: { value: string }) {
 /**
  * Renders file-like values as action links with image-preview semantics.
  */
-function renderFileCell(params: GridRenderCellParams) {
+function renderFileCell(
+    params: GridRenderCellParams,
+    getFileAction: (filename: string) => Promise<string>,
+    width?: number | `${number}`,
+    height?: number | `${number}`,
+) {
     const value = typeof params.value === "string" ? params.value : "";
     if (!value) return "";
 
-    return createElement(FileCellLink, { value });
+    return createElement(FileCellLink, { value, width, height, getFileAction });
 }
 
 /**
@@ -140,7 +158,10 @@ export function normalizeColumns(
 export function columnsFromFields<
     R extends Record<string, unknown>,
     RI extends Record<string, unknown>,
->(fields: FieldConfig<R, RI>[]): readonly GridColDef[] {
+>(
+    fields: FieldConfig<R, RI>[],
+    getFileAction: (filename: string) => Promise<string>,
+): readonly GridColDef[] {
     return normalizeColumns(
         fields
             .filter((field) => !field.hidden)
@@ -150,15 +171,23 @@ export function columnsFromFields<
                 headerName: field.label,
                 ...(field.formatValue
                     ? {
-                          /**
-                           * Renders a data grid cell value from a normalized field definition.
-                           */
-                          renderCell: (params: GridRenderCellParams) =>
-                              String(field.formatValue!(params.value) ?? ""),
-                      }
+                        /**
+                         * Renders a data grid cell value from a normalized field definition.
+                         */
+                        renderCell: (params: GridRenderCellParams) =>
+                            String(field.formatValue!(params.value) ?? ""),
+                    }
                     : field.type === "file"
-                      ? { renderCell: renderFileCell }
-                      : {}),
+                        ? {
+                            renderCell: (params: GridRenderCellParams) =>
+                                renderFileCell(
+                                    params,
+                                    getFileAction,
+                                    field.width,
+                                    field.height,
+                                ),
+                        }
+                        : {}),
             })),
     );
 }

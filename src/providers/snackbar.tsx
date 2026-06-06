@@ -71,7 +71,7 @@ export default function CustomSnackbarProvider({
      */
     const _showMessage = (
         err: unknown,
-        variant?: VariantType,
+        variant: VariantType,
         options?: SnackbarOptions,
     ) => {
         const message = errorToMessage(err);

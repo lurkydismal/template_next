@@ -44,20 +44,10 @@ async function getFile(
 /**
  * Returns the HTTP URL to access a file stored in a MinIO bucket.
  *
- * Notes:
- * - The function checks that the bucket exists via `assertBucketExists` before generating the URL.
- * - The `expires` parameter controls the validity period of the presigned URL.
- *   - Default is 60 seconds.
- *   - Maximum allowed by MinIO is 7 days (604800 seconds).
- *
  * Parameters:
- * @param bucket - Name of the MinIO bucket.
- * @param path - Directory-like path (prefix) inside the bucket; may contain multiple segments.
- * @param filename - Name of the file in the bucket.
+ * @param rawTarget - Logical upload target (must match one of UPLOAD_DIRS keys).
+ * @param rawFilename - Name of the file in the bucket.
  */
-export async function getFileAction(formData: FormData) {
-    const rawTarget = formData.get("target");
-    const rawFilename = formData.get("filename");
-
+export async function getFileAction(rawTarget: unknown, rawFilename: unknown) {
     return getFile(rawTarget, rawFilename);
 }

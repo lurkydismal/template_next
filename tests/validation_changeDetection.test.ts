@@ -35,9 +35,9 @@ function getSingleValidate(
     rules: ReturnType<typeof getFieldRules>,
 ):
     | ((
-          value: unknown,
-          formValues: Record<string, unknown>,
-      ) => Promise<unknown> | unknown)
+        value: unknown,
+        formValues: Record<string, unknown>,
+    ) => Promise<unknown> | unknown)
     | undefined {
     const candidate = rules.validate;
     if (typeof candidate === "function") return candidate;
@@ -139,7 +139,7 @@ describe("getFieldRules validation", () => {
 
         const form = createFormStub({ custom: "", amount: "" });
 
-        const numberRules = getFieldRules(fields[0], fields, form, baseRow, {});
+        const numberRules = getFieldRules(fields[0]!, fields, form, baseRow, {});
         await expect(runSingleValidate(numberRules, "2")).resolves.toBe(true);
         await expect(runSingleValidate(numberRules, "abc")).resolves.toBe(
             "Enter a valid number",
@@ -151,15 +151,15 @@ describe("getFieldRules validation", () => {
             "Amount must be less than or equal to 10",
         );
 
-        const uuidRules = getFieldRules(fields[1], fields, form, baseRow, {});
+        const uuidRules = getFieldRules(fields[1]!, fields, form, baseRow, {});
         await expect(runSingleValidate(uuidRules, "not-uuid")).resolves.toBe(
             "Enter a valid UUID value",
         );
 
-        const hexRules = getFieldRules(fields[2], fields, form, baseRow, {});
+        const hexRules = getFieldRules(fields[2]!, fields, form, baseRow, {});
         await expect(runSingleValidate(hexRules, "0x1af")).resolves.toBe(true);
 
-        const inetRules = getFieldRules(fields[3], fields, form, baseRow, {});
+        const inetRules = getFieldRules(fields[3]!, fields, form, baseRow, {});
         await expect(
             runSingleValidate(inetRules, "127.0.0.1:3000"),
         ).resolves.toBe(true);
@@ -170,7 +170,7 @@ describe("getFieldRules validation", () => {
             runSingleValidate(inetRules, "999.0.0.1"),
         ).resolves.toContain("Enter a valid IPv4/IPv6 value");
 
-        const groupRules = getFieldRules(fields[4], fields, form, baseRow, {});
+        const groupRules = getFieldRules(fields[4]!, fields, form, baseRow, {});
         await expect(runSingleValidate(groupRules, "")).resolves.toContain(
             "Enter at least 1 of:",
         );

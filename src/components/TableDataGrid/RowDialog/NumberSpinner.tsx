@@ -1,4 +1,3 @@
-import * as React from "react";
 import { NumberField as BaseNumberField } from "@base-ui/react/number-field";
 import AddIcon from "@mui/icons-material/Add";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
@@ -9,6 +8,7 @@ import FormControl from "@mui/material/FormControl";
 import FormHelperText from "@mui/material/FormHelperText";
 import FormLabel from "@mui/material/FormLabel";
 import OutlinedInput from "@mui/material/OutlinedInput";
+import { useId } from "react";
 
 export type NumberSpinnerProps = BaseNumberField.Root.Props & {
     label?: React.ReactNode;
@@ -28,7 +28,7 @@ export default function NumberSpinner({
     size = "medium",
     ...other
 }: NumberSpinnerProps) {
-    const generatedId = React.useId();
+    const generatedId = useId();
     const id = idProp ?? generatedId;
 
     return (

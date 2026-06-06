@@ -45,7 +45,6 @@ export const renderField = <
     };
 
     const commonProps = {
-        key: `${key}-${idx}`,
         fieldKey: key,
         label: field.label,
         name,
@@ -74,6 +73,7 @@ export const renderField = <
             return (
                 <MultilineFieldInput
                     {...commonProps}
+                    key={`${key}-${idx}`}
                     onValueChange={(nextValue) => handleChange(nextValue)}
                 />
             );
@@ -82,6 +82,7 @@ export const renderField = <
             return (
                 <MarkdownFieldInput
                     {...commonProps}
+                    key={`${key}-${idx}`}
                     toggleCorner={field.markdownToggleCorner}
                     onValueChange={(nextValue) => handleChange(nextValue)}
                 />
@@ -96,6 +97,7 @@ export const renderField = <
             return (
                 <AutocompleteFieldInput
                     {...commonProps}
+                    key={`${key}-${idx}`}
                     options={filteredOptions}
                     loading={field.autocompleteLoading}
                     open={field.autocompleteOpen}
@@ -115,6 +117,7 @@ export const renderField = <
             return (
                 <NumberSpinnerInput
                     {...commonProps}
+                    key={`${key}-${idx}`}
                     min={field.min}
                     max={field.max}
                     onValueChange={(nextValue) => handleChange(nextValue)}
@@ -125,6 +128,7 @@ export const renderField = <
             return (
                 <FileFieldInput
                     {...commonProps}
+                    key={`${key}-${idx}`}
                     accept={field.fileAccept}
                     onValueChange={(nextValue) => handleChange(nextValue)}
                 />
@@ -136,6 +140,7 @@ export const renderField = <
             return (
                 <DateTimeFieldInput
                     {...commonProps}
+                    key={`${key}-${idx}`}
                     type={field.type}
                     onValueChange={(nextValue) => handleChange(nextValue)}
                 />
@@ -145,6 +150,7 @@ export const renderField = <
             return (
                 <TextFieldInput
                     {...commonProps}
+                    key={`${key}-${idx}`}
                     onValueChange={(nextValue) => handleChange(nextValue)}
                 />
             );

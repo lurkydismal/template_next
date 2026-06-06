@@ -4,8 +4,6 @@ Remove "download file" from file field
 
 Enable upload for filed when draggin to field in form
 
-Notificaitons button: hide badge when all unread notifications are shown on screen
-
 Implement SpeedDial with context based on if row dialog is open or not
 
 Implement option "multiple"(change) to auto-add new field when its filled to

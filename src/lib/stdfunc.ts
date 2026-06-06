@@ -32,7 +32,7 @@ import log from "@/utils/stdlog";
 export async function mockAction(
     milliseconds: number,
     data?: unknown,
-): Promise<{ ok: true, data: undefined }>;
+): Promise<{ ok: true; data: undefined }>;
 
 /**
  * Mock server action that waits for the specified duration

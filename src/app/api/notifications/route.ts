@@ -26,6 +26,11 @@ export async function GET(): Promise<Response> {
  * Persists one notification and emits it through the shared SSE bus.
  */
 export async function POST(request: Request): Promise<Response> {
+    const invalidResponse = Response.json(
+        { error: "Invalid JSON payload" },
+        { status: 400 },
+    );
+
     let payload: { type?: NotificationType; message?: string };
     try {
         payload = (await request.json()) as {
@@ -33,10 +38,7 @@ export async function POST(request: Request): Promise<Response> {
             message?: string;
         };
     } catch {
-        return Response.json(
-            { error: "Invalid JSON payload" },
-            { status: 400 },
-        );
+        return invalidResponse;
     }
     // FIX: Validate type
     const type = payload.type ?? "default";
@@ -51,15 +53,20 @@ export async function POST(request: Request): Promise<Response> {
         .values({ type, message })
         .returning();
 
-    await emitNotificationEvent({
-        event: "notification",
-        notificationId: created.id,
-        type: created.type,
-        message: created.message,
-        occurredAt: new Date().toISOString(),
-    });
+    if (created) {
+        await emitNotificationEvent({
+            event: "notification",
+            notificationId: created.id,
+            type: created.type,
+            message: created.message,
+            occurredAt: new Date().toISOString(),
+        });
 
-    return Response.json(created, { status: 201 });
+        return Response.json(created, { status: 201 });
+
+    } else {
+        return invalidResponse;
+    }
 }
 
 /**

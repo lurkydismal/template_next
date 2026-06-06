@@ -3,7 +3,7 @@
 import CustomDivider from "@/components/TableDataGrid/CustomDivider";
 import { NotificationsRow } from "@/db/types";
 import { useSnackbar } from "@/providers/snackbar";
-import { isDev } from "@/utils/stdvar";
+import { isDev, maxSnackbarCount } from "@/utils/stdvar";
 import uuid from "@/utils/uuid";
 import {
     Queue as MockShowIcon,
@@ -191,14 +191,21 @@ export default function ExtraToolbarButtons<
             (item) => !visibleUnreadIds.includes(item.id),
         );
 
-        notYetVisible.forEach((item) =>
+        const remainingSlots = Math.max(
+            maxSnackbarCount - visibleUnreadIds.length,
+            0,
+        );
+
+        const toShow = notYetVisible.slice(0, remainingSlots);
+
+        toShow.forEach((item) =>
             showStoredNotification(item, snackbar, handleNotificationDismiss),
         );
 
-        if (notYetVisible.length > 0) {
+        if (toShow.length > 0) {
             setVisibleUnreadIds((current) => [
                 ...current,
-                ...notYetVisible.map((item) => item.id),
+                ...toShow.map((item) => item.id),
             ]);
         }
     }, [

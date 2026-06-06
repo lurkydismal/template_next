@@ -98,7 +98,7 @@ async function upload(
             contentType,
         );
 
-        return { ok: true };
+        return { ok: true, data: undefined };
     } catch (err) {
         // err is a ZodError on validation failure or other error
         log.error("Upload error:", err);

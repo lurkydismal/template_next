@@ -234,7 +234,7 @@ export async function save(
 
     await emitDashboardChange(rawTarget);
 
-    return { ok: true };
+    return { ok: true, data: undefined };
 }
 
 /**

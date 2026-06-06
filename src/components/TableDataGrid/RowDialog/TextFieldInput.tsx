@@ -51,7 +51,7 @@ function BaseFieldInput({
                 name={name}
                 control={control}
                 defaultValue={value ?? ""}
-                rules={{ ...(rules ? rules : {}) }}
+                rules={rules ?? {}}
                 disabled={readOnly}
                 render={({ field }) => (
                     <TextField

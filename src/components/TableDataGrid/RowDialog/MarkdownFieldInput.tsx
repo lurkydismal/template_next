@@ -76,7 +76,7 @@ export default function MarkdownFieldInput({
                 name={name}
                 control={control}
                 defaultValue={value ?? ""}
-                rules={{ ...(rules ? rules : {}) }}
+                rules={rules ?? {}}
                 disabled={readOnly}
                 render={({ field }) => (
                     <Box sx={{ position: "relative" }}>

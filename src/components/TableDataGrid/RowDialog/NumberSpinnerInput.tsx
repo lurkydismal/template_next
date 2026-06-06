@@ -54,7 +54,7 @@ export default function NumberSpinnerInput({
             name={name}
             control={control}
             defaultValue={toNullableNumber(value)}
-            rules={{ ...(rules ? rules : {}) }}
+            rules={rules ?? {}}
             disabled={readOnly}
             render={({ field }) => {
                 const numericValue = toNullableNumber(field.value);

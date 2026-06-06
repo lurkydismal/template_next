@@ -55,7 +55,7 @@ export default function AutocompleteFieldInput({
                 name={name}
                 control={control}
                 defaultValue={value ?? null}
-                rules={{ ...(rules ? rules : {}) }}
+                rules={rules ?? {}}
                 render={({ field }) => (
                     <AutocompleteWithHighlight
                         value={field.value ?? null}

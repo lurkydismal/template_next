@@ -48,7 +48,6 @@ export default function NumberSpinner({
                         "& .MuiButton-root": {
                             borderColor: "divider",
                             minWidth: 0,
-                            bgcolor: "action.hover",
                             "&:not(.Mui-disabled)": {
                                 color: "text.primary",
                             },

@@ -1,5 +1,5 @@
 import { ChangeEvent, useMemo } from "react";
-import { Button, Link, Stack, Typography } from "@mui/material";
+import { Button, Stack, Typography } from "@mui/material";
 import {
     Control,
     Controller,
@@ -86,14 +86,24 @@ export default function FileFieldInput({
 
                     return (
                         <Stack spacing={1}>
-                            {sourceValue && sourceIsImage ? (
-                                <Button
-                                    component="label"
-                                    variant="outlined"
-                                    disabled={readOnly}
-                                >
-                                    Open image
-                                </Button>
+                            {sourceValue ? (sourceIsImage
+                                ? (
+                                    <Button
+                                        component="label"
+                                        variant="outlined"
+                                        disabled={readOnly}
+                                    >
+                                        Open image
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        component="label"
+                                        variant="outlined"
+                                        disabled={readOnly}
+                                    >
+                                        Download file
+                                    </Button>
+                                )
                             ) : (
                                 <Button
                                     component="label"

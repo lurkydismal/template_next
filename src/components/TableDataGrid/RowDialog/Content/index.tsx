@@ -19,7 +19,7 @@ type RowDialogContentProps<R, RI> = {
     registerDiscardDraft: (fn: (() => void) | null) => void;
     createRowAction: CreateRowAction<RI>;
     updateRowAction: UpdateRowAction;
-    onUpdated?: () => Promise<void> | void;
+    onUpdated?: (() => Promise<void> | void) | undefined;
     idKey?: keyof R;
 };
 

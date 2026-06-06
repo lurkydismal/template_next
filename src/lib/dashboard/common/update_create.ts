@@ -36,7 +36,7 @@ function toDbMutation(
     const base = { ...parsedRow };
 
     if (opts.isUpdate) {
-        delete base.id;
+        delete base["id"];
         return {
             ...base,
             last_editor_id: actorId,
@@ -211,8 +211,8 @@ export async function save(
             typeof (updateResult as { rowCount?: number }).rowCount === "number"
                 ? (updateResult as { rowCount: number }).rowCount
                 : Array.isArray(updateResult)
-                  ? updateResult.length
-                  : undefined;
+                    ? updateResult.length
+                    : undefined;
 
         if (affectedRows === undefined) {
             throw new Error(
@@ -251,16 +251,16 @@ export async function parseForm(formData: FormData): Promise<MutationRow> {
         }
     }
 
-    if (entries.id !== undefined) {
+    if (entries["id"] !== undefined) {
         const idResult = z.coerce
             .number()
             .int()
             .positive()
-            .safeParse(entries.id);
+            .safeParse(entries["id"]);
         if (!idResult.success) {
-            throw new Error(`Invalid id value: ${entries.id}`);
+            throw new Error(`Invalid id value: ${entries["id"]}`);
         }
-        entries.id = idResult.data;
+        entries["id"] = idResult.data;
     }
 
     return entries;

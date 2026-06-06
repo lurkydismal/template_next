@@ -37,7 +37,7 @@ export default function AppTheme(props: AppThemeProps) {
 
     // Get user's browser locale (e.g., "en-US") and extract language code ("en")
     const userLocale = navigator.language || "en-US";
-    const lang = userLocale.split("-")[0];
+    const lang = userLocale.split("-")[0]!;
 
     // Function to fetch localized messages for MUI components, DataGrid, and DatePicker
     // with a fallback to enUS

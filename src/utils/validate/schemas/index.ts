@@ -92,6 +92,11 @@ export const uploadSchema = z.object({
     file: fileSchema,
 });
 
+export const getFileSchema = z.object({
+    filename: filenameSchema,
+    path: pathSchema.optional(),
+});
+
 export const dateInputSchema = z
     .union([z.string(), z.date(), z.custom<Dayjs>((v) => dayjs.isDayjs(v))])
     .superRefine((v, ctx) => {

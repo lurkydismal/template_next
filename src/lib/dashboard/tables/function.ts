@@ -29,6 +29,8 @@ export async function updateRowAction(
     return _updateRowAction(target, idColumn.name, fd);
 }
 
-export async function getFileAction(filename: string): ReturnType<typeof _getFileAction> {
+export async function getFileAction(
+    filename: string,
+): ReturnType<typeof _getFileAction> {
     return _getFileAction(target, filename);
 }

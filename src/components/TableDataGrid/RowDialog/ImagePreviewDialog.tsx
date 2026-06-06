@@ -77,9 +77,7 @@ function ImagePreviewContent({
 
     useEffect(() => {
         startTransition(async () => {
-            const value = await getFileAction(
-                sourceValue,
-            );
+            const value = await getFileAction(sourceValue);
 
             setResolvedSourceValue(value);
         });
@@ -109,7 +107,13 @@ function ImagePreviewContent({
         setImageRetryKey((currentValue) => currentValue + 1);
     }
 
-    log.debug({ isLoadingPreview, hasPreviewError, imageRetryKey, resolvedSourceValue, isPending });
+    log.debug({
+        isLoadingPreview,
+        hasPreviewError,
+        imageRetryKey,
+        resolvedSourceValue,
+        isPending,
+    });
 
     return (
         <DialogContent>
@@ -175,7 +179,6 @@ function ImagePreviewContent({
  * Displays an image preview dialog with a shared UI across file renderers.
  */
 export function ImagePreviewDialog({
-
     open,
     sourceValue,
     label,

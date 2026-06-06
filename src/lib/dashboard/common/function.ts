@@ -57,10 +57,7 @@ export async function updateRowAction(
 /**
  * Get file action.
  */
-export async function getFileAction(
-    target: DbTarget,
-    filename: string,
-) {
+export async function getFileAction(target: DbTarget, filename: string) {
     const result = await _getFileAction(target, filename);
 
     if (!result.ok) {

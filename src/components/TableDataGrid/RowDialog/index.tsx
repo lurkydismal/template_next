@@ -24,7 +24,6 @@ import RowDialogContent from "./Content";
 import { TransitionProps } from "@mui/material/transitions";
 import Draggable from "react-draggable";
 
-
 export type { FieldConfig } from "./types";
 
 const promptButtonSx = {

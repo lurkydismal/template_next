@@ -11,7 +11,6 @@ import { renderField } from "./renderField";
 import { resolveInterconnectedFieldUpdates } from "./interconnected";
 import { getFieldRules } from "./validation";
 
-
 type RowDialogContentProps<R, RI> = {
     row: R;
     fields: FieldConfig<R, RI>[];

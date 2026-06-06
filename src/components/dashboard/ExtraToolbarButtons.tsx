@@ -108,9 +108,6 @@ function showStoredNotification(
     snackbar: ReturnType<typeof useSnackbar>,
     onDismiss: (notificationId: number) => void,
 ) {
-    /**
-     * Marks the notification as read only when notistack reports an explicit close.
-     */
     const handleSnackbarClose = (
         _event: unknown,
         reason: CloseReason,
@@ -156,12 +153,25 @@ export default function ExtraToolbarButtons<
     createRowAction: CreateRowAction<RI>;
 }>) {
     const snackbar = useSnackbar();
-    const { showError, showInfo, showMessage, showSuccess, showWarning } =
-        snackbar;
-    const [notifications, setNotifications] = useState<StoredNotification[]>(
-        [],
-    );
+    const { showError, showInfo, showMessage, showSuccess, showWarning } = snackbar;
+
+    const [notifications, setNotifications] = useState<StoredNotification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [visibleUnreadIds, setVisibleUnreadIds] = useState<number[]>([]);
+
+    const hiddenUnreadCount = Math.max(unreadCount - visibleUnreadIds.length, 0);
+
+    const syncNotifications = useCallback(async (dismissedId?: number) => {
+        const { rows, unreadCount: unread } = await readNotifications();
+        setNotifications(rows);
+        setUnreadCount(unread);
+
+        if (dismissedId !== undefined) {
+            setVisibleUnreadIds((current) =>
+                current.filter((id) => id !== dismissedId),
+            );
+        }
+    }, []);
 
     /**
      * Marks one notification as read after the user explicitly dismisses it.
@@ -169,41 +179,54 @@ export default function ExtraToolbarButtons<
     const handleNotificationDismiss = useCallback(
         (notificationId: number) => {
             void markNotifications([notificationId], true)
-                .then(() => readNotifications())
-                .then(({ rows, unreadCount: unread }) => {
-                    setNotifications(rows);
-                    setUnreadCount(unread);
-                })
+                .then(() => syncNotifications(notificationId))
                 .catch(showError);
         },
-        [showError],
+        [showError, syncNotifications],
     );
 
+    const handleShowUnreadNotifications = useCallback(() => {
+        const unreadNotifications = getUnreadNotifications(notifications);
+        const notYetVisible = unreadNotifications.filter(
+            (item) => !visibleUnreadIds.includes(item.id),
+        );
+
+        notYetVisible.forEach((item) =>
+            showStoredNotification(item, snackbar, handleNotificationDismiss),
+        );
+
+        if (notYetVisible.length > 0) {
+            setVisibleUnreadIds((current) => [
+                ...current,
+                ...notYetVisible.map((item) => item.id),
+            ]);
+        }
+    }, [
+        notifications,
+        visibleUnreadIds,
+        snackbar,
+        handleNotificationDismiss,
+    ]);
+
     useEffect(() => {
-        void readNotifications()
-            .then(({ rows, unreadCount: unread }) => {
-                setNotifications(rows);
-                setUnreadCount(unread);
-            })
-            .catch(showError);
+        void syncNotifications().catch(showError);
 
         const source = new EventSource("/api/dashboard/changes");
         source.onmessage = (event) => {
             const payload = JSON.parse(event.data) as { type?: string };
-            if ((payload as { event?: string }).event !== "notification")
+            if ((payload as { event?: string }).event !== "notification") {
                 return;
+            }
 
-            void readNotifications()
-                .then(({ rows, unreadCount: unread }) => {
-                    setNotifications(rows);
-                    setUnreadCount(unread);
+            void syncNotifications()
+                .then(() => {
                     showInfo("New notifications available");
                 })
                 .catch(showError);
         };
 
         return () => source.close();
-    }, [showInfo, showError]);
+    }, [syncNotifications, showInfo, showError]);
 
     return (
         <>
@@ -260,21 +283,10 @@ export default function ExtraToolbarButtons<
 
             <Tooltip title="Notifications">
                 <ToolbarButton
-                    onClick={() => {
-                        const unreadNotifications =
-                            getUnreadNotifications(notifications);
-
-                        unreadNotifications.forEach((item) =>
-                            showStoredNotification(
-                                item,
-                                snackbar,
-                                handleNotificationDismiss,
-                            ),
-                        );
-                    }}
+                    onClick={handleShowUnreadNotifications}
                 >
                     <Badge
-                        badgeContent={unreadCount}
+                        badgeContent={hiddenUnreadCount}
                         color="info"
                         variant="dot"
                     >

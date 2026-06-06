@@ -1,9 +1,16 @@
 import { TextField, styled } from "@mui/material";
-import { QuickFilter, ToolbarButton } from "@mui/x-data-grid";
+import { QuickFilter, ToolbarButton, type ToolbarButtonProps } from "@mui/x-data-grid";
+import { forwardRef } from "react";
 
 export type OwnerState = {
     expanded: boolean;
 };
+
+const ToolbarButtonBase = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
+    function ToolbarButtonBase(props, ref) {
+        return <ToolbarButton ref={ref} {...props} />;
+    }
+);
 
 /**
  * Provides the styled quick filter container for the data grid toolbar.
@@ -16,7 +23,7 @@ export const StyledQuickFilter = styled(QuickFilter)({
 /**
  * Provides the styled toolbar button used by custom data grid controls.
  */
-export const StyledToolbarButton = styled(ToolbarButton)<{
+export const StyledToolbarButton = styled(ToolbarButtonBase)<{
     ownerState: OwnerState;
 }>(({ theme, ownerState }) => ({
     gridArea: "1 / 1",

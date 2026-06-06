@@ -37,6 +37,23 @@ export const renderField = <
     )[name] as FieldError | undefined;
     const rules = getRules(field);
 
+    const handleChange = (nextValue: unknown, packedValues?: Record<string, unknown>) => {
+        handleFieldValueChange(field, nextValue, packedValues);
+    };
+
+    const commonProps = {
+        key: `${key}-${idx}`,
+        fieldKey: key,
+        label: field.label,
+        name,
+        required: !!field.required,
+        readOnly,
+        value,
+        control: form.control,
+        error,
+        rules,
+    };
+
     if (typeof field.render === "function") {
         return (
             <CustomFieldInput
@@ -44,167 +61,86 @@ export const renderField = <
                 field={field}
                 value={value}
                 row={row}
-                onValueChange={(nextValue) =>
-                    handleFieldValueChange(field, nextValue)
-                }
+                onValueChange={(nextValue) => handleChange(nextValue)}
             />
         );
     }
 
-    if (field.type === "multiline") {
-        return (
-            <MultilineFieldInput
-                key={`${key}-${idx}`}
-                fieldKey={key}
-                label={field.label}
-                name={name}
-                required={!!field.required}
-                readOnly={readOnly}
-                value={value}
-                onValueChange={(nextValue) =>
-                    handleFieldValueChange(field, nextValue)
-                }
-                control={form.control}
-                error={error}
-                rules={rules}
-            />
-        );
+    switch (field.type) {
+        case "multiline":
+            return (
+                <MultilineFieldInput
+                    {...commonProps}
+                    onValueChange={(nextValue) => handleChange(nextValue)}
+                />
+            );
+
+        case "markdown":
+            return (
+                <MarkdownFieldInput
+                    {...commonProps}
+                    toggleCorner={field.markdownToggleCorner}
+                    onValueChange={(nextValue) => handleChange(nextValue)}
+                />
+            );
+
+        case "autocomplete": {
+            const filteredOptions = getFilteredAutocompleteOptions(field, values);
+
+            return (
+                <AutocompleteFieldInput
+                    {...commonProps}
+                    options={filteredOptions}
+                    loading={field.autocompleteLoading}
+                    open={field.autocompleteOpen}
+                    onOpen={field.onAutocompleteOpen}
+                    onClose={field.onAutocompleteClose}
+                    onValueChange={(nextValue) =>
+                        handleChange(
+                            nextValue,
+                            getPackedValuesFromAutocomplete(nextValue),
+                        )
+                    }
+                />
+            );
+        }
+
+        case "number":
+            return (
+                <NumberSpinnerInput
+                    {...commonProps}
+                    min={field.min}
+                    max={field.max}
+                    onValueChange={(nextValue) => handleChange(nextValue)}
+                />
+            );
+
+        case "file":
+            return (
+                <FileFieldInput
+                    {...commonProps}
+                    accept={field.fileAccept}
+                    onValueChange={(nextValue) => handleChange(nextValue)}
+                />
+            );
+
+        case "date":
+        case "time":
+        case "datetime":
+            return (
+                <DateTimeFieldInput
+                    {...commonProps}
+                    type={field.type}
+                    onValueChange={(nextValue) => handleChange(nextValue)}
+                />
+            );
+
+        default:
+            return (
+                <TextFieldInput
+                    {...commonProps}
+                    onValueChange={(nextValue) => handleChange(nextValue)}
+                />
+            );
     }
-
-    if (field.type === "markdown") {
-        return (
-            <MarkdownFieldInput
-                key={`${key}-${idx}`}
-                fieldKey={key}
-                label={field.label}
-                name={name}
-                required={!!field.required}
-                readOnly={readOnly}
-                value={value}
-                toggleCorner={field.markdownToggleCorner}
-                onValueChange={(nextValue) =>
-                    handleFieldValueChange(field, nextValue)
-                }
-                control={form.control}
-                error={error}
-                rules={rules}
-            />
-        );
-    }
-
-    if (field.type === "autocomplete") {
-        const filteredOptions = getFilteredAutocompleteOptions(field, values);
-
-        return (
-            <AutocompleteFieldInput
-                key={`${key}-${idx}`}
-                fieldKey={key}
-                label={field.label}
-                name={name}
-                required={!!field.required}
-                readOnly={readOnly}
-                value={value}
-                options={filteredOptions}
-                loading={field.autocompleteLoading}
-                open={field.autocompleteOpen}
-                onOpen={field.onAutocompleteOpen}
-                onClose={field.onAutocompleteClose}
-                onValueChange={(nextValue) => {
-                    const packedValues =
-                        getPackedValuesFromAutocomplete(nextValue);
-
-                    handleFieldValueChange(field, nextValue, packedValues);
-                }}
-                control={form.control}
-                error={error}
-                rules={rules}
-            />
-        );
-    }
-
-    if (field.type === "number") {
-        return (
-            <NumberSpinnerInput
-                key={`${key}-${idx}`}
-                fieldKey={key}
-                label={field.label}
-                name={name}
-                required={!!field.required}
-                readOnly={readOnly}
-                value={value}
-                min={field.min}
-                max={field.max}
-                onValueChange={(nextValue) =>
-                    handleFieldValueChange(field, nextValue)
-                }
-                control={form.control}
-                error={error}
-                rules={rules}
-            />
-        );
-    }
-
-    if (field.type === "file") {
-        return (
-            <FileFieldInput
-                key={`${key}-${idx}`}
-                fieldKey={key}
-                label={field.label}
-                name={name}
-                required={!!field.required}
-                readOnly={readOnly}
-                value={value}
-                accept={field.fileAccept}
-                onValueChange={(nextValue) =>
-                    handleFieldValueChange(field, nextValue)
-                }
-                control={form.control}
-                error={error}
-                rules={rules}
-            />
-        );
-    }
-
-    if (
-        field.type === "date" ||
-        field.type === "time" ||
-        field.type === "datetime"
-    ) {
-        return (
-            <DateTimeFieldInput
-                key={`${key}-${idx}`}
-                fieldKey={key}
-                label={field.label}
-                name={name}
-                required={!!field.required}
-                readOnly={readOnly}
-                type={field.type}
-                value={value}
-                onValueChange={(nextValue) =>
-                    handleFieldValueChange(field, nextValue)
-                }
-                control={form.control}
-                error={error}
-                rules={rules}
-            />
-        );
-    }
-
-    return (
-        <TextFieldInput
-            key={`${key}-${idx}`}
-            fieldKey={key}
-            label={field.label}
-            name={name}
-            required={!!field.required}
-            readOnly={readOnly}
-            value={value}
-            onValueChange={(nextValue) =>
-                handleFieldValueChange(field, nextValue)
-            }
-            control={form.control}
-            error={error}
-            rules={rules}
-        />
-    );
 };

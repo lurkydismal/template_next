@@ -59,8 +59,8 @@ docker-up-all:
     just docker-up
 
 # Start one service in detached mode.
-docker-up image='postgres':
-    docker compose up -d '{{ image }}'
+docker-up image='postgres minio':
+    docker compose up -d {{ image }}
 
 # Stop all running containers in the current Docker Compose project without removing containers, networks, or volumes.
 docker-stop:

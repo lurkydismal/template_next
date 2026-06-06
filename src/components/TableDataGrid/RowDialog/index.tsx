@@ -42,8 +42,8 @@ const createSlideTransition = (direction: "up" | "down" | "left" | "right") =>
         return <Slide direction={direction} ref={ref} {...props} />;
     });
 
-export const TransitionRight = createSlideTransition("right");
-export const TransitionUp = createSlideTransition("up");
+const TransitionRight = createSlideTransition("right");
+const TransitionUp = createSlideTransition("up");
 
 function PaperComponent(props: PaperProps) {
     const nodeRef = useRef<HTMLDivElement>(null);

@@ -31,11 +31,11 @@ const logger = new DefaultLogger({ writer: new MyLogWriter() });
 // `casing: "snake_case"` ensures database fields are mapped in snake_case
 const db = drizzle({
     connection: {
-        user: process.env.POSTGRES_USER!,
-        password: process.env.POSTGRES_PASSWORD!,
-        database: process.env.POSTGRES_DB!,
-        host: process.env.DB_HOST!,
-        port: Number(process.env.DB_PORT!),
+        user: process.env["POSTGRES_USER"]!,
+        password: process.env["POSTGRES_PASSWORD"]!,
+        database: process.env["POSTGRES_DB"]!,
+        host: process.env["DB_HOST"]!,
+        port: Number(process.env["DB_PORT"]!),
     },
     casing: "snake_case",
     logger,

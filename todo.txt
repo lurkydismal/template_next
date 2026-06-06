@@ -1,6 +1,5 @@
 Fix file upload and image showing
 Implement image field preview
-Remove "download file" from file field
 
 Enable upload for filed when draggin to field in form
 

@@ -1,11 +1,12 @@
 "use client";
 
-import React, {
+import {
     useCallback,
     useEffect,
     useState,
     cloneElement,
     isValidElement,
+    useMemo,
 } from "react";
 import CustomDataGrid from "./CustomDataGrid";
 import RowDialog, { FieldConfig } from "./RowDialog";
@@ -46,7 +47,7 @@ export default function TableDataGrid<
     const [fieldsResolving, setFieldsResolving] = useState(false);
     const [selectedRow, setSelectedRow] = useState<R | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
-    const emptyRow = React.useMemo(
+    const emptyRow = useMemo(
         () =>
             resolvedFields.reduce((row, field) => {
                 row[field.key as keyof RI] = (field.placeholder ??
@@ -247,15 +248,15 @@ export default function TableDataGrid<
     // If extraButtons is a React element, clone it and inject createRowAction + emptyRow
     const injectedExtraButtons = isValidElement(extraButtons)
         ? cloneElement(
-              extraButtons as React.ReactElement<Record<string, unknown>>,
-              {
-                  createRowAction: {
-                      type: "dialog",
-                      action: openCreateDialog,
-                  },
-                  emptyRow,
-              },
-          )
+            extraButtons as React.ReactElement<Record<string, unknown>>,
+            {
+                createRowAction: {
+                    type: "dialog",
+                    action: openCreateDialog,
+                },
+                emptyRow,
+            },
+        )
         : extraButtons;
 
     const columns = columnsFromFields(resolvedFields);

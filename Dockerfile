@@ -10,7 +10,7 @@ WORKDIR /app
 COPY package.json .
 
 # Install dependencies
-RUN npm i
+RUN npm i --omit dev
 
 # Copy the rest of the application code
 COPY . .

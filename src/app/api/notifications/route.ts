@@ -1,7 +1,6 @@
 import db from "@/db";
 import { notifications } from "@/db/schema";
 import { NotificationsRow } from "@/db/types";
-import { cacheDbRequest, updateDbCacheTags } from "@/lib/cache";
 import { emitNotificationEvent } from "@/lib/dashboard/common/change-events";
 import { and, asc, count, eq, inArray, sql } from "drizzle-orm";
 
@@ -12,9 +11,6 @@ type NotificationType = NotificationsRow["type"];
  */
 export async function GET(): Promise<Response> {
     const getUnreadNotifications = async () => {
-        "use cache";
-        cacheDbRequest(["notifications"]);
-
         const rows = await db
             .select()
             .from(notifications)
@@ -116,8 +112,6 @@ export async function PATCH(request: Request): Promise<Response> {
                 eq(notifications.is_read, !isRead),
             ),
         );
-
-    updateDbCacheTags(["notifications"]);
 
     return Response.json({ ok: true });
 }

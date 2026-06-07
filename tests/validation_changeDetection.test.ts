@@ -185,7 +185,7 @@ describe("getFieldRules validation", () => {
         const field: Field = {
             key: "custom",
             label: "Custom",
-            type: "tableLookup",
+            type: "table-lookup",
             tableLookup,
             tableLookupErrorMessage: "lookup failed",
             validate: customValidate,

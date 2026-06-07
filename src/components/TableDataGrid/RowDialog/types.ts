@@ -160,7 +160,7 @@ export type TableLookupFieldConfig<
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
 > = CommonFieldConfig<R, RI, K> & CommonPlaceholderFieldConfig & {
-    type: "tableLookup";
+    type: "table-lookup";
     tableLookup?: (
         value: unknown,
         row: R,

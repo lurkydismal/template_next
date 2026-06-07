@@ -147,7 +147,7 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
     {
         key: "tableLookupField",
         label: "Table lookup",
-        type: "tableLookup",
+        type: "table-lookup",
         size: 4,
         placeholder: "alpha",
         tableLookup: tableLookupExists,

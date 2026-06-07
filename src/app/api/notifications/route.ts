@@ -11,8 +11,7 @@ type NotificationType = NotificationsRow["type"];
  * Reads notifications and unread count for toolbar center state.
  */
 export async function GET(): Promise<Response> {
-    const getUnreadNotifications = async (
-    ) => {
+    const getUnreadNotifications = async () => {
         "use cache";
         cacheDbRequest(["notifications"]);
 

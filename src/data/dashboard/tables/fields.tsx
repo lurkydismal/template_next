@@ -1,3 +1,4 @@
+import { Bookmark as BookmarkIcon, BookmarkBorder as BookmarkBorderIcon } from '@mui/icons-material';
 import { TextField } from "@mui/material";
 import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
 import {
@@ -164,6 +165,37 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         fileAccept: [".txt", "image/jpeg"],
         toFormValue: fileNameToFormValue,
         onValueChange: syncSelectedFileName,
+    },
+    {
+        key: "checkbox_field",
+        label: "Checkbox",
+        type: "boolean",
+        variant: "checkbox",
+        size: 4,
+    },
+    {
+        key: "checkboxIcon_field",
+        label: "Checkbox Icon",
+        type: "boolean",
+        variant: "icon",
+        default: true,
+        icon: <BookmarkBorderIcon />,
+        checkedIcon: <BookmarkIcon />,
+        size: 4,
+    },
+    {
+        key: "switch_field",
+        label: "Switch",
+        type: "boolean",
+        variant: "switch",
+        default: true,
+        size: 4,
+    },
+    {
+        key: "radioGroup_field",
+        label: "Radio group",
+        type: "radio-group",
+        size: 4,
     },
 ];
 

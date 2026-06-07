@@ -229,7 +229,7 @@ type RadioGroupFieldConfig<
 > = CommonFieldConfig<R, RI, K> & {
     type: "radio-group";
     color?: RadioProps["color"];
-    scale: RadioProps["size"];
+    scale?: RadioProps["size"];
 };
 
 type BooleanFieldConfig<

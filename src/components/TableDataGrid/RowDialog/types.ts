@@ -1,3 +1,5 @@
+import { CheckboxProps, RadioProps } from "@mui/material";
+
 export type AutocompleteOption =
     | string
     | number
@@ -73,101 +75,169 @@ export type TextFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
-> = CommonFieldConfig<R, RI, K> & CommonPlaceholderFieldConfig & {
-    type: "text" | "multiline";
-};
+> = CommonFieldConfig<R, RI, K> &
+    CommonPlaceholderFieldConfig & {
+        type: "text" | "multiline";
+    };
 
 export type NumberFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
-> = CommonFieldConfig<R, RI, K> & CommonPlaceholderFieldConfig & {
-    type: "number";
-    min?: number; // minimum accepted value for number fields
-    max?: number; // maximum accepted value for number fields
-};
-
+> = CommonFieldConfig<R, RI, K> &
+    CommonPlaceholderFieldConfig & {
+        type: "number";
+        min?: number; // minimum accepted value for number fields
+        max?: number; // maximum accepted value for number fields
+    };
 
 export type AutocompleteFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
-> = CommonFieldConfig<R, RI, K> & CommonPlaceholderFieldConfig & {
-    type: "autocomplete";
-    autocompleteOptions?: readonly AutocompleteOption[];
-    loadOptions?: () => Promise<readonly AutocompleteOption[]>;
-    autocompleteLoading?: boolean;
-    autocompleteOpen?: boolean;
-    onAutocompleteOpen?: () => void;
-    onAutocompleteClose?: () => void;
-    /**
-     * List of sibling autocomplete field keys that cannot share the same selected value.
-     *
-     * When provided, options selected in the listed fields are filtered out from this
-     * field's options list (while still keeping this field's current value visible).
-     */
-    mutuallyExclusiveWith?: string[];
-};
+> = CommonFieldConfig<R, RI, K> &
+    CommonPlaceholderFieldConfig & {
+        type: "autocomplete";
+        autocompleteOptions?: readonly AutocompleteOption[];
+        loadOptions?: () => Promise<readonly AutocompleteOption[]>;
+        autocompleteLoading?: boolean;
+        autocompleteOpen?: boolean;
+        onAutocompleteOpen?: () => void;
+        onAutocompleteClose?: () => void;
+        /**
+         * List of sibling autocomplete field keys that cannot share the same selected value.
+         *
+         * When provided, options selected in the listed fields are filtered out from this
+         * field's options list (while still keeping this field's current value visible).
+         */
+        mutuallyExclusiveWith?: string[];
+    };
 
 export type MarkdownFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
-> = CommonFieldConfig<R, RI, K> & CommonPlaceholderFieldConfig & {
-    type: "markdown";
-    toggleCorner?:
-    | "top-left"
-    | "top-right"
-    | "bottom-left"
-    | "bottom-right";
-};
+> = CommonFieldConfig<R, RI, K> &
+    CommonPlaceholderFieldConfig & {
+        type: "markdown";
+        toggleCorner?:
+        | "top-left"
+        | "top-right"
+        | "bottom-left"
+        | "bottom-right";
+    };
 
 export type DateTimeFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
-> = CommonFieldConfig<R, RI, K> & CommonPlaceholderFieldConfig & {
-    type: "date" | "time" | "datetime";
-};
+> = CommonFieldConfig<R, RI, K> &
+    CommonPlaceholderFieldConfig & {
+        type: "date" | "time" | "datetime";
+    };
 
 export type UuidFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
-> = CommonFieldConfig<R, RI, K> & CommonPlaceholderFieldConfig & {
-    type: "uuid";
-};
+> = CommonFieldConfig<R, RI, K> &
+    CommonPlaceholderFieldConfig & {
+        type: "uuid";
+    };
 
 export type HexFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
-> = CommonFieldConfig<R, RI, K> & CommonPlaceholderFieldConfig & {
-    type: "hex";
-};
+> = CommonFieldConfig<R, RI, K> &
+    CommonPlaceholderFieldConfig & {
+        type: "hex";
+    };
 
 export type InetFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
-> = CommonFieldConfig<R, RI, K> & CommonPlaceholderFieldConfig & {
-    type: "inet";
-    inetAllowPort?: boolean;
-};
+> = CommonFieldConfig<R, RI, K> &
+    CommonPlaceholderFieldConfig & {
+        type: "inet";
+        inetAllowPort?: boolean;
+    };
 
 export type TableLookupFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
-> = CommonFieldConfig<R, RI, K> & CommonPlaceholderFieldConfig & {
-    type: "table-lookup";
-    lookup?: (
-        value: unknown,
-        row: R,
-        values: Record<string, unknown>,
-    ) => boolean | Promise<boolean>;
-    tableLookupErrorMessage?: string;
+> = CommonFieldConfig<R, RI, K> &
+    CommonPlaceholderFieldConfig & {
+        type: "table-lookup";
+        lookup?: (
+            value: unknown,
+            row: R,
+            values: Record<string, unknown>,
+        ) => boolean | Promise<boolean>;
+        tableLookupErrorMessage?: string;
+    };
+
+type CommonBooleanFieldConfig = {
+    type: "boolean";
+    color?: CheckboxProps["color"];
+    scale: CheckboxProps["size"];
 };
+
+type CommonBooleanSingleFieldConfig = {
+    default?: boolean;
+};
+
+type CheckboxFieldConfig<
+    R,
+    RI = unknown,
+    K extends PropertyKey = keyof R | keyof RI | string,
+> = CommonFieldConfig<R, RI, K> &
+    CommonBooleanFieldConfig & CommonBooleanSingleFieldConfig & {
+        variant: "checkbox";
+    };
+
+type IconCheckboxFieldConfig<
+    R,
+    RI = unknown,
+    K extends PropertyKey = keyof R | keyof RI | string,
+    I extends CheckboxProps["icon"] = CheckboxProps["icon"],
+> = CommonFieldConfig<R, RI, K> &
+    CommonBooleanFieldConfig & CommonBooleanSingleFieldConfig & {
+        variant: "icon";
+        icon: I;
+        checkedIcon: I;
+    };
+
+type SwitchFieldConfig<
+    R,
+    RI = unknown,
+    K extends PropertyKey = keyof R | keyof RI | string,
+> = CommonFieldConfig<R, RI, K> &
+    CommonBooleanFieldConfig & CommonBooleanSingleFieldConfig & {
+        variant: "switch";
+    };
+
+type RadioGroupFieldConfig<
+    R,
+    RI = unknown,
+    K extends PropertyKey = keyof R | keyof RI | string,
+> = CommonFieldConfig<R, RI, K> & {
+    type: "radio-group";
+    color?: RadioProps["color"];
+    scale: RadioProps["size"];
+};
+
+
+export type BooleanFieldConfig<
+    R,
+    RI = unknown,
+    K extends PropertyKey = keyof R | keyof RI | string,
+> =
+    | CheckboxFieldConfig<R, RI, K>
+    | IconCheckboxFieldConfig<R, RI, K>
+    | SwitchFieldConfig<R, RI, K>;
 
 export type FileFieldConfig<
     R,
@@ -184,14 +254,15 @@ export type CustomFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
-> = CommonFieldConfig<R, RI, K> & CommonPlaceholderFieldConfig & {
-    type: "custom";
-    render?: (
-        value: unknown,
-        setValue: (v: unknown) => void,
-        row: R,
-    ) => React.ReactNode;
-};
+> = CommonFieldConfig<R, RI, K> &
+    CommonPlaceholderFieldConfig & {
+        type: "custom";
+        render?: (
+            value: unknown,
+            setValue: (v: unknown) => void,
+            row: R,
+        ) => React.ReactNode;
+    };
 
 export type FieldConfig<
     R,
@@ -207,5 +278,7 @@ export type FieldConfig<
     | HexFieldConfig<R, RI, K>
     | InetFieldConfig<R, RI, K>
     | TableLookupFieldConfig<R, RI, K>
+    | BooleanFieldConfig<R, RI, K>
+    | RadioGroupFieldConfig<R, RI, K>
     | FileFieldConfig<R, RI, K>
     | CustomFieldConfig<R, RI, K>;

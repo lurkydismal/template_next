@@ -182,7 +182,7 @@ type TableLookupFieldConfig<
 type CommonBooleanFieldConfig = {
     type: "boolean";
     color?: CheckboxProps["color"];
-    scale: CheckboxProps["size"];
+    scale?: CheckboxProps["size"];
 };
 
 type CommonBooleanSingleFieldConfig = {

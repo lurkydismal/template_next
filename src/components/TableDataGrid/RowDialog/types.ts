@@ -115,7 +115,7 @@ export type MarkdownFieldConfig<
     K extends PropertyKey = keyof R | keyof RI | string,
 > = CommonFieldConfig<R, RI, K> & CommonPlaceholderFieldConfig & {
     type: "markdown";
-    markdownToggleCorner?:
+    toggleCorner?:
     | "top-left"
     | "top-right"
     | "bottom-left"

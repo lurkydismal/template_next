@@ -74,7 +74,7 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         type: "markdown",
         size: 12,
         placeholder: "**Markdown** _preview_",
-        markdownToggleCorner: "top-right",
+        toggleCorner: "top-right",
     },
     {
         key: "customField",

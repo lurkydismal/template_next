@@ -86,7 +86,7 @@ export const renderField = <
                 <MarkdownFieldInput
                     {...commonProps}
                     key={`${key}-${idx}`}
-                    toggleCorner={field.markdownToggleCorner}
+                    toggleCorner={field.toggleCorner}
                     onValueChange={(nextValue) => handleChange(nextValue)}
                 />
             );

@@ -1,6 +1,7 @@
 import db from "@/db";
 import { notifications } from "@/db/schema";
 import { NotificationsRow } from "@/db/types";
+import { cacheDbRequest, updateDbCacheTags } from "@/lib/cache";
 import { emitNotificationEvent } from "@/lib/dashboard/common/change-events";
 import { and, asc, count, eq, inArray, sql } from "drizzle-orm";
 
@@ -10,14 +11,24 @@ type NotificationType = NotificationsRow["type"];
  * Reads notifications and unread count for toolbar center state.
  */
 export async function GET(): Promise<Response> {
-    const rows = await db
-        .select()
-        .from(notifications)
-        .orderBy(asc(notifications.created_at));
-    const unreadResult = await db
-        .select({ total: count() })
-        .from(notifications)
-        .where(eq(notifications.is_read, false));
+    const getUnreadNotifications = async (
+    ) => {
+        "use cache";
+        cacheDbRequest(["notifications"]);
+
+        const rows = await db
+            .select()
+            .from(notifications)
+            .orderBy(asc(notifications.created_at));
+        const unreadResult = await db
+            .select({ total: count() })
+            .from(notifications)
+            .where(eq(notifications.is_read, false));
+
+        return { rows, unreadResult };
+    };
+
+    const { rows, unreadResult } = await getUnreadNotifications();
 
     return Response.json({ rows, unreadCount: unreadResult[0]?.total ?? 0 });
 }
@@ -106,6 +117,8 @@ export async function PATCH(request: Request): Promise<Response> {
                 eq(notifications.is_read, !isRead),
             ),
         );
+
+    updateDbCacheTags(["notifications"]);
 
     return Response.json({ ok: true });
 }

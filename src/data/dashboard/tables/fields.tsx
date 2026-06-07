@@ -150,7 +150,7 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         type: "table-lookup",
         size: 4,
         placeholder: "alpha",
-        tableLookup: tableLookupExists,
+        lookup: tableLookupExists,
         tableLookupErrorMessage:
             "Use alpha, bravo, or charlie for this demo lookup",
     },

@@ -186,7 +186,7 @@ describe("getFieldRules validation", () => {
             key: "custom",
             label: "Custom",
             type: "table-lookup",
-            tableLookup,
+            lookup: tableLookup,
             tableLookupErrorMessage: "lookup failed",
             validate: customValidate,
             required: true,

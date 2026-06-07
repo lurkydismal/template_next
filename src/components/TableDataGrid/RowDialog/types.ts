@@ -1,34 +1,34 @@
 import { CheckboxProps, RadioProps } from "@mui/material";
 
-export type AutocompleteOption =
+type AutocompleteOption =
     | string
     | number
     | boolean
     | { label: string; packedValues?: Record<string, unknown> };
 
-export type FieldValueChangeResult =
+type FieldValueChangeResult =
     | void
     | Record<string, unknown>
     | Promise<void | Record<string, unknown>>;
 
-export type FieldValueChangeContext<R> = {
+type FieldValueChangeContext<R> = {
     row: R;
     values: Record<string, unknown>;
 };
 
-export type InterconnectedFieldRelation = {
+type InterconnectedFieldRelation = {
     sourceField: string;
     lookupField: string;
     valueField: string;
     rows: Record<string, unknown>[];
 };
 
-export type InterconnectedFieldContext<R> = {
+type InterconnectedFieldContext<R> = {
     row: R;
     values: Record<string, unknown>;
 };
 
-export type InterconnectedFieldConfig<R> = {
+type InterconnectedFieldConfig<R> = {
     dependsOn: string[];
     makeReadOnly?: boolean;
     getter?: (
@@ -71,7 +71,7 @@ type CommonPlaceholderFieldConfig = {
     placeholder?: string | number | `${number}`;
 };
 
-export type TextFieldConfig<
+type TextFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -80,7 +80,7 @@ export type TextFieldConfig<
         type: "text" | "multiline";
     };
 
-export type NumberFieldConfig<
+type NumberFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -91,7 +91,7 @@ export type NumberFieldConfig<
         max?: number; // maximum accepted value for number fields
     };
 
-export type AutocompleteFieldConfig<
+type AutocompleteFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -113,7 +113,7 @@ export type AutocompleteFieldConfig<
         mutuallyExclusiveWith?: string[];
     };
 
-export type MarkdownFieldConfig<
+type MarkdownFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -127,7 +127,7 @@ export type MarkdownFieldConfig<
         | "bottom-right";
     };
 
-export type DateTimeFieldConfig<
+type DateTimeFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -136,7 +136,7 @@ export type DateTimeFieldConfig<
         type: "date" | "time" | "datetime";
     };
 
-export type UuidFieldConfig<
+type UuidFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -145,7 +145,7 @@ export type UuidFieldConfig<
         type: "uuid";
     };
 
-export type HexFieldConfig<
+type HexFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -154,7 +154,7 @@ export type HexFieldConfig<
         type: "hex";
     };
 
-export type InetFieldConfig<
+type InetFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -164,7 +164,7 @@ export type InetFieldConfig<
         inetAllowPort?: boolean;
     };
 
-export type TableLookupFieldConfig<
+type TableLookupFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -194,7 +194,8 @@ type CheckboxFieldConfig<
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
 > = CommonFieldConfig<R, RI, K> &
-    CommonBooleanFieldConfig & CommonBooleanSingleFieldConfig & {
+    CommonBooleanFieldConfig &
+    CommonBooleanSingleFieldConfig & {
         variant: "checkbox";
     };
 
@@ -204,7 +205,8 @@ type IconCheckboxFieldConfig<
     K extends PropertyKey = keyof R | keyof RI | string,
     I extends CheckboxProps["icon"] = CheckboxProps["icon"],
 > = CommonFieldConfig<R, RI, K> &
-    CommonBooleanFieldConfig & CommonBooleanSingleFieldConfig & {
+    CommonBooleanFieldConfig &
+    CommonBooleanSingleFieldConfig & {
         variant: "icon";
         icon: I;
         checkedIcon: I;
@@ -215,7 +217,8 @@ type SwitchFieldConfig<
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
 > = CommonFieldConfig<R, RI, K> &
-    CommonBooleanFieldConfig & CommonBooleanSingleFieldConfig & {
+    CommonBooleanFieldConfig &
+    CommonBooleanSingleFieldConfig & {
         variant: "switch";
     };
 
@@ -229,8 +232,7 @@ type RadioGroupFieldConfig<
     scale: RadioProps["size"];
 };
 
-
-export type BooleanFieldConfig<
+type BooleanFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -239,7 +241,7 @@ export type BooleanFieldConfig<
     | IconCheckboxFieldConfig<R, RI, K>
     | SwitchFieldConfig<R, RI, K>;
 
-export type FileFieldConfig<
+type FileFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -250,7 +252,7 @@ export type FileFieldConfig<
     height?: number | `${number}`;
 };
 
-export type CustomFieldConfig<
+type CustomFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,

@@ -51,14 +51,14 @@ function tableLookupExists(value: unknown): boolean {
 // Demo fields include every built-in row-dialog field type once.
 const fields: FieldConfig<TableRow, TableRowInsert>[] = [
     {
-        key: "textField",
+        key: "text_field",
         label: "Text",
         type: "text",
         size: 6,
         placeholder: "Single-line text",
     },
     {
-        key: "multilineField",
+        key: "multiline_field",
         label: "Multiline",
         type: "multiline",
         name: "content", // name in FormData. Optional, defaults to key
@@ -69,7 +69,7 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         toFormValue: (v) => (v == null ? "" : String(v)),
     },
     {
-        key: "markdownField",
+        key: "markdown_field",
         label: "Markdown",
         type: "markdown",
         size: 12,
@@ -77,7 +77,7 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         toggleCorner: "top-right",
     },
     {
-        key: "customField",
+        key: "custom_field",
         label: "Custom",
         type: "custom",
         size: 6,
@@ -85,7 +85,7 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         render: renderCustomField,
     },
     {
-        key: "autocompleteField",
+        key: "autocomplete_field",
         label: "Autocomplete",
         type: "autocomplete",
         size: 6,
@@ -93,28 +93,28 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         autocompleteOptions: ["Option A", "Option B", "Option C"],
     },
     {
-        key: "dateField",
+        key: "date_field",
         label: "Date",
         type: "date",
         size: 4,
         placeholder: "2026-05-28",
     },
     {
-        key: "timeField",
+        key: "time_field",
         label: "Time",
         type: "time",
         size: 4,
         placeholder: "12:00:00",
     },
     {
-        key: "datetimeField",
+        key: "datetime_field",
         label: "Datetime",
         type: "datetime",
         size: 4,
         placeholder: "2026-05-28T12:00:00.000Z",
     },
     {
-        key: "numberField",
+        key: "number_field",
         label: "Number",
         type: "number",
         size: 4,
@@ -123,21 +123,21 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         max: 100,
     },
     {
-        key: "uuidField",
+        key: "uuid_field",
         label: "UUID",
         type: "uuid",
         size: 8,
         placeholder: "123e4567-e89b-42d3-a456-426614174000",
     },
     {
-        key: "hexField",
+        key: "hex_field",
         label: "Hex",
         type: "hex",
         size: 4,
         placeholder: "0xCAFE",
     },
     {
-        key: "inetField",
+        key: "inet_field",
         label: "Inet",
         type: "inet",
         size: 4,
@@ -145,7 +145,7 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         inetAllowPort: true,
     },
     {
-        key: "tableLookupField",
+        key: "tableLookup_field",
         label: "Table lookup",
         type: "table-lookup",
         size: 4,
@@ -155,7 +155,7 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
             "Use alpha, bravo, or charlie for this demo lookup",
     },
     {
-        key: "fileField",
+        key: "file_field",
         label: "File",
         type: "file",
         size: 4,

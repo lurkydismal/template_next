@@ -1,0 +1,19 @@
+ALTER TABLE "tables" RENAME COLUMN "textField" TO "text_field";--> statement-breakpoint
+ALTER TABLE "tables" RENAME COLUMN "multilineField" TO "multiline_field";--> statement-breakpoint
+ALTER TABLE "tables" RENAME COLUMN "markdownField" TO "markdown_field";--> statement-breakpoint
+ALTER TABLE "tables" RENAME COLUMN "customField" TO "custom_field";--> statement-breakpoint
+ALTER TABLE "tables" RENAME COLUMN "autocompleteField" TO "autocomplete_field";--> statement-breakpoint
+ALTER TABLE "tables" RENAME COLUMN "dateField" TO "date_field";--> statement-breakpoint
+ALTER TABLE "tables" RENAME COLUMN "timeField" TO "time_field";--> statement-breakpoint
+ALTER TABLE "tables" RENAME COLUMN "datetimeField" TO "datetime_field";--> statement-breakpoint
+ALTER TABLE "tables" RENAME COLUMN "numberField" TO "number_field";--> statement-breakpoint
+ALTER TABLE "tables" RENAME COLUMN "uuidField" TO "uuid_field";--> statement-breakpoint
+ALTER TABLE "tables" RENAME COLUMN "hexField" TO "hex_field";--> statement-breakpoint
+ALTER TABLE "tables" RENAME COLUMN "inetField" TO "inet_field";--> statement-breakpoint
+ALTER TABLE "tables" RENAME COLUMN "tableLookupField" TO "tableLookup_field";--> statement-breakpoint
+ALTER TABLE "tables" RENAME COLUMN "fileField" TO "file_field";--> statement-breakpoint
+ALTER TABLE "tables" RENAME COLUMN "checkboxField" TO "checkbox_field";--> statement-breakpoint
+ALTER TABLE "tables" RENAME COLUMN "checkboxIconField" TO "checkboxIcon_field";--> statement-breakpoint
+ALTER TABLE "tables" RENAME COLUMN "switchField" TO "switch_field";--> statement-breakpoint
+ALTER TABLE "tables" RENAME COLUMN "radioGroupField" TO "radioGroup_field";--> statement-breakpoint
+ALTER TABLE "tables" DROP CONSTRAINT "multilineField_not_blank", ADD CONSTRAINT "multilineField_not_blank" CHECK (length(trim("multiline_field")) > 0);

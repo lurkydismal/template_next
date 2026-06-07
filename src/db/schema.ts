@@ -13,7 +13,7 @@ import * as templates from "./templates";
 import { timestampsColumns } from "./helpers";
 
 export const tables = pgTable("tables", templates.table, (t) => [
-    check("multilineField_not_blank", sql`length(trim(${t.multilineField})) > 0`),
+    check("multilineField_not_blank", sql`length(trim(${t.multiline_field})) > 0`),
 
     index().on(t.author_id),
     index().on(t.last_editor_id),

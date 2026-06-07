@@ -58,7 +58,7 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         placeholder: "Single-line text",
     },
     {
-        key: "content",
+        key: "multilineField",
         label: "Multiline",
         type: "multiline",
         name: "content", // name in FormData. Optional, defaults to key

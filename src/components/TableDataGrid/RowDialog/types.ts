@@ -121,10 +121,10 @@ type MarkdownFieldConfig<
     CommonPlaceholderFieldConfig & {
         type: "markdown";
         toggleCorner?:
-        | "top-left"
-        | "top-right"
-        | "bottom-left"
-        | "bottom-right";
+            | "top-left"
+            | "top-right"
+            | "bottom-left"
+            | "bottom-right";
     };
 
 type DateTimeFieldConfig<

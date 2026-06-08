@@ -1,4 +1,7 @@
-import { Bookmark as BookmarkIcon, BookmarkBorder as BookmarkBorderIcon } from '@mui/icons-material';
+import {
+    Bookmark as BookmarkIcon,
+    BookmarkBorder as BookmarkBorderIcon,
+} from "@mui/icons-material";
 import { TextField } from "@mui/material";
 import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
 import {

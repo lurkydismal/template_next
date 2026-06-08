@@ -113,12 +113,6 @@ function ImagePreviewContent({
         setImageRetryKey((currentValue) => currentValue + 1);
     }
 
-    log.debug({
-        isLoadingPreview,
-        width,
-        height,
-    });
-
     return (
         <DialogContent>
             {isLoadingPreview || isPending ? (

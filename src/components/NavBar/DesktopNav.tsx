@@ -2,15 +2,7 @@ import { NavItem } from "@/data/navbar";
 import NextLink from "@/components/Link";
 import { Badge, Box, Button, SxProps } from "@mui/material";
 import { usePathname } from "next/navigation";
-import { activeButtonSx, navButtonSx } from "./styles";
-
-const badgeSx = {
-    transition: "all 0.2s ease",
-
-    "&:hover": {
-        transform: "translateY(-2px)",
-    },
-};
+import { activeButtonSx, badgeSx, navButtonSx } from "./styles";
 
 /**
  * Renders the nav button component.

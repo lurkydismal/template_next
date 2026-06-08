@@ -31,6 +31,8 @@ Save diff for all text field changes and store it in some format that takes
 less size
 Restore SSE connection on crash
 
+Restore row dialog on crash with saved content
+
 Use uppy for file handling
 Implement infering field config from db schema
 

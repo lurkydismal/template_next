@@ -9,10 +9,12 @@ Fix image preview not closing on Escape key
 Add checkbox and other boolean field types
 Add Toggle button field type
 Add Slider field type
+Add map field type
 
 Implement SpeedDial with context based on if row dialog is open or not
 
-Implement option "multiple"(change) to auto-add new field when its filled to
+Implement "composite" field type to contain multiple fields
+Implement option "stackable" to auto-add new field when its filled to
 support any amount of this field and send it as array in form data
 Organize all react-hook-form usage into @components/rhf
 Implement settings

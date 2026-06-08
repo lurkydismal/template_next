@@ -20,9 +20,10 @@ import {
 import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
 import { isImagePath } from "@/utils/fileHelpers";
 import { toCamelCase } from "@/utils/stdfunc";
-import { Link } from "@mui/material";
+import { Button, Link } from "@mui/material";
 import { createElement, Fragment, MouseEvent } from "react";
 import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import NextLink from "@/components/Link";
 
 type NormalizeOptions = {
     defaultFlex?: number; // fallback flex when column.flex is missing
@@ -59,36 +60,41 @@ function FileCellLink({
     }
 
     if (isImagePath(value)) {
-        return createElement(
-            Fragment,
-            null,
-            createElement(
-                Link,
-                { href: value, underline: "hover", onClick: handleOpenPreview },
-                "Open image",
-            ),
-            createElement(ImagePreviewDialog, {
-                open: imagePreviewOpen,
-                onClose: closeImagePreview,
-                sourceValue: value,
-                label: "Image preview",
-                getFileAction,
-                width,
-                height,
-            }),
+        return (
+            <>
+                <Button
+                    href={value}
+                    variant="text"
+                    size="small"
+                    component={NextLink}
+                    onClick={handleOpenPreview}
+                >
+                    Preview
+                </Button>
+
+                <ImagePreviewDialog
+                    open={imagePreviewOpen}
+                    onClose={closeImagePreview}
+                    sourceValue={value}
+                    label={value}
+                    getFileAction={getFileAction}
+                    width={width}
+                    height={height}
+                />
+            </>
         );
     }
 
-    return createElement(
-        Link,
-        {
-            href: value,
-            download: true,
-            target: "_blank",
-            rel: "noreferrer",
-            underline: "hover",
-        },
-        "Download file",
+    return (
+        <Button
+            href={value}
+            variant="text"
+            size="small"
+            download
+            component={NextLink}
+        >
+            Download
+        </Button>
     );
 }
 
@@ -104,7 +110,14 @@ function renderFileCell(
     const value = typeof params.value === "string" ? params.value : "";
     if (!value) return "";
 
-    return createElement(FileCellLink, { value, width, height, getFileAction });
+    return (
+        <FileCellLink
+            value={value}
+            width={width}
+            height={height}
+            getFileAction={getFileAction}
+        />
+    );
 }
 
 /**

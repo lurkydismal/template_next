@@ -1,4 +1,4 @@
-import { AutocompleteOption, FieldConfig } from "../../types";
+import { AutocompleteFieldConfig, AutocompleteOption } from "../../types";
 
 /**
  * Converts an autocomplete value into a stable primitive used for comparisons.
@@ -18,7 +18,7 @@ export const getFilteredAutocompleteOptions = <
     R extends Record<string, unknown>,
     RI extends Record<string, unknown>,
 >(
-    field: FieldConfig<R, RI>,
+    field: AutocompleteFieldConfig<R, RI>,
     values: Record<string, unknown>,
 ): readonly AutocompleteOption[] => {
     const options = field.autocompleteOptions ?? [];

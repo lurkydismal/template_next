@@ -22,6 +22,6 @@ export type RenderFieldParams<
         packedValues?: Record<string, unknown>,
     ) => void;
     getFileAction: (filename: string) => Promise<string>;
-    width: number | `${number}`;
-    height: number | `${number}`;
+    width?: number | `${number}`;
+    height?: number | `${number}`;
 };

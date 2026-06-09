@@ -1,8 +1,8 @@
 import { Typography } from "@mui/material";
-import { FieldConfig } from "./types";
+import { CustomFieldConfig } from "./types";
 
 type CustomFieldInputProps<R, RI> = {
-    field: FieldConfig<R, RI>;
+    field: CustomFieldConfig<R, RI>;
     value: unknown;
     row: R;
     onValueChange: (value: unknown) => void;

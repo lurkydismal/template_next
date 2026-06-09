@@ -71,7 +71,7 @@ type CommonPlaceholderFieldConfig = {
     placeholder?: string | number | `${number}`;
 };
 
-type TextFieldConfig<
+export type TextFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -80,7 +80,7 @@ type TextFieldConfig<
         type: "text" | "multiline";
     };
 
-type NumberFieldConfig<
+export type NumberFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -91,7 +91,7 @@ type NumberFieldConfig<
         max?: number; // maximum accepted value for number fields
     };
 
-type AutocompleteFieldConfig<
+export type AutocompleteFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -113,7 +113,7 @@ type AutocompleteFieldConfig<
         mutuallyExclusiveWith?: string[];
     };
 
-type MarkdownFieldConfig<
+export type MarkdownFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -121,14 +121,14 @@ type MarkdownFieldConfig<
     CommonPlaceholderFieldConfig & {
         type: "markdown";
         toggleCorner?:
-            | "top-left"
-            | "top-right"
-            | "bottom-left"
-            | "bottom-right";
+        | "top-left"
+        | "top-right"
+        | "bottom-left"
+        | "bottom-right";
         default?: boolean; // default preview state
     };
 
-type DateTimeFieldConfig<
+export type DateTimeFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -137,7 +137,7 @@ type DateTimeFieldConfig<
         type: "date" | "time" | "datetime";
     };
 
-type UuidFieldConfig<
+export type UuidFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -146,7 +146,7 @@ type UuidFieldConfig<
         type: "uuid";
     };
 
-type HexFieldConfig<
+export type HexFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -155,7 +155,7 @@ type HexFieldConfig<
         type: "hex";
     };
 
-type InetFieldConfig<
+export type InetFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -165,7 +165,7 @@ type InetFieldConfig<
         inetAllowPort?: boolean;
     };
 
-type TableLookupFieldConfig<
+export type TableLookupFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -190,7 +190,7 @@ type CommonBooleanSingleFieldConfig = {
     default?: boolean;
 };
 
-type CheckboxFieldConfig<
+export type CheckboxFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -200,7 +200,7 @@ type CheckboxFieldConfig<
         variant: "checkbox";
     };
 
-type IconCheckboxFieldConfig<
+export type IconCheckboxFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -213,7 +213,7 @@ type IconCheckboxFieldConfig<
         checkedIcon: I;
     };
 
-type SwitchFieldConfig<
+export type SwitchFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -223,7 +223,7 @@ type SwitchFieldConfig<
         variant: "switch";
     };
 
-type RadioGroupFieldConfig<
+export type RadioGroupFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -233,7 +233,7 @@ type RadioGroupFieldConfig<
     scale?: RadioProps["size"];
 };
 
-type BooleanFieldConfig<
+export type BooleanFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -242,7 +242,7 @@ type BooleanFieldConfig<
     | IconCheckboxFieldConfig<R, RI, K>
     | SwitchFieldConfig<R, RI, K>;
 
-type FileFieldConfig<
+export type FileFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -253,7 +253,7 @@ type FileFieldConfig<
     height?: number | `${number}`;
 };
 
-type CustomFieldConfig<
+export type CustomFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
@@ -285,3 +285,6 @@ export type FieldConfig<
     | RadioGroupFieldConfig<R, RI, K>
     | FileFieldConfig<R, RI, K>
     | CustomFieldConfig<R, RI, K>;
+
+export type UpdateRowAction = (fd: FormData) => Promise<void>;
+export type CreateRowAction<RI> = (row: RI) => Promise<void>;

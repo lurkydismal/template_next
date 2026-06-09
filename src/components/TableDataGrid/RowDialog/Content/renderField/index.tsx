@@ -59,7 +59,7 @@ export const renderField = <
         rules,
     };
 
-    if (typeof field.render === "function") {
+    if (field.type === "custom" && typeof field.render === "function") {
         return (
             <CustomFieldInput
                 key={`${key}-${idx}`}

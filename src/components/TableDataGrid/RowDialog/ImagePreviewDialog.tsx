@@ -10,8 +10,6 @@ import {
     Typography,
 } from "@mui/material";
 
-import log from "@/utils/stdlog";
-
 type ImagePreviewDialogProps = {
     open: boolean;
     sourceValue: string;

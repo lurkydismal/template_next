@@ -1,5 +1,5 @@
 import { RegisterOptions, UseFormReturn } from "react-hook-form";
-import { FieldConfig } from "../types";
+import { FieldConfig, NumberFieldConfig, TableLookupFieldConfig } from "../types";
 import z from "zod";
 
 /**
@@ -56,7 +56,7 @@ function parseFiniteNumber(value: unknown) {
 function validateNumberValue<
     R extends Record<string, unknown>,
     RI extends Record<string, unknown>,
->(value: unknown, field: FieldConfig<R, RI>) {
+>(value: unknown, field: NumberFieldConfig<R, RI>) {
     if (isEmptyValue(value)) return true;
 
     const parsed = parseFiniteNumber(value);
@@ -133,14 +133,14 @@ async function validateTableLookupValue<
     RI extends Record<string, unknown>,
 >(
     value: unknown,
-    field: FieldConfig<R, RI>,
+    field: TableLookupFieldConfig<R, RI>,
     row: R,
     allValues: Record<string, unknown>,
 ) {
-    if (!field.tableLookup || isEmptyValue(value)) return true;
+    if (!field.lookup || isEmptyValue(value)) return true;
 
     try {
-        const exists = await field.tableLookup(value, row, allValues);
+        const exists = await field.lookup(value, row, allValues);
 
         return (
             exists ||
@@ -214,7 +214,7 @@ async function validateByFieldType<
         case "inet":
             return validateInetValue(value, field.inetAllowPort);
 
-        case "tableLookup":
+        case "table-lookup":
             return validateTableLookupValue(value, field, row, allValues);
 
         default:

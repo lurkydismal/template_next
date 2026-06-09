@@ -24,8 +24,8 @@ type FileFieldInputProps = {
     rules?: RegisterOptions<Record<string, unknown>, string>;
     onValueChange: (value: File | null) => void;
     getFileAction: (filename: string) => Promise<string>;
-    width: number | `${number}`;
-    height: number | `${number}`;
+    width?: number | `${number}` | undefined;
+    height?: number | `${number}` | undefined;
 };
 
 /**
@@ -86,10 +86,10 @@ export default function FileFieldInput({
 
                     const imagePreviewProps = !readOnly
                         ? {
-                              onFileDrop: (file: File | null) => {
-                                  applySelectedFile(file, field.onChange);
-                              },
-                          }
+                            onFileDrop: (file: File | null) => {
+                                applySelectedFile(file, field.onChange);
+                            },
+                        }
                         : {};
 
                     return (

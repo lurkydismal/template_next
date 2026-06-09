@@ -59,8 +59,8 @@ function runSingleValidate(
 describe("row change detection", () => {
     it("rowHasChanges ignores readOnly unless interconnected and detects trimmed differences", () => {
         const fields: Field[] = [
-            { key: "custom", label: "Custom", readOnly: true },
-            { key: "uuid", label: "UUID" },
+            { key: "custom", type: "custom", label: "Custom", readOnly: true },
+            { key: "uuid", type: "uuid", label: "UUID" },
         ];
 
         expect(
@@ -84,6 +84,7 @@ describe("row change detection", () => {
         const fields: Field[] = [
             {
                 key: "amount",
+                type: "number",
                 label: "Amount",
                 isChanged: (oldValue, newValue) =>
                     Number(oldValue) !== Number(newValue),
@@ -91,7 +92,7 @@ describe("row change detection", () => {
         ];
 
         expect(
-            rowHasChanges({ id: "1", amount: 1 }, { amount: "1" }, fields),
+            rowHasChanges({ id: "1", amount: 1 }, { amount: 1 }, fields),
         ).toBe(false);
         expect(
             rowHasChanges({ id: "1", amount: 1 }, { amount: 2 }, fields),
@@ -107,7 +108,7 @@ describe("row change detection", () => {
 describe("getFieldRules validation", () => {
     it("returns empty rules for readOnly fields", () => {
         const rules = getFieldRules(
-            { key: "uuid", label: "UUID", readOnly: true },
+            { key: "uuid", type: "uuid", label: "UUID", readOnly: true },
             [],
             createFormStub({}),
             { id: "1" },

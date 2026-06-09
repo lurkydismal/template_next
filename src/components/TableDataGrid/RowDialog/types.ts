@@ -125,6 +125,7 @@ type MarkdownFieldConfig<
             | "top-right"
             | "bottom-left"
             | "bottom-right";
+        default?: boolean;
     };
 
 type DateTimeFieldConfig<

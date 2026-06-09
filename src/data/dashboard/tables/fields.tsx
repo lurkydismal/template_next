@@ -76,6 +76,7 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         key: "markdown_field",
         label: "Markdown",
         type: "markdown",
+        default: true,
         size: 12,
         placeholder: "**Markdown** _preview_",
         toggleCorner: "top-right",

@@ -1,10 +1,6 @@
 Fix file upload
 
-Improve how file link looks in table
-
 Enable upload for filed when dragging to field in form
-
-Do not open row dialog when clicking "Open image" in table
 
 Show file upload progress
 

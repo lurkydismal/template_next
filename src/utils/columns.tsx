@@ -56,21 +56,21 @@ function FileCellLink({
      */
     function handleOpenPreview(event: MouseEvent<HTMLAnchorElement>): void {
         event.preventDefault();
+        event.stopPropagation(); // Stop the click from reaching the dashboard row
         openImagePreview();
     }
 
     if (isImagePath(value)) {
         return (
             <>
-                <Button
+                <Link
                     href={value}
-                    variant="text"
-                    size="small"
+                    variant="body2"
                     component={NextLink}
                     onClick={handleOpenPreview}
                 >
                     Preview
-                </Button>
+                </Link>
 
                 <ImagePreviewDialog
                     open={imagePreviewOpen}
@@ -86,18 +86,17 @@ function FileCellLink({
     }
 
     return (
-        <Button
+        <Link
             href={value}
-            variant="text"
-            size="small"
+            variant="body2"
             download
             component={NextLink}
-            onClick={(e: React.MouseEvent) => {
+            onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                 e.stopPropagation(); // Stop the click from reaching the dashboard row
             }}
         >
             Download
-        </Button>
+        </Link>
     );
 }
 
@@ -187,14 +186,14 @@ export function columnsFromFields<
                 headerName: field.label,
                 ...(field.formatValue
                     ? {
-                          /**
-                           * Renders a data grid cell value from a normalized field definition.
-                           */
-                          renderCell: (params: GridRenderCellParams) =>
-                              String(field.formatValue!(params.value) ?? ""),
-                      }
+                        /**
+                         * Renders a data grid cell value from a normalized field definition.
+                         */
+                        renderCell: (params: GridRenderCellParams) =>
+                            String(field.formatValue!(params.value) ?? ""),
+                    }
                     : field.type === "file"
-                      ? {
+                        ? {
                             renderCell: (params: GridRenderCellParams) =>
                                 renderFileCell(
                                     params,
@@ -203,7 +202,7 @@ export function columnsFromFields<
                                     field.height,
                                 ),
                         }
-                      : {}),
+                        : {}),
             })),
     );
 }

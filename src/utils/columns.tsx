@@ -92,6 +92,9 @@ function FileCellLink({
             size="small"
             download
             component={NextLink}
+            onClick={(e: React.MouseEvent) => {
+                e.stopPropagation(); // Stop the click from reaching the dashboard row
+            }}
         >
             Download
         </Button>

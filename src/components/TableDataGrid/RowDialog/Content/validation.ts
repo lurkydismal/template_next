@@ -1,5 +1,9 @@
 import { RegisterOptions, UseFormReturn } from "react-hook-form";
-import { FieldConfig, NumberFieldConfig, TableLookupFieldConfig } from "../types";
+import {
+    FieldConfig,
+    NumberFieldConfig,
+    TableLookupFieldConfig,
+} from "../types";
 import z from "zod";
 
 /**

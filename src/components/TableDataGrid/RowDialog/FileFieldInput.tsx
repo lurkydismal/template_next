@@ -86,10 +86,10 @@ export default function FileFieldInput({
 
                     const imagePreviewProps = !readOnly
                         ? {
-                            onFileDrop: (file: File | null) => {
-                                applySelectedFile(file, field.onChange);
-                            },
-                        }
+                              onFileDrop: (file: File | null) => {
+                                  applySelectedFile(file, field.onChange);
+                              },
+                          }
                         : {};
 
                     return (

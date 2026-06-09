@@ -50,8 +50,13 @@ export default function TableDataGrid<
     const emptyRow = useMemo(
         () =>
             resolvedFields.reduce((row, field) => {
-                row[field.key as keyof RI] = ((field.type !== "boolean" && field.type !== "radio-group" && field.type !== "file") ? field.placeholder ??
-                    null : null) as RI[keyof RI];
+                row[field.key as keyof RI] = (
+                    field.type !== "boolean" &&
+                    field.type !== "radio-group" &&
+                    field.type !== "file"
+                        ? (field.placeholder ?? null)
+                        : null
+                ) as RI[keyof RI];
                 return row;
             }, {} as RI),
         [resolvedFields],
@@ -64,7 +69,9 @@ export default function TableDataGrid<
          * Resolves async field configuration declared by each field.
          */
         const resolveFields = async () => {
-            const hasLoaders = fields.some((field) => field.type === "autocomplete" && field.loadOptions);
+            const hasLoaders = fields.some(
+                (field) => field.type === "autocomplete" && field.loadOptions,
+            );
             if (!hasLoaders) {
                 setResolvedFields(fields);
                 return;
@@ -74,7 +81,10 @@ export default function TableDataGrid<
             try {
                 const nextFields = await Promise.all(
                     fields.map(async (field) => {
-                        if (field.type !== "autocomplete" || !field.loadOptions) {
+                        if (
+                            field.type !== "autocomplete" ||
+                            !field.loadOptions
+                        ) {
                             return field;
                         }
 
@@ -250,15 +260,15 @@ export default function TableDataGrid<
     // If extraButtons is a React element, clone it and inject createRowAction + emptyRow
     const injectedExtraButtons = isValidElement(extraButtons)
         ? cloneElement(
-            extraButtons as React.ReactElement<Record<string, unknown>>,
-            {
-                createRowAction: {
-                    type: "dialog",
-                    action: openCreateDialog,
-                },
-                emptyRow,
-            },
-        )
+              extraButtons as React.ReactElement<Record<string, unknown>>,
+              {
+                  createRowAction: {
+                      type: "dialog",
+                      action: openCreateDialog,
+                  },
+                  emptyRow,
+              },
+          )
         : extraButtons;
 
     const columns = columnsFromFields(resolvedFields, getFileAction);

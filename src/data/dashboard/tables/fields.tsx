@@ -150,7 +150,7 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         inetAllowPort: true,
     },
     {
-        key: "tableLookup_field",
+        key: "table_lookup_field",
         label: "Table lookup",
         type: "table-lookup",
         size: 4,
@@ -178,7 +178,7 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         size: 4,
     },
     {
-        key: "checkboxIcon_field",
+        key: "checkbox_icon_field",
         label: "Checkbox Icon",
         type: "boolean",
         variant: "icon",
@@ -196,7 +196,7 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         size: 4,
     },
     {
-        key: "radioGroup_field",
+        key: "radio_group_field",
         label: "Radio group",
         type: "radio-group",
         size: 4,

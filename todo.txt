@@ -22,7 +22,7 @@ Organize all react-hook-form usage into @components/rhf
 Implement settings
 Implement auto-adding settings for fields aka changing the corner of markdown
 toggle for some field
-Consider NextAuth
+Implement NextAuth usage
 Save diff for all text field changes and store it in some format that takes
 less size
 Restore SSE connection on crash

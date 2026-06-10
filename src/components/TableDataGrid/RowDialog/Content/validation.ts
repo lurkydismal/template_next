@@ -5,6 +5,7 @@ import {
     TableLookupFieldConfig,
 } from "../types";
 import z from "zod";
+import { ipSchema, normalizedString, portSchema } from "@/utils/validate/schemas";
 
 /**
  * Checks whether a value is considered empty for row dialog validation.
@@ -76,16 +77,6 @@ function validateNumberValue<
 
     return true;
 }
-
-// TODO: Move to schemas
-const ipSchema = z.union([z.ipv4(), z.ipv6()]);
-
-const portSchema = z.number().int().min(0).max(65535);
-
-const normalizedString = z.preprocess(
-    (value) => (value == null ? value : String(value).trim()),
-    z.string(),
-);
 
 function hasValidHostPort(
     value: string,

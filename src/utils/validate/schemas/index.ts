@@ -110,6 +110,15 @@ export const dateInputSchema = z
     .transform((v) => dayjs(v))
     .describe("Date input (string, Date, or Dayjs)");
 
+export const ipSchema = z.union([z.ipv4(), z.ipv6()]);
+
+export const portSchema = z.number().int().min(0).max(65535);
+
+export const normalizedString = z.preprocess(
+    (value) => (value == null ? value : String(value).trim()),
+    z.string(),
+);
+
 export const userSelectSchema = createSelectSchema(users);
 export const userInsertSchema = createInsertSchema(users);
 export const userUpdateSchema = createUpdateSchema(users);

@@ -20,8 +20,8 @@ import {
 import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
 import { isImagePath } from "@/utils/fileHelpers";
 import { toCamelCase } from "@/utils/stdfunc";
-import { Button, Link } from "@mui/material";
-import { createElement, Fragment, MouseEvent } from "react";
+import { Link } from "@mui/material";
+import { MouseEvent } from "react";
 import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import NextLink from "@/components/Link";
 
@@ -186,14 +186,14 @@ export function columnsFromFields<
                 headerName: field.label,
                 ...(field.formatValue
                     ? {
-                          /**
-                           * Renders a data grid cell value from a normalized field definition.
-                           */
-                          renderCell: (params: GridRenderCellParams) =>
-                              String(field.formatValue!(params.value) ?? ""),
-                      }
+                        /**
+                         * Renders a data grid cell value from a normalized field definition.
+                         */
+                        renderCell: (params: GridRenderCellParams) =>
+                            String(field.formatValue!(params.value) ?? ""),
+                    }
                     : field.type === "file"
-                      ? {
+                        ? {
                             renderCell: (params: GridRenderCellParams) =>
                                 renderFileCell(
                                     params,
@@ -202,7 +202,7 @@ export function columnsFromFields<
                                     field.height,
                                 ),
                         }
-                      : {}),
+                        : {}),
             })),
     );
 }

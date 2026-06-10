@@ -22,10 +22,13 @@ Organize all react-hook-form usage into @components/rhf
 Implement settings
 Implement auto-adding settings for fields aka changing the corner of markdown
 toggle for some field
-Implement NextAuth usage
+Implement Better Auth usage
 Save diff for all text field changes and store it in some format that takes
 less size
 Restore SSE connection on crash
+Add hotkeys with tanstack library
+Make react-hook-form use zod validator
+Use next-safe-actions
 
 Restore row dialog on crash with saved content
 

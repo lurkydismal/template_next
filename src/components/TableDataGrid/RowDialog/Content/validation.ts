@@ -5,7 +5,11 @@ import {
     TableLookupFieldConfig,
 } from "../types";
 import z from "zod";
-import { ipSchema, normalizedString, portSchema } from "@/utils/validate/schemas";
+import {
+    ipSchema,
+    normalizedString,
+    portSchema,
+} from "@/utils/validate/schemas";
 
 /**
  * Checks whether a value is considered empty for row dialog validation.

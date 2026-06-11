@@ -113,3 +113,15 @@ generate-token length='32':
         break
     fi
     done
+
+# Print Better Auth configuration and setup information
+print-better-auth-info:
+    pnpm dlx auth@latest info
+
+# Generate Better Auth compatible secret
+generate-better-auth-secret:
+    pnpm dlx auth@latest secret
+
+# Generate Better Auth database schema files
+generate-better-auth-schema:
+    pnpm dlx auth@latest generate

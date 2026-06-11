@@ -8,7 +8,7 @@ import log from "@/utils/stdlog";
 import { useRouter } from "next/navigation";
 import { Typography } from "@mui/material";
 import { useEffect } from "react";
-import { login } from "@/lib/auth";
+import { login } from "@/lib/auth2";
 import { useSnackbar } from "@/providers/snackbar";
 import { UsersRowPublic } from "@/db/types";
 import { setUser } from "@/utils/stduser";

@@ -1,5 +1,5 @@
 import { afterLoginRoute } from "@/data/routes";
-import { getSessionData } from "@/lib/auth";
+import { getSessionData } from "@/lib/auth2";
 import { permanentRedirect, redirect } from "next/navigation";
 
 /**

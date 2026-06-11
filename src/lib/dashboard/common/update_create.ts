@@ -211,8 +211,8 @@ export async function save(
             typeof (updateResult as { rowCount?: number }).rowCount === "number"
                 ? (updateResult as { rowCount: number }).rowCount
                 : Array.isArray(updateResult)
-                    ? updateResult.length
-                    : undefined;
+                  ? updateResult.length
+                  : undefined;
 
         if (affectedRows === undefined) {
             throw new Error(

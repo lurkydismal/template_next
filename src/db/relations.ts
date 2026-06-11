@@ -27,5 +27,5 @@ export const relations = defineRelations(schema, (r) => ({
             from: r.account.userId,
             to: r.user.id,
         }),
-    }
+    },
 }));

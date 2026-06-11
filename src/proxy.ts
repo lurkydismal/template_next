@@ -4,8 +4,8 @@ import { auth } from "@/lib/auth";
 
 export async function proxy(request: NextRequest) {
     const session = await auth.api.getSession({
-        headers: await headers()
-    })
+        headers: await headers(),
+    });
 
     if (!session) {
         return NextResponse.redirect(new URL("/auth/register", request.url));

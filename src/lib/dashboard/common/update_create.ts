@@ -14,7 +14,7 @@ import {
     createSelectSchema,
     createUpdateSchema,
 } from "drizzle-zod";
-import { z } from "zod";
+import z from "zod";
 import { toCamelCase } from "@/utils/stdfunc";
 import { getUserId, requestUserId } from "@/lib/user";
 

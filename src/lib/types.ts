@@ -1,14 +1,10 @@
-import z from "zod";
 import * as schema from "@/db/schema";
+import { DbTargetSchema } from "@/utils/validate/schemas";
 import { AnyColumn } from "drizzle-orm";
 
 export const TABLES = schema;
 
 export type DbTarget = keyof typeof TABLES;
-
-export const DbTargetSchema = z.enum(
-    Object.keys(TABLES) as [DbTarget, ...DbTarget[]],
-);
 
 /**
  * Parses raw target.

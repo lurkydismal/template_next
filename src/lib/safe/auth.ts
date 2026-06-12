@@ -1,25 +1,26 @@
 "use server";
 
-import z from "zod";
 import { authClient } from "@/lib/auth/client";
 import auth from "@/lib/auth";
 import { headers } from "next/headers";
 import { actionClient } from "./client";
-
-const registerUserSchema = z.object({ name: z.string(), email: z.email(), password: z.string() });
+import { redirect } from "next/navigation";
+import { loginUserSchema, registerUserSchema } from "@/utils/validate/schemas";
 
 export const register = actionClient
     .inputSchema(registerUserSchema)
     .action(async ({ parsedInput }) => {
         await auth.api.signUpEmail({ body: parsedInput });
-    });
 
-const loginUserSchema = z.object({ email: z.email(), password: z.string(), remember: z.boolean().optional() });
+        redirect("/");
+    });
 
 export const login = actionClient
     .inputSchema(loginUserSchema)
     .action(async ({ parsedInput }) => {
         await auth.api.signInEmail({ body: parsedInput });
+
+        redirect("/");
     });
 
 export const logout = authClient

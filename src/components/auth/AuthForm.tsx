@@ -12,13 +12,7 @@ import {
 import { Controller } from "react-hook-form";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { login, register } from "@/lib/safe/auth";
-import z from "zod";
-
-export type SignInValues = z.infer<typeof loginUserSchema>;
-export type SignUpValues = z.infer<typeof registerUserSchema>;
-
-const registerUserSchema = z.object({ name: z.string(), email: z.email(), password: z.string() });
-const loginUserSchema = z.object({ email: z.email(), password: z.string(), remember: z.boolean().optional() });
+import { loginUserSchema, registerUserSchema } from "@/utils/validate/schemas";
 
 function SignInForm() {
     const { form, action, handleSubmitWithAction, resetFormAndAction } =

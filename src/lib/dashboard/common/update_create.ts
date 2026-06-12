@@ -3,7 +3,7 @@
 import { and, AnyColumn, eq, getColumns, SQL } from "drizzle-orm";
 
 import db from "@/db";
-import { getSessionData } from "@/lib/auth2";
+import { getSession } from "@/lib/safe/auth";
 import { updateDbCacheTags } from "@/lib/cache";
 import { ActionResult, DbTarget, parseRawTarget } from "@/lib/types";
 import { emitDashboardChange } from "@/lib/dashboard/common/change-events";
@@ -151,8 +151,8 @@ export async function save(
         : createInsertSchema(table);
     const selectSchema = createSelectSchema(table);
 
-    const sessionUser = await getSessionData();
-    const actor = sessionUser?.username_normalized;
+    const sessionUser = (await getSession()).data?.user;
+    const actor = sessionUser?.name;
 
     if (!actor) {
         throw new Error("Missing authenticated user");
@@ -211,8 +211,8 @@ export async function save(
             typeof (updateResult as { rowCount?: number }).rowCount === "number"
                 ? (updateResult as { rowCount: number }).rowCount
                 : Array.isArray(updateResult)
-                  ? updateResult.length
-                  : undefined;
+                    ? updateResult.length
+                    : undefined;
 
         if (affectedRows === undefined) {
             throw new Error(

@@ -15,6 +15,8 @@ import {
     hasParentTraversal,
     normalizePathSeparators,
 } from "./helpers";
+import { DbTarget, TABLES } from "@/lib/types";
+import { UPLOAD_DIRS, UploadTarget } from "@/data/minioTargets";
 
 export const emptyToNull = <T extends z.ZodTypeAny>(schema: T) =>
     z.preprocess((val) => (val === "" ? null : val), schema.nullable());
@@ -138,4 +140,15 @@ export const mutationInputSchema = z.record(z.string(), z.unknown()).and(
     z.object({
         id: z.coerce.number().int().positive().optional(),
     }),
+);
+
+export const registerUserSchema = z.object({ name: z.string(), email: z.email(), password: z.string() });
+export const loginUserSchema = z.object({ email: z.email(), password: z.string(), remember: z.boolean().optional() });
+
+export const DbTargetSchema = z.enum(
+    Object.keys(TABLES) as [DbTarget, ...DbTarget[]],
+);
+
+export const UploadTargetSchema = z.enum(
+    Object.keys(UPLOAD_DIRS) as [UploadTarget, ...UploadTarget[]],
 );

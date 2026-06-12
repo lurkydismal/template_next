@@ -5,7 +5,6 @@ import * as schema from "@/db/schema";
 import db from "@/db";
 
 const auth = betterAuth({
-    // ...your config (database, plugins, etc.)
     database: drizzleAdapter(db, {
         provider: "pg", // or "sqlite"
         schema: {
@@ -17,6 +16,7 @@ const auth = betterAuth({
     }),
     emailAndPassword: {
         enabled: true,
+        requireEmailVerification: false,
     },
     session: {
         cookieCache: {

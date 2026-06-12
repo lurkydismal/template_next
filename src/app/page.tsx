@@ -1,17 +1,9 @@
 import { afterLoginRoute } from "@/data/routes";
-import { getSessionData } from "@/lib/auth2";
-import { permanentRedirect, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 /**
- * Root page handler that redirects users based on authentication state.
- * Unauthenticated users are sent to registration; authenticated users to their default route.
+ * Root page handler that redirects users to default route.
  */
 export default async function Page() {
-    const user = await getSessionData();
-
-    if (!user) {
-        permanentRedirect("/auth/register");
-    }
-
     redirect(afterLoginRoute);
 }

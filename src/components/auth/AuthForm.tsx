@@ -8,31 +8,34 @@ import {
     Checkbox,
     Button,
 } from "@mui/material";
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-type SignInValues = {
-    username: string;
+export type SignInValues = {
+    email: string;
     password: string;
     remember?: boolean;
 };
 
-type SignUpValues = {
-    username: string;
+export type SignUpValues = {
+    name: string;
+    email: string;
     password: string;
 };
 
 type Values = SignInValues | SignUpValues;
 
+// * TODO: Improve isExecuting
 type Props =
     | {
-          mode: "signin";
-          onSubmit: (data: SignInValues) => Promise<void> | void;
-      }
+        mode: "signin";
+        onSubmit: (data: SignInValues) => Promise<void> | void;
+        isExecuting: boolean;
+    }
     | {
-          mode: "signup";
-          onSubmit: (data: SignUpValues) => Promise<void> | void;
-      };
+        mode: "signup";
+        onSubmit: (data: SignUpValues) => Promise<void> | void;
+        isExecuting: boolean;
+    };
 
 /**
  * Renders the auth form component.
@@ -41,21 +44,18 @@ export default function AuthForm(props: Props) {
     const isSignIn = props.mode === "signin";
     const { control, handleSubmit } = useForm<Values>({
         defaultValues: isSignIn
-            ? { username: "", password: "", remember: false }
-            : { username: "", password: "" },
+            ? { email: "", password: "", remember: false }
+            : { name: "", email: "", password: "" },
     });
-    const [loading, setLoading] = useState(false);
 
     /**
      * Submits the current form or dialog state.
      */
     const _onSubmit = async (data: Values) => {
-        setLoading(true);
-
-        try {
-            await props.onSubmit(data);
-        } finally {
-            setLoading(false);
+        if (isSignIn) {
+            await props.onSubmit(data as SignInValues);
+        } else {
+            await props.onSubmit(data as SignUpValues);
         }
     };
 
@@ -72,16 +72,16 @@ export default function AuthForm(props: Props) {
             }}
         >
             <Controller
-                name="username"
+                name="name"
                 control={control}
-                rules={{ required: "Username is required", maxLength: 32 }}
+                rules={{ required: "Name is required", maxLength: 32 }}
                 render={({ field, fieldState }) => (
                     <FormControl>
-                        <FormLabel htmlFor="username">Username</FormLabel>
+                        <FormLabel htmlFor="name">Name</FormLabel>
 
                         <TextField
                             {...field}
-                            autoComplete="username"
+                            autoComplete="name"
                             autoFocus
                             color={
                                 Boolean(fieldState.error) ? "error" : "primary"
@@ -89,7 +89,7 @@ export default function AuthForm(props: Props) {
                             error={Boolean(fieldState.error)}
                             fullWidth
                             helperText={fieldState.error?.message}
-                            name="username"
+                            name="name"
                             placeholder="tralalero"
                             required
                             type="text"
@@ -99,6 +99,36 @@ export default function AuthForm(props: Props) {
                 )}
             />
 
+            {!isSignIn ? (
+                <Controller
+                    name="email"
+                    control={control}
+                    rules={{ required: "Email is required", maxLength: 32 }}
+                    render={({ field, fieldState }) => (
+                        <FormControl>
+                            <FormLabel htmlFor="email">Email</FormLabel>
+
+                            <TextField
+                                {...field}
+                                autoComplete="email"
+                                autoFocus
+                                color={
+                                    Boolean(fieldState.error) ? "error" : "primary"
+                                }
+                                error={Boolean(fieldState.error)}
+                                fullWidth
+                                helperText={fieldState.error?.message}
+                                name="email"
+                                placeholder="tralalero"
+                                required
+                                type="text"
+                                variant="outlined"
+                            />
+                        </FormControl>
+                    )}
+                />
+            ) : null}
+
             <Controller
                 name="password"
                 control={control}
@@ -106,11 +136,11 @@ export default function AuthForm(props: Props) {
                     required: "Password is required",
                     ...(props.mode === "signup"
                         ? {
-                              minLength: {
-                                  value: 8,
-                                  message: "Min 8 characters",
-                              },
-                          }
+                            minLength: {
+                                value: 8,
+                                message: "Min 8 characters",
+                            },
+                        }
                         : {}),
                     maxLength: 32,
                 }}
@@ -161,7 +191,7 @@ export default function AuthForm(props: Props) {
             <Button
                 endIcon={<AccountCircle />}
                 fullWidth
-                disabled={loading}
+                disabled={props.isExecuting}
                 type="submit"
                 variant="outlined"
             >

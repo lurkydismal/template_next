@@ -1,49 +1,36 @@
 "use client";
 
 import AuthCard from "@/components/auth/AuthCard";
-import AuthForm from "@/components/auth/AuthForm";
+import AuthForm, { SignUpValues } from "@/components/auth/AuthForm";
 import { Link } from "@/components/Link";
 import { CopyrightAligned as Copyright } from "@/components/Copyright";
 import log from "@/utils/stdlog";
 import { useRouter } from "next/navigation";
+import { useAction } from "next-safe-action/hooks";
 import { Typography } from "@mui/material";
-import { useEffect } from "react";
-import { register } from "@/lib/auth2";
+import { register } from "@/lib/safe/auth";
 import { useSnackbar } from "@/providers/snackbar";
-import { setUser } from "@/utils/stduser";
 import { afterLoginRoute } from "@/data/routes";
 
 /**
  * Renders the sign up page component.
  */
 export default function SignUpPage() {
+    const { executeAsync, result, isExecuting } = useAction(register);
     const router = useRouter();
     const { showError } = useSnackbar();
 
-    useEffect(() => {
-        log.trace("SignUp component mounted");
-        return () => {
-            log.trace("SignUp component unmounted");
-        };
-    }, []);
-
-    /**
-     * Handles sign up.
-     */
-    const handleSignUp = async (data: {
-        username: string;
-        password: string;
-    }) => {
+    const handleSignUp = async (data: SignUpValues) => {
         log.trace(`onSubmit called: '${JSON.stringify(data)}'`);
 
-        try {
-            const user = await register({ ...data });
+        await executeAsync(data);
 
-            setUser(user);
-
+        if (result.data) {
             router.push(afterLoginRoute);
-        } catch (err) {
-            showError(err);
+        } else if (result.validationErrors) {
+            showError(result.validationErrors);
+        } else if (result.serverError) {
+            showError(result.serverError);
         }
     };
 
@@ -66,7 +53,7 @@ export default function SignUpPage() {
 
     return (
         <AuthCard footer={footer}>
-            <AuthForm mode="signup" onSubmit={handleSignUp} />
+            <AuthForm mode="signup" onSubmit={handleSignUp} isExecuting={isExecuting} />
         </AuthCard>
     );
 }

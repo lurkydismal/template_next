@@ -4,51 +4,12 @@ import AuthCard from "@/components/auth/AuthCard";
 import AuthForm from "@/components/auth/AuthForm";
 import { Link } from "@/components/Link";
 import { CopyrightAligned as Copyright } from "@/components/Copyright";
-import log from "@/utils/stdlog";
-import { useRouter } from "next/navigation";
 import { Typography } from "@mui/material";
-import { useEffect } from "react";
-import { login } from "@/lib/auth2";
-import { useSnackbar } from "@/providers/snackbar";
-import { UsersRowPublic } from "@/db/types";
-import { setUser } from "@/utils/stduser";
-import { afterLoginRoute } from "@/data/routes";
 
 /**
  * Renders the sign in page component.
  */
 export default function SignInPage() {
-    const router = useRouter();
-    const { showError } = useSnackbar();
-
-    useEffect(() => {
-        log.trace("SignIn component mounted");
-        return () => {
-            log.trace("SignIn component unmounted");
-        };
-    }, []);
-
-    /**
-     * Handles sign in.
-     */
-    const handleSignIn = async (data: {
-        username: string;
-        password: string;
-        remember?: boolean;
-    }) => {
-        log.trace(`onSubmit called: '${JSON.stringify(data)}'`);
-
-        try {
-            const user: UsersRowPublic = await login({ ...data });
-
-            setUser(user);
-
-            router.push(afterLoginRoute);
-        } catch (err) {
-            showError(err);
-        }
-    };
-
     const footer = (
         <>
             <Typography sx={{ textAlign: "center" }}>
@@ -68,7 +29,7 @@ export default function SignInPage() {
 
     return (
         <AuthCard footer={footer}>
-            <AuthForm mode="signin" onSubmit={handleSignIn} />
+            <AuthForm mode="signin" />
         </AuthCard>
     );
 }

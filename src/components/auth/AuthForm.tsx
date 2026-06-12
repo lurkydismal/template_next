@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { AccountCircle } from "@mui/icons-material";
 import {
     Box,
@@ -8,62 +9,149 @@ import {
     Checkbox,
     Button,
 } from "@mui/material";
-import { Controller, useForm } from "react-hook-form";
+import { Controller } from "react-hook-form";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
+import { login, register } from "@/lib/safe/auth";
+import z from "zod";
 
-export type SignInValues = {
-    email: string;
-    password: string;
-    remember?: boolean;
-};
+export type SignInValues = z.infer<typeof loginUserSchema>;
+export type SignUpValues = z.infer<typeof registerUserSchema>;
 
-export type SignUpValues = {
-    name: string;
-    email: string;
-    password: string;
-};
+const registerUserSchema = z.object({ name: z.string(), email: z.email(), password: z.string() });
+const loginUserSchema = z.object({ email: z.email(), password: z.string(), remember: z.boolean().optional() });
 
-type Values = SignInValues | SignUpValues;
-
-// * TODO: Improve isExecuting
-type Props =
-    | {
-        mode: "signin";
-        onSubmit: (data: SignInValues) => Promise<void> | void;
-        isExecuting: boolean;
-    }
-    | {
-        mode: "signup";
-        onSubmit: (data: SignUpValues) => Promise<void> | void;
-        isExecuting: boolean;
-    };
-
-/**
- * Renders the auth form component.
- */
-export default function AuthForm(props: Props) {
-    const isSignIn = props.mode === "signin";
-    const { control, handleSubmit } = useForm<Values>({
-        defaultValues: isSignIn
-            ? { email: "", password: "", remember: false }
-            : { name: "", email: "", password: "" },
-    });
-
-    /**
-     * Submits the current form or dialog state.
-     */
-    const _onSubmit = async (data: Values) => {
-        if (isSignIn) {
-            await props.onSubmit(data as SignInValues);
-        } else {
-            await props.onSubmit(data as SignUpValues);
-        }
-    };
+function SignInForm() {
+    const { form, action, handleSubmitWithAction, resetFormAndAction } =
+        useHookFormAction(login, zodResolver(loginUserSchema), {
+            formProps: {
+                defaultValues:
+                    { email: "", password: "", remember: false }
+            },
+            actionProps: {
+                onSuccess: () => {
+                    resetFormAndAction();
+                },
+            },
+        });
+    const { control } = form;
 
     return (
         <Box
             component="form"
             noValidate
-            onSubmit={handleSubmit(_onSubmit)}
+            onSubmit={handleSubmitWithAction}
+            sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                width: "100%",
+            }}
+        >
+            <Controller
+                name="email"
+                control={control}
+                render={({ field, fieldState }) => (
+                    <FormControl>
+                        <FormLabel htmlFor="email">Email</FormLabel>
+
+                        <TextField
+                            {...field}
+                            autoComplete="email"
+                            autoFocus
+                            color={
+                                Boolean(fieldState.error) ? "error" : "primary"
+                            }
+                            error={Boolean(fieldState.error)}
+                            fullWidth
+                            helperText={fieldState.error?.message}
+                            name="email"
+                            placeholder="tralalero@localhost.noreply"
+                            required
+                            type="email"
+                            variant="outlined"
+                        />
+                    </FormControl>
+                )}
+            />
+
+            <Controller
+                name="password"
+                control={control}
+                render={({ field, fieldState }) => (
+                    <FormControl>
+                        <FormLabel htmlFor="password">Password</FormLabel>
+
+                        <TextField
+                            {...field}
+                            autoComplete="new-password"
+                            color={
+                                Boolean(fieldState.error) ? "error" : "primary"
+                            }
+                            error={Boolean(fieldState.error)}
+                            fullWidth
+                            helperText={fieldState.error?.message}
+                            name="password"
+                            placeholder="••••••"
+                            required
+                            type="password"
+                            variant="outlined"
+                        />
+                    </FormControl>
+                )}
+            />
+
+            <Controller
+                name="remember"
+                control={control}
+                render={({ field }) => (
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={Boolean(field.value)}
+                                onChange={(e) =>
+                                    field.onChange(e.target.checked)
+                                }
+                                color="primary"
+                            />
+                        }
+                        label="Remember me"
+                    />
+                )}
+            />
+
+            <Button
+                endIcon={<AccountCircle />}
+                fullWidth
+                loading={action.isPending}
+                type="submit"
+                variant="outlined"
+            >
+                Sign in
+            </Button>
+        </Box>
+    );
+}
+
+
+function SignUpForm() {
+    const { form, action, handleSubmitWithAction, resetFormAndAction } = useHookFormAction(register, zodResolver(registerUserSchema), {
+        formProps: {
+            defaultValues:
+                { name: "", email: "", password: "" },
+        },
+        actionProps: {
+            onSuccess: () => {
+                resetFormAndAction();
+            },
+        },
+    });
+    const { control } = form;
+
+    return (
+        <Box
+            component="form"
+            noValidate
+            onSubmit={handleSubmitWithAction}
             sx={{
                 display: "flex",
                 flexDirection: "column",
@@ -74,7 +162,6 @@ export default function AuthForm(props: Props) {
             <Controller
                 name="name"
                 control={control}
-                rules={{ required: "Name is required", maxLength: 32 }}
                 render={({ field, fieldState }) => (
                     <FormControl>
                         <FormLabel htmlFor="name">Name</FormLabel>
@@ -99,51 +186,36 @@ export default function AuthForm(props: Props) {
                 )}
             />
 
-            {!isSignIn ? (
-                <Controller
-                    name="email"
-                    control={control}
-                    rules={{ required: "Email is required", maxLength: 32 }}
-                    render={({ field, fieldState }) => (
-                        <FormControl>
-                            <FormLabel htmlFor="email">Email</FormLabel>
+            <Controller
+                name="email"
+                control={control}
+                render={({ field, fieldState }) => (
+                    <FormControl>
+                        <FormLabel htmlFor="email">Email</FormLabel>
 
-                            <TextField
-                                {...field}
-                                autoComplete="email"
-                                autoFocus
-                                color={
-                                    Boolean(fieldState.error) ? "error" : "primary"
-                                }
-                                error={Boolean(fieldState.error)}
-                                fullWidth
-                                helperText={fieldState.error?.message}
-                                name="email"
-                                placeholder="tralalero"
-                                required
-                                type="text"
-                                variant="outlined"
-                            />
-                        </FormControl>
-                    )}
-                />
-            ) : null}
+                        <TextField
+                            {...field}
+                            autoComplete="email"
+                            autoFocus
+                            color={
+                                Boolean(fieldState.error) ? "error" : "primary"
+                            }
+                            error={Boolean(fieldState.error)}
+                            fullWidth
+                            helperText={fieldState.error?.message}
+                            name="email"
+                            placeholder="tralalero@localhost.noreply"
+                            required
+                            type="text"
+                            variant="outlined"
+                        />
+                    </FormControl>
+                )}
+            />
 
             <Controller
                 name="password"
                 control={control}
-                rules={{
-                    required: "Password is required",
-                    ...(props.mode === "signup"
-                        ? {
-                            minLength: {
-                                value: 8,
-                                message: "Min 8 characters",
-                            },
-                        }
-                        : {}),
-                    maxLength: 32,
-                }}
                 render={({ field, fieldState }) => (
                     <FormControl>
                         <FormLabel htmlFor="password">Password</FormLabel>
@@ -167,36 +239,24 @@ export default function AuthForm(props: Props) {
                 )}
             />
 
-            {isSignIn && (
-                <Controller
-                    name="remember"
-                    control={control}
-                    render={({ field }) => (
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={Boolean(field.value)}
-                                    onChange={(e) =>
-                                        field.onChange(e.target.checked)
-                                    }
-                                    color="primary"
-                                />
-                            }
-                            label="Remember me"
-                        />
-                    )}
-                />
-            )}
-
             <Button
                 endIcon={<AccountCircle />}
                 fullWidth
-                disabled={props.isExecuting}
+                loading={action.isPending}
                 type="submit"
                 variant="outlined"
             >
-                {isSignIn ? "Sign in" : "Sign up"}
+                Sign up
             </Button>
         </Box>
     );
+}
+
+/**
+ * Renders the auth form component.
+ */
+export default function AuthForm({ mode }: { mode: "signup" | "signin" }) {
+    const isSignIn = mode === "signin";
+
+    return (isSignIn ? <SignInForm /> : <SignUpForm />);
 }

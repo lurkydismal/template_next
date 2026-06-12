@@ -15,7 +15,7 @@ const auth = betterAuth({
         cookieCache: {
             enabled: true,
             strategy: "jwt",
-        }
+        },
     },
     experimental: { joins: true },
     plugins: [

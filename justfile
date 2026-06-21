@@ -66,9 +66,14 @@ docker-up image='postgres minio':
 docker-stop:
     docker compose stop
 
-# Stop and remove containers, networks, and default resources created by the current Docker Compose project.
-docker-down:
-    docker compose down
+# Stop and remove containers, networks, default resources, and optionally volumes created by the current Docker Compose project.
+docker-down remove_volumes='false':
+    #!/usr/bin/env bash
+    if [ "{{ remove_volumes }}" = "true" ]; then \
+        docker compose down --volumes; \
+    else \
+        docker compose down; \
+    fi
 
 # Open an interactive shell inside a running service container.
 docker-interact image='postgres':

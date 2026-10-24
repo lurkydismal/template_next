@@ -1,18 +1,8 @@
-import {
-    Cancel as CancelIcon,
-    Search as SearchIcon,
-} from "@mui/icons-material";
+import { Cancel as CancelIcon, Search as SearchIcon } from "@mui/icons-material";
 import { InputAdornment, Tooltip } from "@mui/material";
-import {
-    QuickFilterClear,
-    QuickFilterControl,
-    QuickFilterTrigger,
-} from "@mui/x-data-grid";
-import {
-    StyledQuickFilter,
-    StyledTextField,
-    StyledToolbarButton,
-} from "./styles";
+import { QuickFilterClear, QuickFilterControl, QuickFilterTrigger } from "@mui/x-data-grid";
+
+import { StyledQuickFilter, StyledTextField, StyledToolbarButton } from "./styles";
 
 /**
  * Renders the custom quick filter component.

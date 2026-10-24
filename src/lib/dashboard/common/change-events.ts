@@ -1,8 +1,8 @@
 "use server";
 
+import { NotificationsRow } from "@/db/types";
 import { DbTarget } from "@/lib/types";
 import log from "@/utils/stdlog";
-import { NotificationsRow } from "@/db/types";
 
 type DashboardChangeEvent = {
     event: "dashboard-change";
@@ -25,8 +25,7 @@ declare global {
     var __dashboardListeners: Set<DashboardListener> | undefined;
 }
 
-const listeners =
-    globalThis.__dashboardListeners ?? new Set<DashboardListener>();
+const listeners = globalThis.__dashboardListeners ?? new Set<DashboardListener>();
 
 globalThis.__dashboardListeners = listeners;
 
@@ -52,9 +51,7 @@ export async function emitDashboardChange(target: DbTarget): Promise<void> {
 /**
  * Registers a listener for all dashboard stream events and returns an unsubscribe callback.
  */
-export async function emitNotificationEvent(
-    event: NotificationEvent,
-): Promise<void> {
+export async function emitNotificationEvent(event: NotificationEvent): Promise<void> {
     listeners.forEach((listener) => {
         try {
             listener(event);
@@ -67,9 +64,7 @@ export async function emitNotificationEvent(
 /**
  * Registers a dashboard stream listener and returns an unsubscribe callback.
  */
-export async function subscribeToDashboardEvents(
-    listener: DashboardListener,
-): Promise<() => void> {
+export async function subscribeToDashboardEvents(listener: DashboardListener): Promise<() => void> {
     listeners.add(listener);
 
     return () => {

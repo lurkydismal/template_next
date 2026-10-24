@@ -6,7 +6,7 @@ import NextLink from "next/link";
 function ErrorIcon() {
     return (
         <svg
-            className="w-7 h-7 text-red-600 dark:text-red-400"
+            className="h-7 w-7 text-red-600 dark:text-red-400"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -29,9 +29,9 @@ function ErrorIcon() {
  */
 export default function UnauthorizedPage() {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-            <main className="w-full max-w-md p-6 space-y-6 text-center">
-                <div className="mx-auto w-14 h-14 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+        <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+            <main className="w-full max-w-md space-y-6 p-6 text-center">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
                     <ErrorIcon />
                 </div>
 
@@ -46,7 +46,7 @@ export default function UnauthorizedPage() {
 
                 <NextLink
                     href="/auth/login"
-                    className="px-4 py-2 text-sm font-medium rounded-md bg-indigo-600 text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition cursor-pointer"
+                    className="cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-900"
                 >
                     Sign in
                 </NextLink>

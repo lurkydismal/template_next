@@ -1,9 +1,11 @@
 "use client";
 
-import DesktopNav from "./DesktopNav";
-import { items } from "@/data/navbar";
-import MobileNav from "./MobileNav";
 import { styled, Toolbar, alpha, AppBar, Container } from "@mui/material";
+
+import { items } from "@/data/navbar";
+
+import DesktopNav from "./DesktopNav";
+import MobileNav from "./MobileNav";
 
 /**
  * Provides the styled toolbar layout for the responsive navigation bar.

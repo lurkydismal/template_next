@@ -1,12 +1,8 @@
 {
     "compilerOptions": {
-        "target": "ES2025",
-        "lib": [
-            "dom",
-            "dom.iterable",
-            "esnext"
-        ],
-        "allowJs": false,
+        "target": "esnext",
+        "lib": ["dom", "dom.iterable", "esnext"],
+        "allowJs": true,
         "skipLibCheck": true,
         "strict": true,
         "noEmit": true,
@@ -23,21 +19,8 @@
             }
         ],
         "paths": {
-            "@/*": [
-                "./src/*"
-            ]
-        },
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "allowUnusedLabels": false,
-        "noUncheckedSideEffectImports": true,
-        "noFallthroughCasesInSwitch": true,
-        "allowUnreachableCode": false,
-        "noUncheckedIndexedAccess": true,
-        "noPropertyAccessFromIndexSignature": true,
-        "erasableSyntaxOnly": true,
-        "noImplicitOverride": true,
-        "exactOptionalPropertyTypes": true
+            "@/*": ["./src/*"]
+        }
     },
     "include": [
         "next-env.d.ts",
@@ -47,8 +30,5 @@
         ".next/dev/types/**/*.ts",
         "**/*.mts"
     ],
-    "exclude": [
-        "node_modules",
-        ".next"
-    ]
+    "exclude": ["node_modules"]
 }

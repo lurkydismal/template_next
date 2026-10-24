@@ -1,0 +1,159 @@
+/**
+ * normalizeColumns
+ *
+ * Shared utility to normalize MUI DataGrid column definitions.
+ *
+ * Responsibilities:
+ * - Apply consistent defaults (alignment, flex, minWidth)
+ * - Auto-derive `field` from `headerName` when missing
+ * - Optionally supply a default `renderCell`
+ *
+ * Usage:
+ * - Keep files focused on domain: export a small literal array of column metadata
+ * - Call `normalizeColumns(rawColumns, options)` where you need the final GridColDef[]
+ */
+
+import { Link } from "@mui/material";
+import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import { createElement, Fragment, MouseEvent } from "react";
+
+import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
+import {
+    ImagePreviewDialog,
+    useImagePreview,
+} from "@/components/TableDataGrid/RowDialog/ImagePreviewDialog";
+import { isImagePath } from "@/utils/fileHelpers";
+import { toCamelCase } from "@/utils/stdfunc";
+
+type NormalizeOptions = {
+    defaultFlex?: number; // fallback flex when column.flex is missing
+    minWidthMultiplier?: number; // multiplier used to compute minWidth = flex * multiplier
+    defaultAlign?: GridColDef["align"]; // cell alignment default
+    defaultHeaderAlign?: GridColDef["headerAlign"]; // header alignment default
+    defaultRenderCell?: GridColDef["renderCell"]; // use when a column has no renderCell
+    deriveField?: (headerName: GridColDef["headerName"]) => string; // how to derive missing `field`
+};
+
+/**
+ * Renders an interactive file cell that reuses shared image preview behavior.
+ */
+function FileCellLink({ value }: { value: string }) {
+    const { imagePreviewOpen, openImagePreview, closeImagePreview } = useImagePreview();
+
+    /**
+     * Opens the preview dialog while preventing browser navigation.
+     */
+    function handleOpenPreview(event: MouseEvent<HTMLAnchorElement>): void {
+        event.preventDefault();
+        openImagePreview();
+    }
+
+    if (isImagePath(value)) {
+        return createElement(
+            Fragment,
+            null,
+            createElement(
+                Link,
+                { href: value, underline: "hover", onClick: handleOpenPreview },
+                "Open image",
+            ),
+            createElement(ImagePreviewDialog, {
+                open: imagePreviewOpen,
+                onClose: closeImagePreview,
+                sourceValue: value,
+                label: "Image preview",
+            }),
+        );
+    }
+
+    return createElement(
+        Link,
+        {
+            href: value,
+            download: true,
+            target: "_blank",
+            rel: "noreferrer",
+            underline: "hover",
+        },
+        "Download file",
+    );
+}
+
+/**
+ * Renders file-like values as action links with image-preview semantics.
+ */
+function renderFileCell(params: GridRenderCellParams) {
+    const value = typeof params.value === "string" ? params.value : "";
+    if (!value) return "";
+
+    return createElement(FileCellLink, { value });
+}
+
+/**
+ * Normalize and enrich all column definitions:
+ * - Center-align headers and cell content
+ * - Ensure `flex` is set (default: 1)
+ * - Ensure `minWidth` is set (derived from `flex`)
+ * - Ensure `field` exists (derived from headerName if missing)
+ */
+export function normalizeColumns(
+    cols: readonly Partial<GridColDef>[],
+    options: NormalizeOptions = {},
+): readonly GridColDef[] {
+    const {
+        defaultFlex = 1,
+        minWidthMultiplier = 100,
+        defaultAlign = "center",
+        defaultHeaderAlign = "center",
+        defaultRenderCell,
+        deriveField = (h) => (typeof h === "string" ? toCamelCase(h) : ""),
+    } = options;
+
+    return cols.map((item) => {
+        const flex = item.flex ?? defaultFlex;
+        const minWidth = item.minWidth ?? flex * minWidthMultiplier;
+
+        return {
+            ...item,
+            headerAlign: item.headerAlign ?? defaultHeaderAlign,
+            align: item.align ?? defaultAlign,
+            ...(item.flex == null ? { flex } : {}),
+            ...(item.minWidth == null ? { minWidth } : {}),
+            ...(item.field == null && item.headerName != null
+                ? { field: deriveField(item.headerName) }
+                : {}),
+            ...(item.renderCell == null && defaultRenderCell != null
+                ? { renderCell: defaultRenderCell }
+                : {}),
+        } as GridColDef;
+    }) as readonly GridColDef[];
+}
+
+/**
+ * Handles columns from fields behavior.
+ */
+export function columnsFromFields<
+    R extends Record<string, unknown>,
+    RI extends Record<string, unknown>,
+>(fields: FieldConfig<R, RI>[]): readonly GridColDef[] {
+    return normalizeColumns(
+        fields
+            .filter((field) => !field.hidden)
+            .map((field) => ({
+                field: String(field.key),
+                flex: 1,
+                headerName: field.label,
+                ...(field.formatValue
+                    ? {
+                          /**
+                           * Renders a data grid cell value from a normalized field definition.
+                           */
+                          renderCell: (params: GridRenderCellParams) =>
+                              String(field.formatValue!(params.value) ?? ""),
+                      }
+                    : field.type === "file"
+                      ? { renderCell: renderFileCell }
+                      : {}),
+            })),
+    );
+}

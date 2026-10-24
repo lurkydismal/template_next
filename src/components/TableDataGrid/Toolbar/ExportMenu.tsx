@@ -9,8 +9,7 @@ import { MouseEvent, useId, useState } from "react";
 export default function ExportMenu() {
     const exportMenuId = useId();
     const exportMenuTriggerId = `${exportMenuId}-trigger`;
-    const [exportMenuAnchorEl, setExportMenuAnchorEl] =
-        useState<HTMLElement | null>(null);
+    const [exportMenuAnchorEl, setExportMenuAnchorEl] = useState<HTMLElement | null>(null);
     const exportMenuOpen = Boolean(exportMenuAnchorEl);
 
     /**
@@ -54,16 +53,10 @@ export default function ExportMenu() {
                     },
                 }}
             >
-                <ExportPrint
-                    render={<MenuItem />}
-                    onClick={handleExportMenuClose}
-                >
+                <ExportPrint render={<MenuItem />} onClick={handleExportMenuClose}>
                     Print
                 </ExportPrint>
-                <ExportCsv
-                    render={<MenuItem />}
-                    onClick={handleExportMenuClose}
-                >
+                <ExportCsv render={<MenuItem />} onClick={handleExportMenuClose}>
                     Download as CSV
                 </ExportCsv>
             </Menu>

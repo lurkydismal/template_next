@@ -1,8 +1,9 @@
-import uuid from "@/utils/uuid";
-import mermaid from "mermaid";
 import Container from "@mui/material/Container";
 import { useTheme } from "@mui/material/styles";
+import mermaid from "mermaid";
 import { useEffect, useRef } from "react";
+
+import uuid from "@/utils/uuid";
 
 // React component that renders a Mermaid chart
 /**

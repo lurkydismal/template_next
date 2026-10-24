@@ -1,8 +1,8 @@
-import { defineConfig, globalIgnores } from "eslint/config";
-import eslintPluginPerfectionist from 'eslint-plugin-perfectionist';
-import eslintPluginDrizzle from 'eslint-plugin-drizzle';
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import eslintPluginDrizzle from "eslint-plugin-drizzle";
+import eslintPluginPerfectionist from "eslint-plugin-perfectionist";
+import { defineConfig, globalIgnores } from "eslint/config";
 
 const eslintConfig = defineConfig([
     ...nextVitals,
@@ -20,15 +20,8 @@ const eslintConfig = defineConfig([
             "perfectionist/sort-imports": [
                 "error",
                 {
-                    type: "natural",        // "natural" alphabetical sort
-                    groups: [
-                        "builtin",
-                        "external",
-                        "internal",
-                        "parent",
-                        "sibling",
-                        "index"
-                    ],
+                    type: "natural", // "natural" alphabetical sort
+                    groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
                     newlinesBetween: 1, // Add a newline between groups
                 },
             ],
@@ -54,7 +47,7 @@ const eslintConfig = defineConfig([
         "build/**",
         "next-env.d.ts",
         "drizzle/**",
-        'public/**',
+        "public/**",
         "**/*.js",
         "./*.ts",
     ]),

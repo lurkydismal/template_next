@@ -1,13 +1,6 @@
-import {
-    FilterList as FilterListIcon,
-    ViewColumn as ViewColumnIcon,
-} from "@mui/icons-material";
+import { FilterList as FilterListIcon, ViewColumn as ViewColumnIcon } from "@mui/icons-material";
 import { Badge, Tooltip } from "@mui/material";
-import {
-    ColumnsPanelTrigger,
-    FilterPanelTrigger,
-    ToolbarButton,
-} from "@mui/x-data-grid";
+import { ColumnsPanelTrigger, FilterPanelTrigger, ToolbarButton } from "@mui/x-data-grid";
 
 /**
  * Renders the columns panel trigger button.
@@ -45,9 +38,7 @@ export function FiltersPanelButton() {
                     >
                         <ToolbarButton
                             {...triggerProps}
-                            color={
-                                state.filterCount > 0 ? "primary" : "default"
-                            }
+                            color={state.filterCount > 0 ? "primary" : "default"}
                         >
                             <FilterListIcon fontSize="small" />
                         </ToolbarButton>

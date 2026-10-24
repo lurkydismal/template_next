@@ -1,39 +1,20 @@
-Fix file upload
-
-Enable upload for filed when dragging to field in form
-
-Show file upload progress
-
-Show what file was selected
-
-Fix image preview not closing on Escape key
-
-Add checkbox and other boolean field types
-Add Toggle button field type
-Add Slider field type
-Add map field type
-
+Notificaitons button: hide badge when all unread notifications are shown on screen
+Fix file upload and image showing
+Implement image field preview
+Remove "download file" from file field
 Implement SpeedDial with context based on if row dialog is open or not
-
-Implement "composite" field type to contain multiple fields
-Implement option "stackable" to auto-add new field when its filled to
+Enable upload for filed when draggin to field in form
+Implement option "multiple"(change) to auto-add new field when its filled to
 support any amount of this field and send it as array in form data
 Organize all react-hook-form usage into @components/rhf
+Refactor all duplicate code across the whole project
 Implement settings
 Implement auto-adding settings for fields aka changing the corner of markdown
 toggle for some field
-Implement Better Auth usage
+Consider NextAuth
 Save diff for all text field changes and store it in some format that takes
 less size
 Restore SSE connection on crash
-Add hotkeys with tanstack library
-Make react-hook-form use zod validator
-Use next-safe-actions
-
-Restore row dialog on crash with saved content
-
-Use uppy for file handling
-Implement infering field config from db schema
 
 Implement dashboard with graphs, administration, messaging as sending
 notifications

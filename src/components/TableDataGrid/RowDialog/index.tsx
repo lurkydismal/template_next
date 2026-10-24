@@ -1,4 +1,3 @@
-import log from "@/utils/stdlog";
 import {
     Button,
     Dialog,
@@ -10,6 +9,7 @@ import {
     PaperProps,
     Slide,
 } from "@mui/material";
+import { TransitionProps } from "@mui/material/transitions";
 import {
     Dispatch,
     forwardRef,
@@ -19,10 +19,12 @@ import {
     useRef,
     useState,
 } from "react";
-import { CreateRowAction, FieldConfig, UpdateRowAction } from "./types";
-import RowDialogContent from "./Content";
-import { TransitionProps } from "@mui/material/transitions";
 import Draggable from "react-draggable";
+
+import log from "@/utils/stdlog";
+
+import RowDialogContent from "./Content";
+import { CreateRowAction, FieldConfig, UpdateRowAction } from "./types";
 
 export type { FieldConfig } from "./types";
 
@@ -72,7 +74,6 @@ export default function RowDialog<
     dashboardKey,
     createRowAction,
     updateRowAction,
-    getFileAction,
     onUpdated,
     fields,
     idKey = "id" as keyof R,
@@ -84,7 +85,6 @@ export default function RowDialog<
     dashboardKey: string;
     createRowAction: CreateRowAction<RI>;
     updateRowAction: UpdateRowAction;
-    getFileAction: (filename: string) => Promise<string>;
     onUpdated?: () => Promise<void> | void;
     fields: FieldConfig<R, RI>[];
     idKey?: keyof R;
@@ -216,7 +216,6 @@ export default function RowDialog<
                             registerDiscardDraft={registerDiscardDraft}
                             createRowAction={createRowAction}
                             updateRowAction={updateRowAction}
-                            getFileAction={getFileAction}
                             onUpdated={onUpdated}
                             idKey={idKey}
                         />
@@ -235,16 +234,13 @@ export default function RowDialog<
                 maxWidth="xs"
                 fullWidth
             >
-                <DialogTitle
-                    style={{ cursor: "move" }}
-                    id="draggable-dialog-title"
-                >
+                <DialogTitle style={{ cursor: "move" }} id="draggable-dialog-title">
                     Leave dialog?
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        You still have invalid fields. Do you want to leave
-                        anyway and discard changes?
+                        You still have invalid fields. Do you want to leave anyway and discard
+                        changes?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>

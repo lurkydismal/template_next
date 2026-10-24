@@ -1,4 +1,5 @@
 import { boolean, integer, serial, text } from "drizzle-orm/pg-core";
+
 import { metadataColumns } from "./helpers";
 
 export const table = {
@@ -16,7 +17,6 @@ export const table = {
     hex_field: text(),
     inet_field: text(),
     table_lookup_field: text(),
-    file_field: text(),
     checkbox_field: boolean(),
     checkbox_icon_field: boolean(),
     switch_field: boolean(),

@@ -39,39 +39,6 @@ export function parseBool(value: string): boolean {
 }
 
 /**
- * Encode each segment of a URL/path safely.
- * Filters out empty segments to avoid "//" and encodes each segment.
- */
-export function encodePath(path: string): string {
-    return path.split("/").filter(Boolean).map(encodeURIComponent).join("/");
-}
-
-/**
- * Sanitize a filename to be filesystem-safe.
- * - Replaces spaces with underscores
- * - Replaces non-alphanumeric characters with underscores
- * - Removes leading dots
- * - Truncates to 100 characters
- * - Converts to lowercase
- *
- * @param raw - Input to sanitize
- * @returns Sanitized string or null if invalid/empty
- */
-export function sanitizeFilename(raw: unknown): string | null {
-    if (typeof raw !== "string") return null;
-
-    const s = raw
-        .trim()
-        .replace(/\s+/g, "_")
-        .replace(/[^a-zA-Z0-9_\-\.]/g, "_")
-        .replace(/^\.+/, "")
-        .slice(0, 100)
-        .toLowerCase();
-
-    return s || null;
-}
-
-/**
  * Convert a string to camelCase.
  * - Trims and lowercases
  * - Removes special characters except spaces
@@ -219,11 +186,7 @@ export function delay(milliseconds: number): Promise<void> {
  * @example
  * paginate(["a", "b", "c", "d"], 2, 2); // ["c", "d"]
  */
-export function paginate<T>(
-    items: T[],
-    currentPage: number,
-    perPage: number,
-): T[] {
+export function paginate<T>(items: T[], currentPage: number, perPage: number): T[] {
     const start = (currentPage - 1) * perPage;
     const end = start + perPage;
 

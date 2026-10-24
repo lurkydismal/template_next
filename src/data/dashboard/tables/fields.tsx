@@ -3,19 +3,14 @@ import {
     BookmarkBorder as BookmarkBorderIcon,
 } from "@mui/icons-material";
 import { TextField } from "@mui/material";
+
 import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
-import {
-    TablesRow as TableRow,
-    TablesRowInsert as TableRowInsert,
-} from "@/db/types";
+import { TablesRow as TableRow, TablesRowInsert as TableRowInsert } from "@/db/types";
 
 /**
  * Renders the demo custom field with a plain MUI text input.
  */
-function renderCustomField(
-    value: unknown,
-    setValue: (value: unknown) => void,
-): React.ReactNode {
+function renderCustomField(value: unknown, setValue: (value: unknown) => void): React.ReactNode {
     return (
         <TextField
             fullWidth
@@ -24,25 +19,6 @@ function renderCustomField(
             onChange={(event) => setValue(event.target.value)}
         />
     );
-}
-
-/**
- * Converts selected file values into a stable string that can be stored in the table.
- */
-function fileNameToFormValue(value: unknown): string | undefined {
-    if (value instanceof File) return value.name;
-    if (value == null || value === "") return undefined;
-
-    return String(value);
-}
-
-/**
- * Mirrors selected file names back into form state so create and update both store strings.
- */
-function syncSelectedFileName(value: unknown): Record<string, unknown> {
-    return {
-        fileField: value instanceof File ? value.name : value,
-    };
 }
 
 /**
@@ -156,19 +132,7 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         size: 4,
         placeholder: "alpha",
         lookup: tableLookupExists,
-        tableLookupErrorMessage:
-            "Use alpha, bravo, or charlie for this demo lookup",
-    },
-    {
-        key: "file_field",
-        label: "File",
-        type: "file",
-        size: 4,
-        width: 200,
-        height: 200,
-        fileAccept: [".txt", "image/jpeg"],
-        toFormValue: fileNameToFormValue,
-        onValueChange: syncSelectedFileName,
+        tableLookupErrorMessage: "Use alpha, bravo, or charlie for this demo lookup",
     },
     {
         key: "checkbox_field",

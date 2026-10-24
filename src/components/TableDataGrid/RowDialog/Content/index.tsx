@@ -1,14 +1,16 @@
-import { useSnackbar } from "@/providers/snackbar";
 import { Divider, Grid } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RegisterOptions, useForm } from "react-hook-form";
+
+import { useSnackbar } from "@/providers/snackbar";
+
 import { CreateRowAction, FieldConfig, UpdateRowAction } from "../types";
 import { rowHasChanges, rowHasId } from "./changeDetection";
 import { buildUpdateFormData } from "./formData";
 import { buildInitialValues } from "./helpers";
+import { resolveInterconnectedFieldUpdates } from "./interconnected";
 import MetadataFields from "./MetadataFields";
 import { renderField } from "./renderField";
-import { resolveInterconnectedFieldUpdates } from "./interconnected";
 import { getFieldRules } from "./validation";
 
 type RowDialogContentProps<R, RI> = {
@@ -19,7 +21,6 @@ type RowDialogContentProps<R, RI> = {
     registerDiscardDraft: (fn: (() => void) | null) => void;
     createRowAction: CreateRowAction<RI>;
     updateRowAction: UpdateRowAction;
-    getFileAction: (filename: string) => Promise<string>;
     onUpdated?: (() => Promise<void> | void) | undefined;
     idKey?: keyof R;
 };
@@ -38,7 +39,6 @@ export default function RowDialogContent<
     registerDiscardDraft,
     createRowAction,
     updateRowAction,
-    getFileAction,
     onUpdated,
     idKey = "id" as keyof R,
 }: RowDialogContentProps<R, RI>) {
@@ -49,9 +49,7 @@ export default function RowDialogContent<
         mode: "onSubmit",
     });
 
-    const [values, setValues] = useState<Record<string, unknown>>(
-        buildInitialValues(row, fields),
-    );
+    const [values, setValues] = useState<Record<string, unknown>>(buildInitialValues(row, fields));
 
     useEffect(() => {
         const initialValues = buildInitialValues(row, fields);
@@ -114,11 +112,7 @@ export default function RowDialogContent<
      * Stores an edited value, then lets the field derive any dependent values.
      */
     const handleFieldValueChange = useCallback(
-        (
-            field: FieldConfig<R, RI>,
-            value: unknown,
-            packedValues?: Record<string, unknown>,
-        ) => {
+        (field: FieldConfig<R, RI>, value: unknown, packedValues?: Record<string, unknown>) => {
             const key = String(field.key);
             const changedValues = packedValues
                 ? { [key]: value, ...packedValues }
@@ -129,19 +123,14 @@ export default function RowDialogContent<
             setValuesAndForm(changedValues);
 
             void (async () => {
-                const siblingUpdates = await runFieldValueChange(
-                    field,
-                    value,
-                    nextValues,
-                );
+                const siblingUpdates = await runFieldValueChange(field, value, nextValues);
                 const mergedNextValues = { ...nextValues, ...siblingUpdates };
-                const interconnectedUpdates =
-                    await resolveInterconnectedFieldUpdates(
-                        fields,
-                        row,
-                        mergedNextValues,
-                        key,
-                    );
+                const interconnectedUpdates = await resolveInterconnectedFieldUpdates(
+                    fields,
+                    row,
+                    mergedNextValues,
+                    key,
+                );
 
                 if (requestEpoch !== interconnectedRequestEpochRef.current) {
                     return;
@@ -219,8 +208,7 @@ export default function RowDialogContent<
      * Builds the localStorage key used to persist in-progress dialog values.
      */
     const getDraftStorageKey = useCallback(
-        (rowKey: string): string =>
-            `row-dialog-draft:${dashboardKey}:${rowKey}`,
+        (rowKey: string): string => `row-dialog-draft:${dashboardKey}:${rowKey}`,
         [dashboardKey],
     );
 
@@ -247,10 +235,7 @@ export default function RowDialogContent<
      */
     const saveDraftValues = useCallback(
         (rowKey: string, nextValues: Record<string, unknown>) => {
-            window.localStorage.setItem(
-                getDraftStorageKey(rowKey),
-                JSON.stringify(nextValues),
-            );
+            window.localStorage.setItem(getDraftStorageKey(rowKey), JSON.stringify(nextValues));
         },
         [getDraftStorageKey],
     );
@@ -311,12 +296,11 @@ export default function RowDialogContent<
 
         setValuesAndForm(bootstrapValues, false);
         void (async () => {
-            const interconnectedUpdates =
-                await resolveInterconnectedFieldUpdates(
-                    fields,
-                    row,
-                    bootstrapValues,
-                );
+            const interconnectedUpdates = await resolveInterconnectedFieldUpdates(
+                fields,
+                row,
+                bootstrapValues,
+            );
             if (Object.keys(interconnectedUpdates).length > 0) {
                 setValuesAndForm(interconnectedUpdates, false);
             }
@@ -326,21 +310,9 @@ export default function RowDialogContent<
             if (!field.runOnDialogOpen) continue;
 
             const key = String(field.key);
-            void runFieldValueChange(
-                field,
-                bootstrapValues[key],
-                bootstrapValues,
-                false,
-            );
+            void runFieldValueChange(field, bootstrapValues[key], bootstrapValues, false);
         }
-    }, [
-        fields,
-        getRowKey,
-        loadDraftValues,
-        row,
-        runFieldValueChange,
-        setValuesAndForm,
-    ]);
+    }, [fields, getRowKey, loadDraftValues, row, runFieldValueChange, setValuesAndForm]);
 
     const submitWithDraftCleanup = useCallback(async (): Promise<boolean> => {
         const ok = await submit();
@@ -382,9 +354,7 @@ export default function RowDialogContent<
                     <input
                         type="hidden"
                         name={String(idKey)}
-                        value={String(
-                            (row as Record<string, unknown>)[String(idKey)],
-                        )}
+                        value={String((row as Record<string, unknown>)[String(idKey)])}
                     />
                 )}
 
@@ -401,10 +371,6 @@ export default function RowDialogContent<
                             form,
                             getRules,
                             handleFieldValueChange,
-                            getFileAction,
-                            ...(field.type === "file"
-                                ? { width: field.width, height: field.height }
-                                : {}),
                         })}
                     </Grid>
                 ))}

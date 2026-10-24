@@ -1,20 +1,15 @@
 "use client";
 
-import {
-    useCallback,
-    useEffect,
-    useState,
-    cloneElement,
-    isValidElement,
-    useMemo,
-} from "react";
+import { Box, CircularProgress } from "@mui/material";
+import { useGridApiRef, GridRowsProp, GridRowParams } from "@mui/x-data-grid";
+import { useCallback, useEffect, useState, cloneElement, isValidElement, useMemo } from "react";
+
+import { useSnackbar } from "@/providers/snackbar";
+import { columnsFromFields } from "@/utils/columns";
+
 import CustomDataGrid from "./CustomDataGrid";
 import RowDialog, { FieldConfig } from "./RowDialog";
-import { useSnackbar } from "@/providers/snackbar";
 import CustomToolbar from "./Toolbar";
-import { useGridApiRef, GridRowsProp, GridRowParams } from "@mui/x-data-grid";
-import { Box, CircularProgress } from "@mui/material";
-import { columnsFromFields } from "@/utils/columns";
 
 /**
  * Renders the table data grid component.
@@ -26,7 +21,6 @@ export default function TableDataGrid<
     getRowsAction,
     createRowAction,
     updateRowAction,
-    getFileAction,
     extraButtons,
     fields,
     dashboardKey,
@@ -34,15 +28,13 @@ export default function TableDataGrid<
     getRowsAction: () => Promise<Readonly<GridRowsProp>>;
     createRowAction: (row: RI) => Promise<void>;
     updateRowAction: (fd: FormData) => Promise<void>;
-    getFileAction: (filename: string) => Promise<string>;
     extraButtons?: React.ReactNode; // optionally a ReactElement expecting props
     fields: FieldConfig<R, RI>[];
     dashboardKey: string;
 }>) {
     const { showError } = useSnackbar();
     const apiRef = useGridApiRef();
-    const [currentRows, setCurrentRows] =
-        useState<Readonly<GridRowsProp> | null>(null);
+    const [currentRows, setCurrentRows] = useState<Readonly<GridRowsProp> | null>(null);
     const [resolvedFields, setResolvedFields] = useState(fields);
     const [fieldsResolving, setFieldsResolving] = useState(false);
     const [selectedRow, setSelectedRow] = useState<R | null>(null);
@@ -51,9 +43,7 @@ export default function TableDataGrid<
         () =>
             resolvedFields.reduce((row, field) => {
                 row[field.key as keyof RI] = (
-                    field.type !== "boolean" &&
-                    field.type !== "radio-group" &&
-                    field.type !== "file"
+                    field.type !== "boolean" && field.type !== "radio-group"
                         ? (field.placeholder ?? null)
                         : null
                 ) as RI[keyof RI];
@@ -81,10 +71,7 @@ export default function TableDataGrid<
             try {
                 const nextFields = await Promise.all(
                     fields.map(async (field) => {
-                        if (
-                            field.type !== "autocomplete" ||
-                            !field.loadOptions
-                        ) {
+                        if (field.type !== "autocomplete" || !field.loadOptions) {
                             return field;
                         }
 
@@ -147,13 +134,8 @@ export default function TableDataGrid<
 
         source.onmessage = (event) => {
             try {
-                const payload = JSON.parse(event.data) as
-                    | { type?: string }
-                    | undefined;
-                if (
-                    (payload as { event?: string })?.event ===
-                    "dashboard-change"
-                ) {
+                const payload = JSON.parse(event.data) as { type?: string } | undefined;
+                if ((payload as { event?: string })?.event === "dashboard-change") {
                     scheduleRefresh();
                 }
             } catch {
@@ -213,18 +195,14 @@ export default function TableDataGrid<
             if (!currentRows) return;
             openCreateDialog();
             // scroll to top row (you might want to select the created row if you can get its id)
-            setTimeout(
-                () => apiRef.current?.scrollToIndexes?.({ rowIndex: 0 }),
-                0,
-            );
+            setTimeout(() => apiRef.current?.scrollToIndexes?.({ rowIndex: 0 }), 0);
         };
 
         /**
          * Handles keyboard shortcuts for the editable data grid.
          */
         const onKeyDown = (e: KeyboardEvent) => {
-            if (!((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "m"))
-                return;
+            if (!((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "m")) return;
 
             const active = document.activeElement;
             if (
@@ -259,19 +237,16 @@ export default function TableDataGrid<
 
     // If extraButtons is a React element, clone it and inject createRowAction + emptyRow
     const injectedExtraButtons = isValidElement(extraButtons)
-        ? cloneElement(
-              extraButtons as React.ReactElement<Record<string, unknown>>,
-              {
-                  createRowAction: {
-                      type: "dialog",
-                      action: openCreateDialog,
-                  },
-                  emptyRow,
-              },
-          )
+        ? cloneElement(extraButtons as React.ReactElement<Record<string, unknown>>, {
+            createRowAction: {
+                type: "dialog",
+                action: openCreateDialog,
+            },
+            emptyRow,
+        })
         : extraButtons;
 
-    const columns = columnsFromFields(resolvedFields, getFileAction);
+    const columns = columnsFromFields(resolvedFields);
 
     if (currentRows === null || fieldsResolving) {
         return (
@@ -317,7 +292,6 @@ export default function TableDataGrid<
                 dashboardKey={dashboardKey}
                 createRowAction={createAndRefresh}
                 updateRowAction={updateRowAction}
-                getFileAction={getFileAction}
                 onUpdated={_getRows}
             />
         </>

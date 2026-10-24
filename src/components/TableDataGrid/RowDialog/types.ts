@@ -31,17 +31,11 @@ type InterconnectedFieldContext<R> = {
 type InterconnectedFieldConfig<R> = {
     dependsOn: string[];
     makeReadOnly?: boolean;
-    getter?: (
-        context: InterconnectedFieldContext<R>,
-    ) => unknown | Promise<unknown>;
+    getter?: (context: InterconnectedFieldContext<R>) => unknown | Promise<unknown>;
     relation?: InterconnectedFieldRelation;
 };
 
-type CommonFieldConfig<
-    R,
-    RI = unknown,
-    K extends PropertyKey = keyof R | keyof RI | string,
-> = {
+type CommonFieldConfig<R, RI = unknown, K extends PropertyKey = keyof R | keyof RI | string> = {
     key: K; // property key in row/insert (string allowed for synthetic fields)
     label: string;
     name?: string; // form field name (defaults to key)
@@ -54,10 +48,7 @@ type CommonFieldConfig<
     formatValue?: (value: unknown) => unknown; // optional custom render: (value, setValue, row) => ReactNode
     toFormValue?: (v: unknown) => string | Blob | undefined; // convert local value to form payload value
     isChanged?: (rowValue: unknown, currentValue: unknown) => boolean; // optional comparator for this field
-    onValueChange?: (
-        value: unknown,
-        context: FieldValueChangeContext<R>,
-    ) => FieldValueChangeResult; // optional field effect that can return sibling field values after this field changes
+    onValueChange?: (value: unknown, context: FieldValueChangeContext<R>) => FieldValueChangeResult; // optional field effect that can return sibling field values after this field changes
     runOnDialogOpen?: boolean; // run onValueChange with the initial dialog value when the dialog content opens
     interconnected?: InterconnectedFieldConfig<R>;
     validate?: (
@@ -120,11 +111,7 @@ export type MarkdownFieldConfig<
 > = CommonFieldConfig<R, RI, K> &
     CommonPlaceholderFieldConfig & {
         type: "markdown";
-        toggleCorner?:
-            | "top-left"
-            | "top-right"
-            | "bottom-left"
-            | "bottom-right";
+        toggleCorner?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
         default?: boolean; // default preview state
     };
 
@@ -237,21 +224,7 @@ export type BooleanFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
-> =
-    | CheckboxFieldConfig<R, RI, K>
-    | IconCheckboxFieldConfig<R, RI, K>
-    | SwitchFieldConfig<R, RI, K>;
-
-export type FileFieldConfig<
-    R,
-    RI = unknown,
-    K extends PropertyKey = keyof R | keyof RI | string,
-> = CommonFieldConfig<R, RI, K> & {
-    type: "file";
-    fileAccept?: string | string[];
-    width?: number | `${number}`;
-    height?: number | `${number}`;
-};
+> = CheckboxFieldConfig<R, RI, K> | IconCheckboxFieldConfig<R, RI, K> | SwitchFieldConfig<R, RI, K>;
 
 export type CustomFieldConfig<
     R,
@@ -260,18 +233,10 @@ export type CustomFieldConfig<
 > = CommonFieldConfig<R, RI, K> &
     CommonPlaceholderFieldConfig & {
         type: "custom";
-        render?: (
-            value: unknown,
-            setValue: (v: unknown) => void,
-            row: R,
-        ) => React.ReactNode;
+        render?: (value: unknown, setValue: (v: unknown) => void, row: R) => React.ReactNode;
     };
 
-export type FieldConfig<
-    R,
-    RI = unknown,
-    K extends PropertyKey = keyof R | keyof RI | string,
-> =
+export type FieldConfig<R, RI = unknown, K extends PropertyKey = keyof R | keyof RI | string> =
     | TextFieldConfig<R, RI, K>
     | NumberFieldConfig<R, RI, K>
     | AutocompleteFieldConfig<R, RI, K>
@@ -283,7 +248,6 @@ export type FieldConfig<
     | TableLookupFieldConfig<R, RI, K>
     | BooleanFieldConfig<R, RI, K>
     | RadioGroupFieldConfig<R, RI, K>
-    | FileFieldConfig<R, RI, K>
     | CustomFieldConfig<R, RI, K>;
 
 export type UpdateRowAction = (fd: FormData) => Promise<void>;

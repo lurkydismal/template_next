@@ -1,22 +1,18 @@
 "use server";
 
 import { and, AnyColumn, eq, getColumns, SQL } from "drizzle-orm";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/zod";
+import z from "zod";
 
 import db from "@/db";
-import { getSession } from "@/lib/safe/auth";
 import { updateDbCacheTags } from "@/lib/cache";
-import { ActionResult, DbTarget, parseRawTarget } from "@/lib/types";
 import { emitDashboardChange } from "@/lib/dashboard/common/change-events";
+import { getSession } from "@/lib/safe/auth";
+import { ActionResult, DbTarget, parseRawTarget } from "@/lib/types";
+import { getUserId, requestUserId } from "@/lib/user";
+import { toCamelCase } from "@/utils/stdfunc";
 import log from "@/utils/stdlog";
 import { mutationInputSchema } from "@/utils/validate/schemas";
-import {
-    createInsertSchema,
-    createSelectSchema,
-    createUpdateSchema,
-} from "drizzle-zod";
-import z from "zod";
-import { toCamelCase } from "@/utils/stdfunc";
-import { getUserId, requestUserId } from "@/lib/user";
 
 type MutationRow = Record<string, unknown>;
 
@@ -28,11 +24,7 @@ type SaveOptions = {
 /**
  * Converts input into db mutation.
  */
-function toDbMutation(
-    parsedRow: MutationRow,
-    actorId: number,
-    opts: SaveOptions,
-): MutationRow {
+function toDbMutation(parsedRow: MutationRow, actorId: number, opts: SaveOptions): MutationRow {
     const base = { ...parsedRow };
 
     if (opts.isUpdate) {
@@ -60,10 +52,7 @@ function normalizeIdColumns(idColumnName: string | string[]): string[] {
 /**
  * Gets the value for a primary-key column from parsed input.
  */
-function getPrimaryKeyValue(
-    parsedInput: MutationRow,
-    idColumnName: string,
-): unknown {
+function getPrimaryKeyValue(parsedInput: MutationRow, idColumnName: string): unknown {
     const camelKey = toCamelCase(idColumnName);
 
     return parsedInput[camelKey] ?? parsedInput[idColumnName];
@@ -82,10 +71,7 @@ function buildPrimaryKeyWhereClause(
     }
 
     const table = parseRawTarget(rawTarget);
-    const idColumns = getColumns(table) as Record<
-        string,
-        AnyColumn | undefined
-    >;
+    const idColumns = getColumns(table) as Record<string, AnyColumn | undefined>;
 
     const predicates = idColumnNames.map((columnName) => {
         const column = idColumns[columnName];
@@ -109,10 +95,7 @@ function buildPrimaryKeyWhereClause(
 /**
  * Removes normalized primary-key fields from an update mutation payload.
  */
-function removeIdColumnsFromMutation(
-    row: MutationRow,
-    idColumns: AnyColumn[],
-): MutationRow {
+function removeIdColumnsFromMutation(row: MutationRow, idColumns: AnyColumn[]): MutationRow {
     const mutation = { ...row };
     for (const column of idColumns) {
         const dbKey = column.name;
@@ -127,10 +110,7 @@ function removeIdColumnsFromMutation(
 /**
  * Fetches the current database row for an update so callers can validate it still exists.
  */
-async function getExistingRows(
-    rawTarget: DbTarget,
-    whereClause: SQL,
-): Promise<MutationRow[]> {
+async function getExistingRows(rawTarget: DbTarget, whereClause: SQL): Promise<MutationRow[]> {
     const table = parseRawTarget(rawTarget);
     return db.select().from(table).where(whereClause).limit(1).execute();
 }
@@ -146,9 +126,7 @@ export async function save(
     const table = parseRawTarget(rawTarget);
     const parsedInput = await mutationInputSchema.parseAsync(input);
 
-    const schema = opts.isUpdate
-        ? createUpdateSchema(table)
-        : createInsertSchema(table);
+    const schema = opts.isUpdate ? createUpdateSchema(table) : createInsertSchema(table);
     const selectSchema = createSelectSchema(table);
 
     const sessionUser = (await getSession()).data?.user;
@@ -164,9 +142,7 @@ export async function save(
         throw new Error("Missing authenticated user");
     }
 
-    const row = await schema.parseAsync(
-        toDbMutation(parsedInput, actorId, opts),
-    );
+    const row = await schema.parseAsync(toDbMutation(parsedInput, actorId, opts));
 
     if (opts.isUpdate) {
         if (!opts.idColumnName) {
@@ -175,10 +151,7 @@ export async function save(
 
         const idColumnNames = normalizeIdColumns(opts.idColumnName);
 
-        const columns = getColumns(table) as Record<
-            string,
-            AnyColumn | undefined
-        >;
+        const columns = getColumns(table) as Record<string, AnyColumn | undefined>;
 
         const idColumns: AnyColumn[] = [];
         for (const columnName of idColumnNames) {
@@ -190,21 +163,13 @@ export async function save(
         }
 
         const mutationRow = removeIdColumnsFromMutation(row, idColumns);
-        const whereClause = buildPrimaryKeyWhereClause(
-            rawTarget,
-            parsedInput,
-            idColumnNames,
-        );
+        const whereClause = buildPrimaryKeyWhereClause(rawTarget, parsedInput, idColumnNames);
 
         const existingRows = await getExistingRows(rawTarget, whereClause);
 
         await selectSchema.array().length(1).parseAsync(existingRows);
 
-        const updateResult = await db
-            .update(table)
-            .set(mutationRow)
-            .where(whereClause)
-            .execute();
+        const updateResult = await db.update(table).set(mutationRow).where(whereClause).execute();
 
         // Ensure mutation actually affected one row.
         const affectedRows =
@@ -252,11 +217,7 @@ export async function parseForm(formData: FormData): Promise<MutationRow> {
     }
 
     if (entries["id"] !== undefined) {
-        const idResult = z.coerce
-            .number()
-            .int()
-            .positive()
-            .safeParse(entries["id"]);
+        const idResult = z.coerce.number().int().positive().safeParse(entries["id"]);
         if (!idResult.success) {
             throw new Error(`Invalid id value: ${entries["id"]}`);
         }

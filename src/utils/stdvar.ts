@@ -116,62 +116,6 @@ export const timeZone = "UTC";
 export const dateTimeFormat = "HH:mm DD.MM.YYYY";
 
 /**
- * Maximum allowed image size for uploads.
- * - Set to 1 megabyte (1 MB) = 1 * 1024 * 1024 bytes.
- * - Used in file validation to prevent oversized uploads.
- */
-export const maxImageSize = 1 * 1024 * 1024; // 1 MB
-
-/**
- * Allowed MIME types for image uploads.
- * - Includes common browser image formats (JPEG, PNG, WebP, GIF).
- * - Used in validation to reject unsupported formats.
- */
-export const allowedImageTypes = [
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "image/gif",
-];
-
-function startsWithBytes(
-    bytes: Uint8Array,
-    offset: number,
-    signature: readonly number[],
-): boolean {
-    return signature.every((value, index) => bytes[offset + index] === value);
-}
-
-export const fileTypeSignatures = [
-    {
-        mimeType: "image/jpeg",
-        matches: (b: Uint8Array) => startsWithBytes(b, 0, [0xff, 0xd8, 0xff]),
-    },
-    {
-        mimeType: "image/png",
-        matches: (b: Uint8Array) =>
-            startsWithBytes(
-                b,
-                0,
-                [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
-            ),
-    },
-    {
-        mimeType: "image/gif",
-        matches: (b: Uint8Array) =>
-            startsWithBytes(b, 0, [0x47, 0x49, 0x46, 0x38]) &&
-            (b[4] === 0x37 || b[4] === 0x39) &&
-            b[5] === 0x61,
-    },
-    {
-        mimeType: "image/webp",
-        matches: (b: Uint8Array) =>
-            startsWithBytes(b, 0, [0x52, 0x49, 0x46, 0x46]) &&
-            startsWithBytes(b, 8, [0x57, 0x45, 0x42, 0x50]),
-    },
-] as const;
-
-/**
  * Maximum number of retry attempts for network requests or operations.
  */
 export const maxRetries = 3;
@@ -198,13 +142,13 @@ export const maxSnackbarCount = 5;
 export const storageKeys = {
     client: isBrowser
         ? {
-              authStorageKey: "user", // FIX: Not found
-          }
+            authStorageKey: "user", // FIX: Not found
+        }
         : null,
 
     server: isServer
         ? {
-              accessToken: getEnv("COOKIE_NAME"),
-          }
+            accessToken: getEnv("COOKIE_NAME"),
+        }
         : null,
 };

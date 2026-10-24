@@ -1,18 +1,11 @@
 "use client";
 
-import TableDataGrid from "@/components/TableDataGrid";
+import type { TablesRow as TableRow, TablesRowInsert as TableRowInsert } from "@/db/types";
+
 import ExtraToolbarButtons from "@/components/dashboard/ExtraToolbarButtons";
+import TableDataGrid from "@/components/TableDataGrid";
 import fields from "@/data/dashboard/tables/fields";
-import type {
-    TablesRow as TableRow,
-    TablesRowInsert as TableRowInsert,
-} from "@/db/types";
-import {
-    createRowAction,
-    getRowsAction,
-    updateRowAction,
-    getFileAction,
-} from "@/lib/dashboard/tables/function";
+import { createRowAction, getRowsAction, updateRowAction } from "@/lib/dashboard/tables/function";
 
 /**
  * Renders the protected bans dashboard page.
@@ -24,7 +17,6 @@ export default function Page() {
             fields={fields}
             getRowsAction={getRowsAction}
             updateRowAction={updateRowAction}
-            getFileAction={getFileAction}
             dashboardKey="table"
             extraButtons={
                 <ExtraToolbarButtons

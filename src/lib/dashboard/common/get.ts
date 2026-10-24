@@ -2,16 +2,16 @@
 
 import { GridValidRowModel } from "@mui/x-data-grid";
 import { AnyColumn, desc, eq, getColumns } from "drizzle-orm";
-import { createSelectSchema } from "drizzle-zod";
+import { alias } from "drizzle-orm/pg-core";
+import { createSelectSchema } from "drizzle-orm/zod";
+import z from "zod";
 
 import db from "@/db";
+import { users } from "@/db/schema";
 import { cacheDbRequest } from "@/lib/cache";
 import { ActionResult, DbTarget, parseRawTarget } from "@/lib/types";
-import log from "@/utils/stdlog";
 import { toCamelCase } from "@/utils/stdfunc";
-import { users } from "@/db/schema";
-import { alias } from "drizzle-orm/pg-core";
-import z from "zod";
+import log from "@/utils/stdlog";
 
 /**
  * Gets rows.
@@ -26,10 +26,7 @@ export async function getRows(
     try {
         const table = parseRawTarget(rawTarget);
 
-        const columns = getColumns(table) as Record<
-            string,
-            AnyColumn | undefined
-        >;
+        const columns = getColumns(table) as Record<string, AnyColumn | undefined>;
         const id = columns[idColumnName];
         if (!id) {
             return { ok: false, error: "Unknown id column" };
@@ -71,9 +68,7 @@ export async function getRows(
             ? validRows
             : validRows.map((row: Row) => ({
                 ...row,
-                id:
-                    row[toCamelCase(id.name) as keyof Row] ??
-                    row[id.name as keyof Row], // fallback to original name
+                id: row[toCamelCase(id.name) as keyof Row] ?? row[id.name as keyof Row], // fallback to original name
             }));
 
         return {

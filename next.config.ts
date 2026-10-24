@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
     cacheComponents: true,
+    partialPrefetching: true,
 
     logging: {
         browserToTerminal: true,
@@ -13,6 +14,9 @@ const nextConfig: NextConfig = {
     experimental: {
         cssChunking: true,
         authInterrupts: true,
+        // Use the Rust port instead of the Babel transform
+        turbopackRustReactCompiler: true,
+        useOffline: true,
     },
 
     images: {

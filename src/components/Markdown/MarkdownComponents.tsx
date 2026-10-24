@@ -1,4 +1,3 @@
-import { Components } from "react-markdown";
 import {
     Typography,
     TableRow,
@@ -16,8 +15,10 @@ import {
     Container,
     CardMedia,
 } from "@mui/material";
-import CodeBlock from "./CodeBlock";
 import { AnchorHTMLAttributes, HTMLAttributes, ImgHTMLAttributes } from "react";
+import { Components } from "react-markdown";
+
+import CodeBlock from "./CodeBlock";
 
 /**
  * Mapping of markdown elements to Material UI components.
@@ -90,8 +91,7 @@ const MarkdownComponents: Components = {
      * Renders a Markdown link with project link behavior.
      */
     a: ({ href, children }: AnchorHTMLAttributes<HTMLAnchorElement>) => {
-        const safeHref =
-            href?.startsWith("http") || href?.startsWith("/") ? href : "#";
+        const safeHref = href?.startsWith("http") || href?.startsWith("/") ? href : "#";
 
         return (
             <Link
@@ -117,15 +117,11 @@ const MarkdownComponents: Components = {
     /**
      * Renders a styled ordered Markdown list.
      */
-    ol: ({ children }: HTMLAttributes<HTMLOListElement>) => (
-        <List component="ol">{children}</List>
-    ),
+    ol: ({ children }: HTMLAttributes<HTMLOListElement>) => <List component="ol">{children}</List>,
     /**
      * Renders a styled Markdown list item.
      */
-    li: ({ children }: HTMLAttributes<HTMLLIElement>) => (
-        <List>{children}</List>
-    ),
+    li: ({ children }: HTMLAttributes<HTMLLIElement>) => <List>{children}</List>,
 
     // Blockquote
     /**
@@ -205,21 +201,15 @@ const MarkdownComponents: Components = {
     /**
      * Renders a Markdown table row.
      */
-    tr: ({ children }: HTMLAttributes<HTMLTableRowElement>) => (
-        <TableRow>{children}</TableRow>
-    ),
+    tr: ({ children }: HTMLAttributes<HTMLTableRowElement>) => <TableRow>{children}</TableRow>,
     /**
      * Renders a styled Markdown table header cell.
      */
-    th: ({ children }: HTMLAttributes<HTMLTableCellElement>) => (
-        <TableCell>{children}</TableCell>
-    ),
+    th: ({ children }: HTMLAttributes<HTMLTableCellElement>) => <TableCell>{children}</TableCell>,
     /**
      * Renders a styled Markdown table cell.
      */
-    td: ({ children }: HTMLAttributes<HTMLTableCellElement>) => (
-        <TableCell>{children}</TableCell>
-    ),
+    td: ({ children }: HTMLAttributes<HTMLTableCellElement>) => <TableCell>{children}</TableCell>,
 
     /**
      * Renders Markdown strikethrough text.
@@ -228,9 +218,7 @@ const MarkdownComponents: Components = {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         node,
         ...props
-    }: HTMLAttributes<HTMLModElement> & { node?: unknown }) => (
-        <del {...props}></del>
-    ),
+    }: HTMLAttributes<HTMLModElement> & { node?: unknown }) => <del {...props}></del>,
 };
 
 export default MarkdownComponents;

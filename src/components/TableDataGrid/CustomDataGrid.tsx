@@ -1,11 +1,6 @@
 "use client";
 
-import {
-    DataGrid,
-    DataGridProps,
-    GridRowsProp,
-    GridColDef,
-} from "@mui/x-data-grid";
+import { DataGrid, DataGridProps, GridRowsProp, GridColDef } from "@mui/x-data-grid";
 
 type TasksGridProps = Omit<DataGridProps, "rows" | "columns"> & {
     columns: readonly GridColDef[];
@@ -15,11 +10,7 @@ type TasksGridProps = Omit<DataGridProps, "rows" | "columns"> & {
 /**
  * Renders the custom data grid component.
  */
-export default function CustomDataGrid({
-    columns,
-    rows,
-    ...props
-}: TasksGridProps) {
+export default function CustomDataGrid({ columns, rows, ...props }: TasksGridProps) {
     return (
         <DataGrid
             autoPageSize

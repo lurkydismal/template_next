@@ -88,14 +88,9 @@ export default function MainFallback({
     itemsLength,
     className,
 }: Props) {
-    const childrenEmpty =
-        isEmptyNode(children) && Children.count(children) === 0;
-    const countEmpty =
-        itemsLength !== undefined && itemsLength !== null
-            ? itemsLength === 0
-            : true;
-    const showFallback =
-        childrenEmpty || (itemsLength === undefined ? true : countEmpty);
+    const childrenEmpty = isEmptyNode(children) && Children.count(children) === 0;
+    const countEmpty = itemsLength !== undefined && itemsLength !== null ? itemsLength === 0 : true;
+    const showFallback = childrenEmpty || (itemsLength === undefined ? true : countEmpty);
 
     if (!showFallback) {
         return (

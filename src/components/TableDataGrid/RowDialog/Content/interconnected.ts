@@ -5,10 +5,7 @@ import { FieldConfig } from "../types";
  */
 function resolveInterconnectedRelationValue(
     relation: NonNullable<
-        FieldConfig<
-            Record<string, unknown>,
-            Record<string, unknown>
-        >["interconnected"]
+        FieldConfig<Record<string, unknown>, Record<string, unknown>>["interconnected"]
     >["relation"],
     values: Record<string, unknown>,
 ) {
@@ -17,9 +14,7 @@ function resolveInterconnectedRelationValue(
     const sourceValue = values[relation.sourceField];
     if (sourceValue === undefined || sourceValue === null) return null;
 
-    const relatedRow = relation.rows.find(
-        (row) => row[relation.lookupField] === sourceValue,
-    );
+    const relatedRow = relation.rows.find((row) => row[relation.lookupField] === sourceValue);
 
     if (!relatedRow) return null;
     return relatedRow[relation.valueField] ?? null;
@@ -41,10 +36,7 @@ export async function resolveInterconnectedFieldValue<
 
     return resolveInterconnectedRelationValue(
         interconnected.relation as NonNullable<
-            FieldConfig<
-                Record<string, unknown>,
-                Record<string, unknown>
-            >["interconnected"]
+            FieldConfig<Record<string, unknown>, Record<string, unknown>>["interconnected"]
         >["relation"],
         values,
     );
@@ -67,32 +59,20 @@ export function isFieldReadOnly<
 export async function resolveInterconnectedFieldUpdates<
     R extends Record<string, unknown>,
     RI extends Record<string, unknown>,
->(
-    fields: FieldConfig<R, RI>[],
-    row: R,
-    values: Record<string, unknown>,
-    changedFieldKey?: string,
-) {
+>(fields: FieldConfig<R, RI>[], row: R, values: Record<string, unknown>, changedFieldKey?: string) {
     const updates: Record<string, unknown> = {};
 
     for (const field of fields) {
         const interconnected = field.interconnected;
         if (!interconnected) continue;
 
-        if (
-            changedFieldKey &&
-            !interconnected.dependsOn.includes(changedFieldKey)
-        ) {
+        if (changedFieldKey && !interconnected.dependsOn.includes(changedFieldKey)) {
             continue;
         }
 
         const key = String(field.key);
         const mergedValues = { ...values, ...updates };
-        updates[key] = await resolveInterconnectedFieldValue(
-            field,
-            row,
-            mergedValues,
-        );
+        updates[key] = await resolveInterconnectedFieldValue(field, row, mergedValues);
     }
 
     return updates;

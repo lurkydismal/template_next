@@ -19,8 +19,7 @@ export function rowHasChanges<
         }
 
         return (
-            String((rowVal ?? "").toString()).trim() !==
-            String((newVal ?? "").toString()).trim()
+            String((rowVal ?? "").toString()).trim() !== String((newVal ?? "").toString()).trim()
         );
     });
 }
@@ -28,9 +27,6 @@ export function rowHasChanges<
 /**
  * Checks whether the row has a persisted identifier value.
  */
-export function rowHasId<R extends Record<string, unknown>>(
-    row: R,
-    idKey: keyof R,
-) {
+export function rowHasId<R extends Record<string, unknown>>(row: R, idKey: keyof R) {
     return ((row as Record<string, unknown>)[String(idKey)] ?? null) !== null;
 }

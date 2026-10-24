@@ -1,17 +1,11 @@
 "use client";
 
 import { CloseRounded, Menu } from "@mui/icons-material";
+import { Drawer, Box, IconButton, MenuItem, Divider, MenuList } from "@mui/material";
 import { Fragment, useCallback, useMemo, useState } from "react";
+
 import NextLink from "@/components/Link";
 import { NavItem } from "@/data/navbar";
-import {
-    Drawer,
-    Box,
-    IconButton,
-    MenuItem,
-    Divider,
-    MenuList,
-} from "@mui/material";
 
 /**
  * Renders the mobile nav component.
@@ -19,14 +13,8 @@ import {
 export default function MobileNav({ items }: { items: NavItem[] }) {
     const [open, setOpen] = useState(false);
 
-    const left = useMemo(
-        () => items.filter((i) => i.position === "left"),
-        [items],
-    );
-    const right = useMemo(
-        () => items.filter((i) => i.position === "right"),
-        [items],
-    );
+    const left = useMemo(() => items.filter((i) => i.position === "left"), [items]);
+    const right = useMemo(() => items.filter((i) => i.position === "right"), [items]);
 
     const openDrawer = useCallback(() => setOpen(true), []);
     const closeDrawer = useCallback(() => setOpen(false), []);

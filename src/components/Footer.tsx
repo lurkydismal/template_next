@@ -1,15 +1,10 @@
 import { GitHub } from "@mui/icons-material";
-import { Copyright } from "./Copyright";
+import { Divider, Container, Box, Stack, Typography, IconButton } from "@mui/material";
+
 import { Link } from "@/components/Link";
 import { githubUrl } from "@/utils/stdvar";
-import {
-    Divider,
-    Container,
-    Box,
-    Stack,
-    Typography,
-    IconButton,
-} from "@mui/material";
+
+import { Copyright } from "./Copyright";
 
 /**
  * Renders the footer component.
@@ -39,26 +34,14 @@ export default function Footer() {
                     {/* LEFT SIDE */}
                     <Stack spacing={0.5}>
                         {/* Row 1 */}
-                        <Stack
-                            direction="row"
-                            spacing={1}
-                            sx={{ alignItems: "center" }}
-                        >
-                            <Link
-                                color="text.secondary"
-                                variant="body2"
-                                href="/privacy"
-                            >
+                        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                            <Link color="text.secondary" variant="body2" href="/privacy">
                                 Privacy Policy
                             </Link>
 
                             <Typography sx={{ opacity: 0.5 }}>•</Typography>
 
-                            <Link
-                                color="text.secondary"
-                                variant="body2"
-                                href="/terms"
-                            >
+                            <Link color="text.secondary" variant="body2" href="/terms">
                                 Terms of Service
                             </Link>
                         </Stack>
@@ -77,8 +60,7 @@ export default function Footer() {
                             borderRadius: 1,
                             color: "white",
 
-                            transition:
-                                "border-color 200ms ease, background-color 200ms ease",
+                            transition: "border-color 200ms ease, background-color 200ms ease",
 
                             "&:hover": {
                                 borderColor: "gray",

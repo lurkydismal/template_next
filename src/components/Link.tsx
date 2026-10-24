@@ -3,8 +3,8 @@
 // This file exists solely to mark Next.js `Link` as a Client Component,
 // allowing it to be passed safely to MUI components (e.g. via `component={Link}`)
 
-import NextLink, { LinkProps } from "next/link";
 import { Link as MuiLink, LinkProps as MuiLinkProps } from "@mui/material";
+import NextLink, { LinkProps } from "next/link";
 import { ComponentProps } from "react";
 
 export type { LinkProps };

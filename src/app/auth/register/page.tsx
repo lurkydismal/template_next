@@ -1,10 +1,11 @@
 "use client";
 
+import { Typography } from "@mui/material";
+
 import AuthCard from "@/components/auth/AuthCard";
 import AuthForm from "@/components/auth/AuthForm";
-import { Link } from "@/components/Link";
 import { CopyrightAligned as Copyright } from "@/components/Copyright";
-import { Typography } from "@mui/material";
+import { Link } from "@/components/Link";
 
 /**
  * Renders the sign up page component.
@@ -14,11 +15,7 @@ export default function SignUpPage() {
         <>
             <Typography sx={{ textAlign: "center" }}>
                 Already have an account?{" "}
-                <Link
-                    href="/auth/login"
-                    sx={{ alignSelf: "center" }}
-                    variant="body2"
-                >
+                <Link href="/auth/login" sx={{ alignSelf: "center" }} variant="body2">
                     Sign in
                 </Link>
             </Typography>

@@ -14,8 +14,8 @@
  * logic is not yet available but timing and response structure matter.
  */
 
-import { delay } from "@/utils/stdfunc";
 import { ActionResult } from "@/lib/types";
+import { delay } from "@/utils/stdfunc";
 import log from "@/utils/stdlog";
 
 /**
@@ -47,10 +47,7 @@ export async function mockAction(
  * const result = await mockAction(100, { id: 7 });
  * // { ok: true, data: { id: 7 } }
  */
-export async function mockAction<T>(
-    milliseconds: number,
-    data: T,
-): Promise<{ ok: true; data: T }>;
+export async function mockAction<T>(milliseconds: number, data: T): Promise<{ ok: true; data: T }>;
 
 /**
  * Implementation of the overloaded `mockAction`.
@@ -63,10 +60,7 @@ export async function mockAction<T>(
  * This function is intended for testing, prototyping, or mocking
  * server actions with predictable timing and response shapes.
  */
-export async function mockAction<T>(
-    milliseconds: number,
-    data: T,
-): Promise<ActionResult<T>> {
+export async function mockAction<T>(milliseconds: number, data: T): Promise<ActionResult<T>> {
     log.trace("mockAction called", {
         milliseconds,
         hasData: data !== undefined,

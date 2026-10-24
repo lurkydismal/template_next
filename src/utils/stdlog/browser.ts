@@ -1,6 +1,7 @@
 "use client";
 
 import { isDev, needTrace } from "@/utils/stdvar";
+
 import { CommonLogger, LogFn } from "./types";
 
 /**
@@ -51,9 +52,7 @@ function makeBrowserLogger(): CommonLogger {
 
         return (...args: unknown[]) => {
             const isSingleObject =
-                args.length === 1 &&
-                typeof args[0] === "object" &&
-                args[0] !== null;
+                args.length === 1 && typeof args[0] === "object" && args[0] !== null;
 
             // If first arg is a string, include it in the formatted line; otherwise show label + object(s)
             if (isSingleObject) {

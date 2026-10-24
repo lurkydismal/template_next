@@ -1,8 +1,5 @@
 "use client";
 
-import log from "@/utils/stdlog";
-import { LogFn } from "@/utils/stdlog/types";
-import { maxSnackbarCount } from "@/utils/stdvar";
 import {
     NotificationsNone as DefaultIcon,
     CheckCircleOutlined as SuccessIcon,
@@ -20,6 +17,10 @@ import {
     closeSnackbar,
 } from "notistack";
 import { createContext, useContext } from "react";
+
+import log from "@/utils/stdlog";
+import { LogFn } from "@/utils/stdlog/types";
+import { maxSnackbarCount } from "@/utils/stdvar";
 
 type SnackbarOptions = Pick<OptionsObject, "persist" | "onClose">;
 
@@ -70,11 +71,7 @@ export default function CustomSnackbarProvider({
     /**
      * Handles show message behavior.
      */
-    const _showMessage = (
-        err: unknown,
-        variant: VariantType,
-        options?: SnackbarOptions,
-    ) => {
+    const _showMessage = (err: unknown, variant: VariantType, options?: SnackbarOptions) => {
         const message = errorToMessage(err);
 
         let logVariant: LogFn;

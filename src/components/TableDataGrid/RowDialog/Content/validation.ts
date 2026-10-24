@@ -1,15 +1,9 @@
 import { RegisterOptions, UseFormReturn } from "react-hook-form";
-import {
-    FieldConfig,
-    NumberFieldConfig,
-    TableLookupFieldConfig,
-} from "../types";
 import z from "zod";
-import {
-    ipSchema,
-    normalizedString,
-    portSchema,
-} from "@/utils/validate/schemas";
+
+import { ipSchema, normalizedString, portSchema } from "@/utils/validate/schemas";
+
+import { FieldConfig, NumberFieldConfig, TableLookupFieldConfig } from "../types";
 
 /**
  * Checks whether a value is considered empty for row dialog validation.
@@ -62,10 +56,10 @@ function parseFiniteNumber(value: unknown) {
 /**
  * Validates that a number field contains a finite numeric value within any bounds.
  */
-function validateNumberValue<
-    R extends Record<string, unknown>,
-    RI extends Record<string, unknown>,
->(value: unknown, field: NumberFieldConfig<R, RI>) {
+function validateNumberValue<R extends Record<string, unknown>, RI extends Record<string, unknown>>(
+    value: unknown,
+    field: NumberFieldConfig<R, RI>,
+) {
     if (isEmptyValue(value)) return true;
 
     const parsed = parseFiniteNumber(value);
@@ -82,11 +76,7 @@ function validateNumberValue<
     return true;
 }
 
-function hasValidHostPort(
-    value: string,
-    regex: RegExp,
-    hostSchema: z.ZodTypeAny,
-): boolean {
+function hasValidHostPort(value: string, regex: RegExp, hostSchema: z.ZodTypeAny): boolean {
     const groups = value.match(regex)?.groups;
     if (!groups) return false;
 
@@ -111,11 +101,7 @@ function validateInetValue(value: unknown, allowPort = false) {
             /^(?<host>(?:\d{1,3}\.){3}\d{1,3}):(?<port>\d{1,5})$/,
             z.ipv4(),
         ) ||
-            hasValidHostPort(
-                rawValue,
-                /^\[(?<host>.+)\]:(?<port>\d{1,5})$/,
-                z.ipv6(),
-            ))
+            hasValidHostPort(rawValue, /^\[(?<host>.+)\]:(?<port>\d{1,5})$/, z.ipv6()))
     ) {
         return true;
     }
@@ -173,8 +159,7 @@ function validateRequiredGroup<
         (candidate) => candidate.requiredGroup === field.requiredGroup,
     );
     const providedCount = groupFields.reduce((count, candidate) => {
-        const candidateValue =
-            allValues[String(candidate.key)] ?? values[String(candidate.key)];
+        const candidateValue = allValues[String(candidate.key)] ?? values[String(candidate.key)];
 
         return count + (isEmptyValue(candidateValue) ? 0 : 1);
     }, 0);
@@ -194,12 +179,7 @@ function validateRequiredGroup<
 async function validateByFieldType<
     R extends Record<string, unknown>,
     RI extends Record<string, unknown>,
->(
-    field: FieldConfig<R, RI>,
-    value: unknown,
-    row: R,
-    allValues: Record<string, unknown>,
-) {
+>(field: FieldConfig<R, RI>, value: unknown, row: R, allValues: Record<string, unknown>) {
     switch (field.type) {
         case "number":
             return validateNumberValue(value, field);
@@ -240,21 +220,11 @@ export function getFieldRules<
         required: field.required ? `${field.label} is required` : false,
         validate: async (value) => {
             const allValues = form.getValues();
-            const groupError = validateRequiredGroup(
-                field,
-                fields,
-                allValues,
-                values,
-            );
+            const groupError = validateRequiredGroup(field, fields, allValues, values);
 
             if (groupError) return groupError;
 
-            const typeValidation = await validateByFieldType(
-                field,
-                value,
-                row,
-                allValues,
-            );
+            const typeValidation = await validateByFieldType(field, value, row, allValues);
             if (typeValidation !== true) return typeValidation;
 
             if (field.validate) {

@@ -1,5 +1,6 @@
-import { afterLoginRoute } from "@/data/routes";
 import { redirect } from "next/navigation";
+
+import { afterLoginRoute } from "@/data/routes";
 
 /**
  * Root page handler that redirects users to default route.

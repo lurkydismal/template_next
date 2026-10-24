@@ -1,9 +1,5 @@
-import {
-    Control,
-    Controller,
-    FieldError,
-    RegisterOptions,
-} from "react-hook-form";
+import { Control, Controller, FieldError, RegisterOptions } from "react-hook-form";
+
 import NumberSpinner from "./NumberSpinner";
 
 type NumberSpinnerInputProps = {

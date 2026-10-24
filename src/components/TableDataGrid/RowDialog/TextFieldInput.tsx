@@ -1,11 +1,6 @@
-import { ChangeEvent } from "react";
 import { TextField, Typography } from "@mui/material";
-import {
-    Control,
-    Controller,
-    FieldError,
-    RegisterOptions,
-} from "react-hook-form";
+import { ChangeEvent } from "react";
+import { Control, Controller, FieldError, RegisterOptions } from "react-hook-form";
 
 type FieldInputProps = {
     fieldKey: string;

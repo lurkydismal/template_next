@@ -9,24 +9,27 @@ import {
     Checkbox,
     Button,
 } from "@mui/material";
-import { Controller } from "react-hook-form";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
+import { Controller } from "react-hook-form";
+
 import { login, register } from "@/lib/safe/auth";
 import { loginUserSchema, registerUserSchema } from "@/utils/validate/schemas";
 
 function SignInForm() {
-    const { form, action, handleSubmitWithAction, resetFormAndAction } =
-        useHookFormAction(login, zodResolver(loginUserSchema), {
+    const { form, action, handleSubmitWithAction, resetFormAndAction } = useHookFormAction(
+        login,
+        zodResolver(loginUserSchema),
+        {
             formProps: {
-                defaultValues:
-                    { email: "", password: "", remember: false }
+                defaultValues: { email: "", password: "", remember: false },
             },
             actionProps: {
                 onSuccess: () => {
                     resetFormAndAction();
                 },
             },
-        });
+        },
+    );
     const { control } = form;
 
     return (
@@ -52,9 +55,7 @@ function SignInForm() {
                             {...field}
                             autoComplete="email"
                             autoFocus
-                            color={
-                                Boolean(fieldState.error) ? "error" : "primary"
-                            }
+                            color={Boolean(fieldState.error) ? "error" : "primary"}
                             error={Boolean(fieldState.error)}
                             fullWidth
                             helperText={fieldState.error?.message}
@@ -78,9 +79,7 @@ function SignInForm() {
                         <TextField
                             {...field}
                             autoComplete="new-password"
-                            color={
-                                Boolean(fieldState.error) ? "error" : "primary"
-                            }
+                            color={Boolean(fieldState.error) ? "error" : "primary"}
                             error={Boolean(fieldState.error)}
                             fullWidth
                             helperText={fieldState.error?.message}
@@ -102,9 +101,7 @@ function SignInForm() {
                         control={
                             <Checkbox
                                 checked={Boolean(field.value)}
-                                onChange={(e) =>
-                                    field.onChange(e.target.checked)
-                                }
+                                onChange={(e) => field.onChange(e.target.checked)}
                                 color="primary"
                             />
                         }
@@ -126,19 +123,21 @@ function SignInForm() {
     );
 }
 
-
 function SignUpForm() {
-    const { form, action, handleSubmitWithAction, resetFormAndAction } = useHookFormAction(register, zodResolver(registerUserSchema), {
-        formProps: {
-            defaultValues:
-                { name: "", email: "", password: "" },
-        },
-        actionProps: {
-            onSuccess: () => {
-                resetFormAndAction();
+    const { form, action, handleSubmitWithAction, resetFormAndAction } = useHookFormAction(
+        register,
+        zodResolver(registerUserSchema),
+        {
+            formProps: {
+                defaultValues: { name: "", email: "", password: "" },
+            },
+            actionProps: {
+                onSuccess: () => {
+                    resetFormAndAction();
+                },
             },
         },
-    });
+    );
     const { control } = form;
 
     return (
@@ -164,9 +163,7 @@ function SignUpForm() {
                             {...field}
                             autoComplete="name"
                             autoFocus
-                            color={
-                                Boolean(fieldState.error) ? "error" : "primary"
-                            }
+                            color={Boolean(fieldState.error) ? "error" : "primary"}
                             error={Boolean(fieldState.error)}
                             fullWidth
                             helperText={fieldState.error?.message}
@@ -191,9 +188,7 @@ function SignUpForm() {
                             {...field}
                             autoComplete="email"
                             autoFocus
-                            color={
-                                Boolean(fieldState.error) ? "error" : "primary"
-                            }
+                            color={Boolean(fieldState.error) ? "error" : "primary"}
                             error={Boolean(fieldState.error)}
                             fullWidth
                             helperText={fieldState.error?.message}
@@ -217,9 +212,7 @@ function SignUpForm() {
                         <TextField
                             {...field}
                             autoComplete="new-password"
-                            color={
-                                Boolean(fieldState.error) ? "error" : "primary"
-                            }
+                            color={Boolean(fieldState.error) ? "error" : "primary"}
                             error={Boolean(fieldState.error)}
                             fullWidth
                             helperText={fieldState.error?.message}
@@ -252,5 +245,5 @@ function SignUpForm() {
 export default function AuthForm({ mode }: { mode: "signup" | "signin" }) {
     const isSignIn = mode === "signin";
 
-    return (isSignIn ? <SignInForm /> : <SignUpForm />);
+    return isSignIn ? <SignInForm /> : <SignUpForm />;
 }

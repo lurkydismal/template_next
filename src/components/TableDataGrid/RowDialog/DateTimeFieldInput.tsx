@@ -1,14 +1,9 @@
-import dayjs, { Dayjs } from "dayjs";
+import { Typography } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-import { Typography } from "@mui/material";
-import {
-    Control,
-    Controller,
-    FieldError,
-    RegisterOptions,
-} from "react-hook-form";
+import dayjs, { Dayjs } from "dayjs";
+import { Control, Controller, FieldError, RegisterOptions } from "react-hook-form";
 
 type PickerInputValue = string | number | Date | Dayjs | null | undefined;
 
@@ -81,20 +76,12 @@ export default function DateTimeFieldInput({
                     render={({ field }) => (
                         <DatePicker
                             readOnly={readOnly}
-                            value={
-                                field.value
-                                    ? dayjs(field.value as PickerInputValue)
-                                    : null
-                            }
+                            value={field.value ? dayjs(field.value as PickerInputValue) : null}
                             onChange={(next) => {
                                 handleChange(next);
                                 if (readOnly) return;
 
-                                field.onChange(
-                                    next?.isValid()
-                                        ? next.format("YYYY-MM-DD")
-                                        : null,
-                                );
+                                field.onChange(next?.isValid() ? next.format("YYYY-MM-DD") : null);
                             }}
                             slotProps={{
                                 textField: {
@@ -123,21 +110,14 @@ export default function DateTimeFieldInput({
                             readOnly={readOnly}
                             value={
                                 field.value
-                                    ? dayjs(
-                                          field.value as PickerInputValue,
-                                          "HH:mm:ss",
-                                      )
+                                    ? dayjs(field.value as PickerInputValue, "HH:mm:ss")
                                     : null
                             }
                             onChange={(next) => {
                                 handleChange(next);
                                 if (readOnly) return;
 
-                                field.onChange(
-                                    next?.isValid()
-                                        ? next.format("HH:mm:ss")
-                                        : null,
-                                );
+                                field.onChange(next?.isValid() ? next.format("HH:mm:ss") : null);
                             }}
                             slotProps={{
                                 textField: {
@@ -164,18 +144,12 @@ export default function DateTimeFieldInput({
                     render={({ field }) => (
                         <DateTimePicker
                             readOnly={readOnly}
-                            value={
-                                field.value
-                                    ? dayjs(field.value as PickerInputValue)
-                                    : null
-                            }
+                            value={field.value ? dayjs(field.value as PickerInputValue) : null}
                             onChange={(next) => {
                                 handleChange(next);
                                 if (readOnly) return;
 
-                                field.onChange(
-                                    next?.isValid() ? next.toISOString() : null,
-                                );
+                                field.onChange(next?.isValid() ? next.toISOString() : null);
                             }}
                             slotProps={{
                                 textField: {

@@ -1,8 +1,9 @@
+import { and, asc, count, eq, inArray, sql } from "drizzle-orm";
+
 import db from "@/db";
 import { notifications } from "@/db/schema";
 import { NotificationsRow } from "@/db/types";
 import { emitNotificationEvent } from "@/lib/dashboard/common/change-events";
-import { and, asc, count, eq, inArray, sql } from "drizzle-orm";
 
 type NotificationType = NotificationsRow["type"];
 
@@ -11,10 +12,7 @@ type NotificationType = NotificationsRow["type"];
  */
 export async function GET(): Promise<Response> {
     const getUnreadNotifications = async () => {
-        const rows = await db
-            .select()
-            .from(notifications)
-            .orderBy(asc(notifications.created_at));
+        const rows = await db.select().from(notifications).orderBy(asc(notifications.created_at));
         const unreadResult = await db
             .select({ total: count() })
             .from(notifications)
@@ -32,10 +30,7 @@ export async function GET(): Promise<Response> {
  * Persists one notification and emits it through the shared SSE bus.
  */
 export async function POST(request: Request): Promise<Response> {
-    const invalidResponse = Response.json(
-        { error: "Invalid JSON payload" },
-        { status: 400 },
-    );
+    const invalidResponse = Response.json({ error: "Invalid JSON payload" }, { status: 400 });
 
     let payload: { type?: NotificationType; message?: string };
     try {
@@ -54,10 +49,7 @@ export async function POST(request: Request): Promise<Response> {
         return Response.json({ error: "Message is required" }, { status: 400 });
     }
 
-    const [created] = await db
-        .insert(notifications)
-        .values({ type, message })
-        .returning();
+    const [created] = await db.insert(notifications).values({ type, message }).returning();
 
     if (created) {
         await emitNotificationEvent({
@@ -85,10 +77,7 @@ export async function PATCH(request: Request): Promise<Response> {
             isRead?: boolean;
         };
     } catch {
-        return Response.json(
-            { error: "Invalid JSON payload" },
-            { status: 400 },
-        );
+        return Response.json({ error: "Invalid JSON payload" }, { status: 400 });
     }
     const ids = payload.ids ?? [];
 
@@ -106,12 +95,7 @@ export async function PATCH(request: Request): Promise<Response> {
             is_read: isRead,
             read_at: isRead ? sql`now()` : null,
         })
-        .where(
-            and(
-                inArray(notifications.id, normalizedIds),
-                eq(notifications.is_read, !isRead),
-            ),
-        );
+        .where(and(inArray(notifications.id, normalizedIds), eq(notifications.is_read, !isRead)));
 
     return Response.json({ ok: true });
 }

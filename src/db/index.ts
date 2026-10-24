@@ -7,9 +7,11 @@
  * - Exports the configured database instance for use across the application.
  */
 import "dotenv/config";
-import { drizzle } from "drizzle-orm/node-postgres";
 import { DefaultLogger, LogWriter } from "drizzle-orm/logger";
+import { drizzle } from "drizzle-orm/node-postgres";
+
 import log from "@/utils/stdlog";
+
 import { relations } from "./relations";
 
 // Custom implementation of Drizzle's LogWriter interface

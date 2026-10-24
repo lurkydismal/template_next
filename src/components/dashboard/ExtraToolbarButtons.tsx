@@ -1,10 +1,7 @@
 "use client";
 
-import CustomDivider from "@/components/TableDataGrid/CustomDivider";
-import { NotificationsRow } from "@/db/types";
-import { useSnackbar } from "@/providers/snackbar";
-import { isDev, maxSnackbarCount } from "@/utils/stdvar";
-import uuid from "@/utils/uuid";
+import type { CloseReason, SnackbarKey } from "notistack";
+
 import {
     Queue as MockShowIcon,
     AddBoxOutlined as AddIcon,
@@ -12,8 +9,13 @@ import {
 } from "@mui/icons-material";
 import { Badge, Tooltip } from "@mui/material";
 import { ToolbarButton } from "@mui/x-data-grid";
-import type { CloseReason, SnackbarKey } from "notistack";
 import { useCallback, useEffect, useState } from "react";
+
+import CustomDivider from "@/components/TableDataGrid/CustomDivider";
+import { NotificationsRow } from "@/db/types";
+import { useSnackbar } from "@/providers/snackbar";
+import { isDev, maxSnackbarCount } from "@/utils/stdvar";
+import uuid from "@/utils/uuid";
 
 type DialogCreateRowAction = {
     type: "dialog";
@@ -62,10 +64,7 @@ async function readNotifications(): Promise<{
 /**
  * Marks notification IDs as read in the database.
  */
-async function markNotifications(
-    ids: number[],
-    isRead: boolean,
-): Promise<void> {
+async function markNotifications(ids: number[], isRead: boolean): Promise<void> {
     const response = await fetch("/api/notifications", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -108,11 +107,7 @@ function showStoredNotification(
     snackbar: ReturnType<typeof useSnackbar>,
     onDismiss: (notificationId: number) => void,
 ) {
-    const handleSnackbarClose = (
-        _event: unknown,
-        reason: CloseReason,
-        key?: SnackbarKey,
-    ) => {
+    const handleSnackbarClose = (_event: unknown, reason: CloseReason, key?: SnackbarKey) => {
         if (reason === "instructed" && key !== undefined) {
             onDismiss(notification.id);
         }
@@ -123,29 +118,22 @@ function showStoredNotification(
         onClose: handleSnackbarClose,
     };
 
-    const actions: Record<
-        StoredNotification["type"],
-        (msg: string, opts: typeof options) => void
-    > = {
-        success: snackbar.showSuccess,
-        error: snackbar.showError,
-        warning: snackbar.showWarning,
-        info: snackbar.showInfo,
-        default: snackbar.showMessage,
-    };
+    const actions: Record<StoredNotification["type"], (msg: string, opts: typeof options) => void> =
+        {
+            success: snackbar.showSuccess,
+            error: snackbar.showError,
+            warning: snackbar.showWarning,
+            info: snackbar.showInfo,
+            default: snackbar.showMessage,
+        };
 
-    (actions[notification.type] ?? snackbar.showMessage)(
-        notification.message,
-        options,
-    );
+    (actions[notification.type] ?? snackbar.showMessage)(notification.message, options);
 }
 
 /**
  * Renders extra data-grid toolbar actions including notifications center.
  */
-export default function ExtraToolbarButtons<
-    RI extends Record<string, unknown>,
->({
+export default function ExtraToolbarButtons<RI extends Record<string, unknown>>({
     emptyRow,
     createRowAction,
 }: Readonly<{
@@ -153,19 +141,13 @@ export default function ExtraToolbarButtons<
     createRowAction: CreateRowAction<RI>;
 }>) {
     const snackbar = useSnackbar();
-    const { showError, showInfo, showMessage, showSuccess, showWarning } =
-        snackbar;
+    const { showError, showInfo, showMessage, showSuccess, showWarning } = snackbar;
 
-    const [notifications, setNotifications] = useState<StoredNotification[]>(
-        [],
-    );
+    const [notifications, setNotifications] = useState<StoredNotification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [visibleUnreadIds, setVisibleUnreadIds] = useState<number[]>([]);
 
-    const hiddenUnreadCount = Math.max(
-        unreadCount - visibleUnreadIds.length,
-        0,
-    );
+    const hiddenUnreadCount = Math.max(unreadCount - visibleUnreadIds.length, 0);
 
     const syncNotifications = useCallback(async (dismissedId?: number) => {
         const { rows, unreadCount: unread } = await readNotifications();
@@ -173,9 +155,7 @@ export default function ExtraToolbarButtons<
         setUnreadCount(unread);
 
         if (dismissedId !== undefined) {
-            setVisibleUnreadIds((current) =>
-                current.filter((id) => id !== dismissedId),
-            );
+            setVisibleUnreadIds((current) => current.filter((id) => id !== dismissedId));
         }
     }, []);
 
@@ -197,22 +177,14 @@ export default function ExtraToolbarButtons<
             (item) => !visibleUnreadIds.includes(item.id),
         );
 
-        const remainingSlots = Math.max(
-            maxSnackbarCount - visibleUnreadIds.length,
-            0,
-        );
+        const remainingSlots = Math.max(maxSnackbarCount - visibleUnreadIds.length, 0);
 
         const toShow = notYetVisible.slice(0, remainingSlots);
 
-        toShow.forEach((item) =>
-            showStoredNotification(item, snackbar, handleNotificationDismiss),
-        );
+        toShow.forEach((item) => showStoredNotification(item, snackbar, handleNotificationDismiss));
 
         if (toShow.length > 0) {
-            setVisibleUnreadIds((current) => [
-                ...current,
-                ...toShow.map((item) => item.id),
-            ]);
+            setVisibleUnreadIds((current) => [...current, ...toShow.map((item) => item.id)]);
         }
     }, [notifications, visibleUnreadIds, snackbar, handleNotificationDismiss]);
 
@@ -258,26 +230,11 @@ export default function ExtraToolbarButtons<
                         <ToolbarButton
                             onClick={() => {
                                 void Promise.all([
-                                    createNotification(
-                                        "default",
-                                        `default-${uuid()}`,
-                                    ),
-                                    createNotification(
-                                        "success",
-                                        `success-${uuid()}`,
-                                    ),
-                                    createNotification(
-                                        "error",
-                                        `error-${uuid()}`,
-                                    ),
-                                    createNotification(
-                                        "warning",
-                                        `warning-${uuid()}`,
-                                    ),
-                                    createNotification(
-                                        "info",
-                                        `info-${uuid()}`,
-                                    ),
+                                    createNotification("default", `default-${uuid()}`),
+                                    createNotification("success", `success-${uuid()}`),
+                                    createNotification("error", `error-${uuid()}`),
+                                    createNotification("warning", `warning-${uuid()}`),
+                                    createNotification("info", `info-${uuid()}`),
                                 ]).catch(showError);
                             }}
                         >
@@ -291,11 +248,7 @@ export default function ExtraToolbarButtons<
 
             <Tooltip title="Notifications">
                 <ToolbarButton onClick={handleShowUnreadNotifications}>
-                    <Badge
-                        badgeContent={hiddenUnreadCount}
-                        color="info"
-                        variant="dot"
-                    >
+                    <Badge badgeContent={hiddenUnreadCount} color="info" variant="dot">
                         <NotificationsIcon fontSize="small" />
                     </Badge>
                 </ToolbarButton>
@@ -308,9 +261,7 @@ export default function ExtraToolbarButtons<
                             createRowAction.action();
                         } else if (emptyRow) {
                             createRowAction.action(emptyRow).catch((err) => {
-                                showError(
-                                    `Failed to create row: ${err.message}`,
-                                );
+                                showError(`Failed to create row: ${err.message}`);
                             });
                         }
                     }}

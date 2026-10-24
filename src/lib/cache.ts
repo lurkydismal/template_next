@@ -1,6 +1,6 @@
-import type { DbTarget } from "@/lib/types";
-
 import { cacheLife, cacheTag, updateTag } from "next/cache";
+
+import type { DbTarget } from "@/lib/types";
 
 const DB_CACHE_TAG_PREFIX = "db";
 

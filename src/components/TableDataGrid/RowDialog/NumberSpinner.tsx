@@ -55,28 +55,18 @@ export default function NumberSpinner({
                     }}
                 >
                     {props.children}
-                    {helperText ? (
-                        <FormHelperText>{helperText}</FormHelperText>
-                    ) : null}
+                    {helperText ? <FormHelperText>{helperText}</FormHelperText> : null}
                 </FormControl>
             )}
         >
             <BaseNumberField.ScrubArea
-                render={
-                    <Box
-                        component="span"
-                        sx={{ userSelect: "none", width: "max-content" }}
-                    />
-                }
+                render={<Box component="span" sx={{ userSelect: "none", width: "max-content" }} />}
             >
                 <FormLabel
                     htmlFor={id}
                     sx={{
                         display: "inline-block",
-                        cursor:
-                            other.readOnly || other.disabled
-                                ? "default"
-                                : "ew-resize",
+                        cursor: other.readOnly || other.disabled ? "default" : "ew-resize",
                         fontSize: "0.875rem",
                         color: "text.primary",
                         fontWeight: 500,
@@ -130,10 +120,8 @@ export default function NumberSpinner({
                                     ...props,
                                     size:
                                         Math.max(
-                                            (other.min?.toString() || "")
-                                                .length,
-                                            (other.max?.toString() || "")
-                                                .length,
+                                            (other.min?.toString() || "").length,
+                                            (other.max?.toString() || "").length,
                                             state.inputValue.length || 1,
                                         ) + 1,
                                     sx: {

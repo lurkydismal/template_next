@@ -1,21 +1,13 @@
-import { ChangeEvent, useMemo, useState } from "react";
-import {
-    Preview as PreviewIcon,
-    Subject as SubjectIcon,
-} from "@mui/icons-material";
+import { Preview as PreviewIcon, Subject as SubjectIcon } from "@mui/icons-material";
 import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
+import { ChangeEvent, useMemo, useState } from "react";
+import { Control, Controller, FieldError, RegisterOptions } from "react-hook-form";
+
 import Markdown from "@/components/Markdown";
-import {
-    Control,
-    Controller,
-    FieldError,
-    RegisterOptions,
-} from "react-hook-form";
+
 import { MarkdownFieldConfig } from "./types";
 
-type MarkdownToggleCorner = NonNullable<
-    MarkdownFieldConfig<unknown, unknown>["toggleCorner"]
->;
+type MarkdownToggleCorner = NonNullable<MarkdownFieldConfig<unknown, unknown>["toggleCorner"]>;
 
 type MarkdownFieldInputProps = {
     fieldKey: string;
@@ -38,10 +30,8 @@ function getTogglePositionStyles(corner: MarkdownToggleCorner) {
     const sharedStyles = { m: 0.5, position: "absolute" as const, zIndex: 1 };
 
     if (corner === "top-left") return { ...sharedStyles, left: 0, top: 0 };
-    if (corner === "bottom-left")
-        return { ...sharedStyles, bottom: 0, left: 0 };
-    if (corner === "bottom-right")
-        return { ...sharedStyles, bottom: 0, right: 0 };
+    if (corner === "bottom-left") return { ...sharedStyles, bottom: 0, left: 0 };
+    if (corner === "bottom-right") return { ...sharedStyles, bottom: 0, right: 0 };
     return { ...sharedStyles, right: 0, top: 0 };
 }
 
@@ -80,13 +70,7 @@ export default function MarkdownFieldInput({
                 disabled={readOnly}
                 render={({ field }) => (
                     <Box sx={{ position: "relative" }}>
-                        <Tooltip
-                            title={
-                                isPreviewMode
-                                    ? "Switch to edit"
-                                    : "Preview markdown"
-                            }
-                        >
+                        <Tooltip title={isPreviewMode ? "Switch to edit" : "Preview markdown"}>
                             <IconButton
                                 size="small"
                                 aria-label={
@@ -94,9 +78,7 @@ export default function MarkdownFieldInput({
                                         ? "Switch to text edit mode"
                                         : "Switch to markdown preview mode"
                                 }
-                                onClick={() =>
-                                    setIsPreviewMode((prev) => !prev)
-                                }
+                                onClick={() => setIsPreviewMode((prev) => !prev)}
                                 sx={togglePositionStyles}
                             >
                                 {isPreviewMode ? (
@@ -113,18 +95,14 @@ export default function MarkdownFieldInput({
                                     id={`${fieldKey}-markdown-preview`}
                                     sx={{
                                         border: 1,
-                                        borderColor: error
-                                            ? "error.main"
-                                            : "divider",
+                                        borderColor: error ? "error.main" : "divider",
                                         borderRadius: 1,
                                         minHeight: 120,
                                         p: 2,
                                         whiteSpace: "normal",
                                     }}
                                 >
-                                    <Markdown>
-                                        {String(field.value ?? "")}
-                                    </Markdown>
+                                    <Markdown>{String(field.value ?? "")}</Markdown>
                                 </Box>
                                 {error?.message && (
                                     <Typography
@@ -143,9 +121,7 @@ export default function MarkdownFieldInput({
                                 slotProps={{ htmlInput: { readOnly } }}
                                 id={`${fieldKey}-markdown`}
                                 value={field.value ?? ""}
-                                onChange={(
-                                    e: ChangeEvent<HTMLInputElement>,
-                                ) => {
+                                onChange={(e: ChangeEvent<HTMLInputElement>) => {
                                     if (readOnly) return;
                                     field.onChange(e.target.value);
                                     onValueChange(e.target.value);

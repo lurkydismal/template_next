@@ -1,12 +1,14 @@
+import type { UseFormReturn } from "react-hook-form";
+
 import { describe, expect, it, vi } from "vitest";
+
+import type { FieldConfig } from "../src/components/TableDataGrid/RowDialog/types";
 
 import {
     rowHasChanges,
     rowHasId,
 } from "../src/components/TableDataGrid/RowDialog/Content/changeDetection";
 import { getFieldRules } from "../src/components/TableDataGrid/RowDialog/Content/validation";
-import type { FieldConfig } from "../src/components/TableDataGrid/RowDialog/types";
-import type { UseFormReturn } from "react-hook-form";
 
 type Row = {
     id: string | null;
@@ -34,10 +36,7 @@ function createFormStub(allValues: Record<string, unknown>) {
 function getSingleValidate(
     rules: ReturnType<typeof getFieldRules>,
 ):
-    | ((
-        value: unknown,
-        formValues: Record<string, unknown>,
-    ) => Promise<unknown> | unknown)
+    | ((value: unknown, formValues: Record<string, unknown>) => Promise<unknown> | unknown)
     | undefined {
     const candidate = rules.validate;
     if (typeof candidate === "function") return candidate;
@@ -49,10 +48,7 @@ function getSingleValidate(
  * the react-hook-form type signature but is unused; the actual form state comes
  * from the mocked form.getValues().
  */
-function runSingleValidate(
-    rules: ReturnType<typeof getFieldRules>,
-    value: unknown,
-) {
+function runSingleValidate(rules: ReturnType<typeof getFieldRules>, value: unknown) {
     return getSingleValidate(rules)?.(value, {});
 }
 
@@ -72,11 +68,7 @@ describe("row change detection", () => {
         ).toBe(false);
 
         expect(
-            rowHasChanges(
-                { id: "1", custom: "A", uuid: "x" },
-                { custom: "A", uuid: "y" },
-                fields,
-            ),
+            rowHasChanges({ id: "1", custom: "A", uuid: "x" }, { custom: "A", uuid: "y" }, fields),
         ).toBe(true);
     });
 
@@ -86,17 +78,12 @@ describe("row change detection", () => {
                 key: "amount",
                 type: "number",
                 label: "Amount",
-                isChanged: (oldValue, newValue) =>
-                    Number(oldValue) !== Number(newValue),
+                isChanged: (oldValue, newValue) => Number(oldValue) !== Number(newValue),
             },
         ];
 
-        expect(
-            rowHasChanges({ id: "1", amount: 1 }, { amount: 1 }, fields),
-        ).toBe(false);
-        expect(
-            rowHasChanges({ id: "1", amount: 1 }, { amount: 2 }, fields),
-        ).toBe(true);
+        expect(rowHasChanges({ id: "1", amount: 1 }, { amount: 1 }, fields)).toBe(false);
+        expect(rowHasChanges({ id: "1", amount: 1 }, { amount: 2 }, fields)).toBe(true);
     });
 
     it("rowHasId validates null/non-null id values", () => {
@@ -142,9 +129,7 @@ describe("getFieldRules validation", () => {
 
         const numberRules = getFieldRules(fields[0]!, fields, form, baseRow, {});
         await expect(runSingleValidate(numberRules, "2")).resolves.toBe(true);
-        await expect(runSingleValidate(numberRules, "abc")).resolves.toBe(
-            "Enter a valid number",
-        );
+        await expect(runSingleValidate(numberRules, "abc")).resolves.toBe("Enter a valid number");
         await expect(runSingleValidate(numberRules, "0")).resolves.toBe(
             "Amount must be greater than or equal to 1",
         );
@@ -161,20 +146,14 @@ describe("getFieldRules validation", () => {
         await expect(runSingleValidate(hexRules, "0x1af")).resolves.toBe(true);
 
         const inetRules = getFieldRules(fields[3]!, fields, form, baseRow, {});
-        await expect(
-            runSingleValidate(inetRules, "127.0.0.1:3000"),
-        ).resolves.toBe(true);
-        await expect(
-            runSingleValidate(inetRules, "[2001:db8::1]:443"),
-        ).resolves.toBe(true);
-        await expect(
-            runSingleValidate(inetRules, "999.0.0.1"),
-        ).resolves.toContain("Enter a valid IPv4/IPv6 value");
+        await expect(runSingleValidate(inetRules, "127.0.0.1:3000")).resolves.toBe(true);
+        await expect(runSingleValidate(inetRules, "[2001:db8::1]:443")).resolves.toBe(true);
+        await expect(runSingleValidate(inetRules, "999.0.0.1")).resolves.toContain(
+            "Enter a valid IPv4/IPv6 value",
+        );
 
         const groupRules = getFieldRules(fields[4]!, fields, form, baseRow, {});
-        await expect(runSingleValidate(groupRules, "")).resolves.toContain(
-            "Enter at least 1 of:",
-        );
+        await expect(runSingleValidate(groupRules, "")).resolves.toContain("Enter at least 1 of:");
     });
 
     it("validates table lookup and custom validate hooks", async () => {
@@ -198,12 +177,8 @@ describe("getFieldRules validation", () => {
 
         expect(rules.required).toBe("Custom is required");
         await expect(runSingleValidate(rules, "ok")).resolves.toBe(true);
-        await expect(runSingleValidate(rules, "bad")).resolves.toBe(
-            "lookup failed",
-        );
-        await expect(runSingleValidate(rules, "x")).resolves.toBe(
-            "lookup failed",
-        );
+        await expect(runSingleValidate(rules, "bad")).resolves.toBe("lookup failed");
+        await expect(runSingleValidate(rules, "x")).resolves.toBe("lookup failed");
         expect(tableLookup).toHaveBeenCalled();
     });
 });

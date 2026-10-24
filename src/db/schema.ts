@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
     pgTable,
     check,
@@ -8,15 +9,12 @@ import {
     boolean,
     timestamp,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
-import * as templates from "./templates";
+
 import { timestampsColumns } from "./helpers";
+import * as templates from "./templates";
 
 export const tables = pgTable("tables", templates.table, (t) => [
-    check(
-        "multilineField_not_blank",
-        sql`length(trim(${t.multiline_field})) > 0`,
-    ),
+    check("multilineField_not_blank", sql`length(trim(${t.multiline_field})) > 0`),
 
     index().on(t.author_id),
     index().on(t.last_editor_id),
@@ -33,10 +31,7 @@ export const users = pgTable(
     },
     (t) => [
         check("username_not_blank", sql`length(trim(${t.username})) > 0`),
-        check(
-            "username_normalized_not_blank",
-            sql`length(trim(${t.username_normalized})) > 0`,
-        ),
+        check("username_normalized_not_blank", sql`length(trim(${t.username_normalized})) > 0`),
         check(
             "username_normalized_lowercase",
             sql`${t.username_normalized} = lower(${t.username_normalized})`,
@@ -60,10 +55,7 @@ export const notifications = pgTable(
         created_at: timestamp({ withTimezone: true }).notNull().defaultNow(),
     },
     (t) => [
-        check(
-            "notification_message_not_blank",
-            sql`length(trim(${t.message})) > 0`,
-        ),
+        check("notification_message_not_blank", sql`length(trim(${t.message})) > 0`),
         index().on(t.is_read),
         index().on(t.created_at),
     ],

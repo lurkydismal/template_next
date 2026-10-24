@@ -1,11 +1,8 @@
-import AutocompleteWithHighlight from "@/components/Autocomplete";
 import { CircularProgress, TextField, Typography } from "@mui/material";
-import {
-    Control,
-    Controller,
-    FieldError,
-    RegisterOptions,
-} from "react-hook-form";
+import { Control, Controller, FieldError, RegisterOptions } from "react-hook-form";
+
+import AutocompleteWithHighlight from "@/components/Autocomplete";
+
 import { AutocompleteOption } from "./types";
 
 type AutocompleteFieldInputProps = {
@@ -68,8 +65,7 @@ export default function AutocompleteFieldInput({
                         onChange={(_, nextValue) => {
                             if (readOnly) return;
 
-                            const mapped =
-                                nextValue as AutocompleteOption | null;
+                            const mapped = nextValue as AutocompleteOption | null;
                             field.onChange(mapped);
                             onValueChange(mapped);
                         }}
@@ -93,15 +89,9 @@ export default function AutocompleteFieldInput({
                                         endAdornment: (
                                             <>
                                                 {loading ? (
-                                                    <CircularProgress
-                                                        color="inherit"
-                                                        size={20}
-                                                    />
+                                                    <CircularProgress color="inherit" size={20} />
                                                 ) : null}
-                                                {
-                                                    params.slotProps.input
-                                                        .endAdornment
-                                                }
+                                                {params.slotProps.input.endAdornment}
                                             </>
                                         ),
                                     },

@@ -26,19 +26,12 @@ export const getFilteredAutocompleteOptions = <
 
     if (excludedFieldKeys.length === 0) return options;
 
-    const currentComparableValue = getAutocompleteComparableValue(
-        values[String(field.key)],
-    );
+    const currentComparableValue = getAutocompleteComparableValue(values[String(field.key)]);
 
     const excludedValues = new Set<unknown>(
         excludedFieldKeys
-            .map((excludedFieldKey) =>
-                getAutocompleteComparableValue(values[excludedFieldKey]),
-            )
-            .filter(
-                (optionValue) =>
-                    optionValue !== null && optionValue !== undefined,
-            ),
+            .map((excludedFieldKey) => getAutocompleteComparableValue(values[excludedFieldKey]))
+            .filter((optionValue) => optionValue !== null && optionValue !== undefined),
     );
 
     return options.filter((option) => {

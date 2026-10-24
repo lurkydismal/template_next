@@ -1,24 +1,156 @@
 {
-  "version": "8",
+  "type": "base",
+  "version": "9",
   "dialect": "postgres",
   "id": "11e0647e-111b-435d-a051-26cafd70cd37",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
+  "footprints": [
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "tables"
+      ],
+      "writes": [
+        "s|tbl|public.tables",
+        "n|tbl|public.tables",
+        "e|tbl|public.tables",
+        "n|rel|public.tables",
+        "n|type|public.tables",
+        "n|rel|public.tables_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "users"
+      ],
+      "writes": [
+        "s|tbl|public.users",
+        "n|tbl|public.users",
+        "e|tbl|public.users",
+        "n|rel|public.users",
+        "n|type|public.users",
+        "n|rel|public.users_pkey",
+        "n|rel|public.users_username_key",
+        "n|rel|public.users_username_normalized_key"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "tables",
+        "tables_author_id_index"
+      ],
+      "writes": [
+        "s|idx|public.tables_author_id_index",
+        "n|idx|public.tables_author_id_index",
+        "e|idx|public.tables_author_id_index",
+        "n|rel|public.tables_author_id_index"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public",
+        "n|col|public.tables.author_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "tables",
+        "tables_last_editor_id_index"
+      ],
+      "writes": [
+        "s|idx|public.tables_last_editor_id_index",
+        "n|idx|public.tables_last_editor_id_index",
+        "e|idx|public.tables_last_editor_id_index",
+        "n|rel|public.tables_last_editor_id_index"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public",
+        "n|col|public.tables.last_editor_id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "tables"
+      ],
+      "writes": [
+        "s|fk|public.tables.tables_author_id_users_id_fkey",
+        "n|fk|public.tables.tables_author_id_users_id_fkey",
+        "e|fk|public.tables.tables_author_id_users_id_fkey",
+        "n|con|public.tables.tables_author_id_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public",
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.tables.author_id",
+        "n|col|public.users.id",
+        "e|uniqueness|public.users.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "tables"
+      ],
+      "writes": [
+        "s|fk|public.tables.tables_last_editor_id_users_id_fkey",
+        "n|fk|public.tables.tables_last_editor_id_users_id_fkey",
+        "e|fk|public.tables.tables_last_editor_id_users_id_fkey",
+        "n|con|public.tables.tables_last_editor_id_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public",
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.tables.last_editor_id",
+        "n|col|public.users.id",
+        "e|uniqueness|public.users.id"
+      ]
+    }
+  ],
   "ddl": [
     {
-      "isRlsEnabled": false,
+      "schema": "public",
       "name": "tables",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
       "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
       "name": "users",
-      "entityType": "tables",
-      "schema": "public"
+      "isRlsEnabled": false,
+      "entityType": "tables"
     },
     {
+      "schema": "public",
+      "table": "tables",
+      "name": "id",
       "type": "serial",
       "typeSchema": null,
       "notNull": true,
@@ -26,116 +158,12 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "tables"
+      "entityType": "columns"
     },
     {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
+      "schema": "public",
+      "table": "tables",
       "name": "content",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "tables"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "author_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "tables"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "last_editor_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "tables"
-    },
-    {
-      "type": "timestamp(0) with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "updated_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "tables"
-    },
-    {
-      "type": "timestamp(0) with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "tables"
-    },
-    {
-      "type": "serial",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "users"
-    },
-    {
-      "type": "varchar(32)",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "username",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "users"
-    },
-    {
-      "type": "varchar(32)",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "username_normalized",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "users"
-    },
-    {
       "type": "text",
       "typeSchema": null,
       "notNull": true,
@@ -143,25 +171,38 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "password_hash",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "users"
+      "entityType": "columns"
     },
     {
-      "type": "timestamp(0) with time zone",
+      "schema": "public",
+      "table": "tables",
+      "name": "author_id",
+      "type": "integer",
       "typeSchema": null,
-      "notNull": true,
+      "notNull": false,
       "dimensions": 0,
-      "default": "now()",
+      "default": null,
       "generated": null,
       "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "tables",
+      "name": "last_editor_id",
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "tables",
       "name": "updated_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "users"
-    },
-    {
       "type": "timestamp(0) with time zone",
       "typeSchema": null,
       "notNull": true,
@@ -169,12 +210,103 @@
       "default": "now()",
       "generated": null,
       "identity": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "users"
+      "entityType": "columns"
     },
     {
+      "schema": "public",
+      "table": "tables",
+      "name": "created_at",
+      "type": "timestamp(0) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "users",
+      "name": "id",
+      "type": "serial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "users",
+      "name": "username",
+      "type": "varchar(32)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "users",
+      "name": "username_normalized",
+      "type": "varchar(32)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "users",
+      "name": "password_hash",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "users",
+      "name": "updated_at",
+      "type": "timestamp(0) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "users",
+      "name": "created_at",
+      "type": "timestamp(0) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "tables",
+      "name": "tables_author_id_index",
       "nameExplicit": false,
       "columns": [
         {
@@ -190,12 +322,12 @@
       "with": "",
       "method": "btree",
       "concurrently": false,
-      "name": "tables_author_id_index",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "tables"
+      "entityType": "indexes"
     },
     {
+      "schema": "public",
+      "table": "tables",
+      "name": "tables_last_editor_id_index",
       "nameExplicit": false,
       "columns": [
         {
@@ -211,12 +343,12 @@
       "with": "",
       "method": "btree",
       "concurrently": false,
-      "name": "tables_last_editor_id_index",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "tables"
+      "entityType": "indexes"
     },
     {
+      "schema": "public",
+      "table": "tables",
+      "name": "tables_author_id_users_id_fkey",
       "nameExplicit": false,
       "columns": [
         "author_id"
@@ -228,12 +360,12 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
-      "name": "tables_author_id_users_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "tables"
+      "entityType": "fks"
     },
     {
+      "schema": "public",
+      "table": "tables",
+      "name": "tables_last_editor_id_users_id_fkey",
       "nameExplicit": false,
       "columns": [
         "last_editor_id"
@@ -245,81 +377,77 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
-      "name": "tables_last_editor_id_users_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "tables"
+      "entityType": "fks"
     },
     {
-      "columns": [
-        "id"
-      ],
-      "nameExplicit": false,
-      "name": "tables_pkey",
       "schema": "public",
       "table": "tables",
-      "entityType": "pks"
-    },
-    {
+      "name": "tables_pkey",
       "columns": [
         "id"
       ],
       "nameExplicit": false,
-      "name": "users_pkey",
-      "schema": "public",
-      "table": "users",
       "entityType": "pks"
     },
     {
+      "schema": "public",
+      "table": "users",
+      "name": "users_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "users",
+      "name": "users_username_key",
       "nameExplicit": false,
       "columns": [
         "username"
       ],
       "nullsNotDistinct": false,
-      "name": "users_username_key",
-      "schema": "public",
-      "table": "users",
       "entityType": "uniques"
     },
     {
+      "schema": "public",
+      "table": "users",
+      "name": "users_username_normalized_key",
       "nameExplicit": false,
       "columns": [
         "username_normalized"
       ],
       "nullsNotDistinct": false,
-      "name": "users_username_normalized_key",
-      "schema": "public",
-      "table": "users",
       "entityType": "uniques"
     },
     {
-      "value": "length(trim(\"content\")) > 0",
+      "schema": "public",
+      "table": "tables",
       "name": "content_not_blank",
-      "entityType": "checks",
-      "schema": "public",
-      "table": "tables"
+      "value": "length(trim(\"content\")) > 0",
+      "entityType": "checks"
     },
     {
-      "value": "length(trim(\"username\")) > 0",
+      "schema": "public",
+      "table": "users",
       "name": "username_not_blank",
-      "entityType": "checks",
-      "schema": "public",
-      "table": "users"
+      "value": "length(trim(\"username\")) > 0",
+      "entityType": "checks"
     },
     {
-      "value": "length(trim(\"username_normalized\")) > 0",
+      "schema": "public",
+      "table": "users",
       "name": "username_normalized_not_blank",
-      "entityType": "checks",
-      "schema": "public",
-      "table": "users"
+      "value": "length(trim(\"username_normalized\")) > 0",
+      "entityType": "checks"
     },
     {
-      "value": "\"username_normalized\" = lower(\"username_normalized\")",
-      "name": "username_normalized_lowercase",
-      "entityType": "checks",
       "schema": "public",
-      "table": "users"
+      "table": "users",
+      "name": "username_normalized_lowercase",
+      "value": "\"username_normalized\" = lower(\"username_normalized\")",
+      "entityType": "checks"
     }
-  ],
-  "renames": []
+  ]
 }

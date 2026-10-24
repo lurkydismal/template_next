@@ -68,7 +68,7 @@ Create a local environment file:
 cp env.example .env
 ```
 
-Review `.env` and configure your database, authentication, and object storage settings.
+Review `.env` and configure your database, authentication settings.
 
 For local development, make sure the database settings use the host machine's address:
 
@@ -88,7 +88,7 @@ Set a strong, random `JWT_SECRET` and configure `JWT_EXPIRES_IN` and `COOKIE_SEC
 pnpm install
 ```
 
-### 4. Start the database and object storage
+### 4. Start the database
 
 Start PostgreSQL using Docker Compose:
 

@@ -10,14 +10,20 @@ type NotificationType = NotificationsRow["type"];
  * Reads notifications and unread count for toolbar center state.
  */
 export async function GET(): Promise<Response> {
-    const rows = await db
-        .select()
-        .from(notifications)
-        .orderBy(asc(notifications.created_at));
-    const unreadResult = await db
-        .select({ total: count() })
-        .from(notifications)
-        .where(eq(notifications.is_read, false));
+    const getUnreadNotifications = async () => {
+        const rows = await db
+            .select()
+            .from(notifications)
+            .orderBy(asc(notifications.created_at));
+        const unreadResult = await db
+            .select({ total: count() })
+            .from(notifications)
+            .where(eq(notifications.is_read, false));
+
+        return { rows, unreadResult };
+    };
+
+    const { rows, unreadResult } = await getUnreadNotifications();
 
     return Response.json({ rows, unreadCount: unreadResult[0]?.total ?? 0 });
 }
@@ -26,6 +32,11 @@ export async function GET(): Promise<Response> {
  * Persists one notification and emits it through the shared SSE bus.
  */
 export async function POST(request: Request): Promise<Response> {
+    const invalidResponse = Response.json(
+        { error: "Invalid JSON payload" },
+        { status: 400 },
+    );
+
     let payload: { type?: NotificationType; message?: string };
     try {
         payload = (await request.json()) as {
@@ -33,10 +44,7 @@ export async function POST(request: Request): Promise<Response> {
             message?: string;
         };
     } catch {
-        return Response.json(
-            { error: "Invalid JSON payload" },
-            { status: 400 },
-        );
+        return invalidResponse;
     }
     // FIX: Validate type
     const type = payload.type ?? "default";
@@ -51,15 +59,19 @@ export async function POST(request: Request): Promise<Response> {
         .values({ type, message })
         .returning();
 
-    await emitNotificationEvent({
-        event: "notification",
-        notificationId: created.id,
-        type: created.type,
-        message: created.message,
-        occurredAt: new Date().toISOString(),
-    });
+    if (created) {
+        await emitNotificationEvent({
+            event: "notification",
+            notificationId: created.id,
+            type: created.type,
+            message: created.message,
+            occurredAt: new Date().toISOString(),
+        });
 
-    return Response.json(created, { status: 201 });
+        return Response.json(created, { status: 201 });
+    } else {
+        return invalidResponse;
+    }
 }
 
 /**

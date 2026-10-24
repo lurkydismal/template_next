@@ -11,10 +11,10 @@ import {
     FieldError,
     RegisterOptions,
 } from "react-hook-form";
-import { FieldConfig } from "./types";
+import { MarkdownFieldConfig } from "./types";
 
 type MarkdownToggleCorner = NonNullable<
-    FieldConfig<unknown, unknown>["markdownToggleCorner"]
+    MarkdownFieldConfig<unknown, unknown>["toggleCorner"]
 >;
 
 type MarkdownFieldInputProps = {
@@ -25,9 +25,9 @@ type MarkdownFieldInputProps = {
     readOnly?: boolean;
     value: unknown;
     control: Control<Record<string, unknown>>;
-    error?: FieldError;
+    error?: FieldError | undefined;
     rules?: RegisterOptions<Record<string, unknown>, string>;
-    toggleCorner?: MarkdownToggleCorner;
+    toggleCorner?: MarkdownToggleCorner | undefined;
     onValueChange: (value: string) => void;
 };
 
@@ -76,7 +76,7 @@ export default function MarkdownFieldInput({
                 name={name}
                 control={control}
                 defaultValue={value ?? ""}
-                rules={rules}
+                rules={rules ?? {}}
                 disabled={readOnly}
                 render={({ field }) => (
                     <Box sx={{ position: "relative" }}>

@@ -1,14 +1,10 @@
-import z from "zod";
 import * as schema from "@/db/schema";
+import { DbTargetSchema } from "@/utils/validate/schemas";
 import { AnyColumn } from "drizzle-orm";
 
 export const TABLES = schema;
 
 export type DbTarget = keyof typeof TABLES;
-
-export const DbTargetSchema = z.enum(
-    Object.keys(TABLES) as [DbTarget, ...DbTarget[]],
-);
 
 /**
  * Parses raw target.
@@ -31,7 +27,7 @@ export function parseRawTarget(
     };
 }
 
-type SuccessResult<T> = { ok: true; data?: T };
+type SuccessResult<T> = { ok: true; data: T };
 type FailureResult = { ok: false; error: string };
 
 export type ActionResult<T = void> = SuccessResult<T> | FailureResult;

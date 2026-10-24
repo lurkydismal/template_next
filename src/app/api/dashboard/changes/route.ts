@@ -34,9 +34,7 @@ export async function GET(): Promise<Response> {
              */
             const send = (payload: unknown) => {
                 try {
-                    controller.enqueue(
-                        encoder.encode(`data: ${JSON.stringify(payload)}\n\n`),
-                    );
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
                 } catch {
                     cleanup();
 

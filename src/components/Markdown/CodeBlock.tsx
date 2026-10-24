@@ -33,7 +33,7 @@ export default function CodeBlock({
     ...props
 }: {
     inline?: boolean;
-    className?: string;
+    className?: string | undefined;
     children?: React.ReactNode;
     node?: unknown;
 }) {

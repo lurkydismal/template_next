@@ -1,11 +1,12 @@
 "use client";
 
-import React, {
+import {
     useCallback,
     useEffect,
     useState,
     cloneElement,
     isValidElement,
+    useMemo,
 } from "react";
 import CustomDataGrid from "./CustomDataGrid";
 import RowDialog, { FieldConfig } from "./RowDialog";
@@ -25,6 +26,7 @@ export default function TableDataGrid<
     getRowsAction,
     createRowAction,
     updateRowAction,
+    getFileAction,
     extraButtons,
     fields,
     dashboardKey,
@@ -32,6 +34,7 @@ export default function TableDataGrid<
     getRowsAction: () => Promise<Readonly<GridRowsProp>>;
     createRowAction: (row: RI) => Promise<void>;
     updateRowAction: (fd: FormData) => Promise<void>;
+    getFileAction: (filename: string) => Promise<string>;
     extraButtons?: React.ReactNode; // optionally a ReactElement expecting props
     fields: FieldConfig<R, RI>[];
     dashboardKey: string;
@@ -44,11 +47,16 @@ export default function TableDataGrid<
     const [fieldsResolving, setFieldsResolving] = useState(false);
     const [selectedRow, setSelectedRow] = useState<R | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
-    const emptyRow = React.useMemo(
+    const emptyRow = useMemo(
         () =>
             resolvedFields.reduce((row, field) => {
-                row[field.key as keyof RI] = (field.placeholder ??
-                    null) as RI[keyof RI];
+                row[field.key as keyof RI] = (
+                    field.type !== "boolean" &&
+                    field.type !== "radio-group" &&
+                    field.type !== "file"
+                        ? (field.placeholder ?? null)
+                        : null
+                ) as RI[keyof RI];
                 return row;
             }, {} as RI),
         [resolvedFields],
@@ -61,7 +69,9 @@ export default function TableDataGrid<
          * Resolves async field configuration declared by each field.
          */
         const resolveFields = async () => {
-            const hasLoaders = fields.some((field) => field.loadOptions);
+            const hasLoaders = fields.some(
+                (field) => field.type === "autocomplete" && field.loadOptions,
+            );
             if (!hasLoaders) {
                 setResolvedFields(fields);
                 return;
@@ -71,7 +81,12 @@ export default function TableDataGrid<
             try {
                 const nextFields = await Promise.all(
                     fields.map(async (field) => {
-                        if (!field.loadOptions) return field;
+                        if (
+                            field.type !== "autocomplete" ||
+                            !field.loadOptions
+                        ) {
+                            return field;
+                        }
 
                         try {
                             return {
@@ -256,7 +271,7 @@ export default function TableDataGrid<
           )
         : extraButtons;
 
-    const columns = columnsFromFields(resolvedFields);
+    const columns = columnsFromFields(resolvedFields, getFileAction);
 
     if (currentRows === null || fieldsResolving) {
         return (
@@ -302,6 +317,7 @@ export default function TableDataGrid<
                 dashboardKey={dashboardKey}
                 createRowAction={createAndRefresh}
                 updateRowAction={updateRowAction}
+                getFileAction={getFileAction}
                 onUpdated={_getRows}
             />
         </>

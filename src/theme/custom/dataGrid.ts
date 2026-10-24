@@ -1,5 +1,3 @@
-import { gridClasses } from "@mui/x-data-grid";
-import { gray } from "@/theme/themePrimitives";
 import {
     Theme,
     checkboxClasses,
@@ -11,6 +9,9 @@ import {
     iconButtonClasses,
     alpha,
 } from "@mui/material";
+import { gridClasses } from "@mui/x-data-grid";
+
+import { gray } from "@/theme/themePrimitives";
 
 // Custom style overrides for MUI DataGrid and related components
 export const dataGridCustomizations = {
@@ -23,15 +24,12 @@ export const dataGridCustomizations = {
                 "--DataGrid-overlayHeight": "300px",
                 overflow: "clip",
                 borderColor: (theme.vars || theme).palette.divider,
-                backgroundColor: (theme.vars || theme).palette.background
-                    .default,
+                backgroundColor: (theme.vars || theme).palette.background.default,
                 [`& .${gridClasses.columnHeader}`]: {
-                    backgroundColor: (theme.vars || theme).palette.background
-                        .paper,
+                    backgroundColor: (theme.vars || theme).palette.background.paper,
                 },
                 [`& .${gridClasses.footerContainer}`]: {
-                    backgroundColor: (theme.vars || theme).palette.background
-                        .paper,
+                    backgroundColor: (theme.vars || theme).palette.background.paper,
                 },
                 [`& .${checkboxClasses.root}`]: {
                     padding: theme.spacing(0.5),
@@ -89,8 +87,7 @@ export const dataGridCustomizations = {
                 "&.Mui-selected": {
                     background: (theme.vars || theme).palette.action.selected,
                     "&:hover": {
-                        backgroundColor: (theme.vars || theme).palette.action
-                            .hover,
+                        backgroundColor: (theme.vars || theme).palette.action.hover,
                     },
                 },
             }),
@@ -102,10 +99,7 @@ export const dataGridCustomizations = {
                     border: "none",
                     backgroundColor: "transparent",
                     "&:hover": {
-                        backgroundColor: alpha(
-                            theme.palette.action.selected,
-                            0.3,
-                        ),
+                        backgroundColor: alpha(theme.palette.action.selected, 0.3),
                     },
                     "&:active": {
                         backgroundColor: gray[200],

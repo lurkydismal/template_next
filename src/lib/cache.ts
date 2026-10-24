@@ -4,7 +4,7 @@ import { cacheLife, cacheTag, updateTag } from "next/cache";
 
 const DB_CACHE_TAG_PREFIX = "db";
 
-export const DASHBOARD_DB_CACHE_LIFE = {
+const DASHBOARD_DB_CACHE_LIFE = {
     expire: 60 * 60,
     revalidate: 60,
     stale: 30,
@@ -13,7 +13,7 @@ export const DASHBOARD_DB_CACHE_LIFE = {
 /**
  * Builds a stable cache tag for a database table or query dependency.
  */
-export function getDbCacheTag(target: DbTarget | "all") {
+function getDbCacheTag(target: DbTarget | "all") {
     return `${DB_CACHE_TAG_PREFIX}:${target}`;
 }
 

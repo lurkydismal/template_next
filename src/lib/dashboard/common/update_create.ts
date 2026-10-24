@@ -3,7 +3,7 @@
 import { and, AnyColumn, eq, getColumns, SQL } from "drizzle-orm";
 
 import db from "@/db";
-import { getSessionData } from "@/lib/auth";
+import { getSession } from "@/lib/safe/auth";
 import { updateDbCacheTags } from "@/lib/cache";
 import { ActionResult, DbTarget, parseRawTarget } from "@/lib/types";
 import { emitDashboardChange } from "@/lib/dashboard/common/change-events";
@@ -14,7 +14,7 @@ import {
     createSelectSchema,
     createUpdateSchema,
 } from "drizzle-zod";
-import { z } from "zod";
+import z from "zod";
 import { toCamelCase } from "@/utils/stdfunc";
 import { getUserId, requestUserId } from "@/lib/user";
 
@@ -36,7 +36,7 @@ function toDbMutation(
     const base = { ...parsedRow };
 
     if (opts.isUpdate) {
-        delete base.id;
+        delete base["id"];
         return {
             ...base,
             last_editor_id: actorId,
@@ -151,8 +151,8 @@ export async function save(
         : createInsertSchema(table);
     const selectSchema = createSelectSchema(table);
 
-    const sessionUser = await getSessionData();
-    const actor = sessionUser?.username_normalized;
+    const sessionUser = (await getSession()).data?.user;
+    const actor = sessionUser?.name;
 
     if (!actor) {
         throw new Error("Missing authenticated user");
@@ -211,8 +211,8 @@ export async function save(
             typeof (updateResult as { rowCount?: number }).rowCount === "number"
                 ? (updateResult as { rowCount: number }).rowCount
                 : Array.isArray(updateResult)
-                  ? updateResult.length
-                  : undefined;
+                    ? updateResult.length
+                    : undefined;
 
         if (affectedRows === undefined) {
             throw new Error(
@@ -234,7 +234,7 @@ export async function save(
 
     await emitDashboardChange(rawTarget);
 
-    return { ok: true };
+    return { ok: true, data: undefined };
 }
 
 /**
@@ -251,16 +251,16 @@ export async function parseForm(formData: FormData): Promise<MutationRow> {
         }
     }
 
-    if (entries.id !== undefined) {
+    if (entries["id"] !== undefined) {
         const idResult = z.coerce
             .number()
             .int()
             .positive()
-            .safeParse(entries.id);
+            .safeParse(entries["id"]);
         if (!idResult.success) {
-            throw new Error(`Invalid id value: ${entries.id}`);
+            throw new Error(`Invalid id value: ${entries["id"]}`);
         }
-        entries.id = idResult.data;
+        entries["id"] = idResult.data;
     }
 
     return entries;

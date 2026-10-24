@@ -19,7 +19,8 @@ type RowDialogContentProps<R, RI> = {
     registerDiscardDraft: (fn: (() => void) | null) => void;
     createRowAction: CreateRowAction<RI>;
     updateRowAction: UpdateRowAction;
-    onUpdated?: () => Promise<void> | void;
+    getFileAction: (filename: string) => Promise<string>;
+    onUpdated?: (() => Promise<void> | void) | undefined;
     idKey?: keyof R;
 };
 
@@ -37,6 +38,7 @@ export default function RowDialogContent<
     registerDiscardDraft,
     createRowAction,
     updateRowAction,
+    getFileAction,
     onUpdated,
     idKey = "id" as keyof R,
 }: RowDialogContentProps<R, RI>) {
@@ -399,6 +401,10 @@ export default function RowDialogContent<
                             form,
                             getRules,
                             handleFieldValueChange,
+                            getFileAction,
+                            ...(field.type === "file"
+                                ? { width: field.width, height: field.height }
+                                : {}),
                         })}
                     </Grid>
                 ))}

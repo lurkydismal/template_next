@@ -29,7 +29,10 @@ import log from "@/utils/stdlog";
  * const result = await mockAction(200);
  * // { ok: true }
  */
-export async function mockAction(milliseconds: number): Promise<{ ok: true }>;
+export async function mockAction(
+    milliseconds: number,
+    data?: unknown,
+): Promise<{ ok: true; data: undefined }>;
 
 /**
  * Mock server action that waits for the specified duration
@@ -62,7 +65,7 @@ export async function mockAction<T>(
  */
 export async function mockAction<T>(
     milliseconds: number,
-    data?: T,
+    data: T,
 ): Promise<ActionResult<T>> {
     log.trace("mockAction called", {
         milliseconds,

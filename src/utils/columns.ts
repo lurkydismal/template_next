@@ -13,16 +13,17 @@
  * - Call `normalizeColumns(rawColumns, options)` where you need the final GridColDef[]
  */
 
+import { Link } from "@mui/material";
+import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import { createElement, Fragment, MouseEvent } from "react";
+
+import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
 import {
     ImagePreviewDialog,
     useImagePreview,
 } from "@/components/TableDataGrid/RowDialog/ImagePreviewDialog";
-import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
 import { isImagePath } from "@/utils/fileHelpers";
 import { toCamelCase } from "@/utils/stdfunc";
-import { Link } from "@mui/material";
-import { createElement, Fragment, MouseEvent } from "react";
-import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 
 type NormalizeOptions = {
     defaultFlex?: number; // fallback flex when column.flex is missing
@@ -37,8 +38,7 @@ type NormalizeOptions = {
  * Renders an interactive file cell that reuses shared image preview behavior.
  */
 function FileCellLink({ value }: { value: string }) {
-    const { imagePreviewOpen, openImagePreview, closeImagePreview } =
-        useImagePreview();
+    const { imagePreviewOpen, openImagePreview, closeImagePreview } = useImagePreview();
 
     /**
      * Opens the preview dialog while preventing browser navigation.

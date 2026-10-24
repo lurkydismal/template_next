@@ -21,14 +21,14 @@ export default function Loading() {
     }, []);
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-            <main className="w-full max-w-3xl p-6 space-y-6">
+        <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+            <main className="w-full max-w-3xl space-y-6 p-6">
                 {/* header + spinner */}
                 <div className="flex items-center gap-4">
                     <svg
                         role="status"
                         aria-hidden="true"
-                        className="w-10 h-10 text-indigo-600 animate-spin"
+                        className="h-10 w-10 animate-spin text-indigo-600"
                         viewBox="0 0 24 24"
                     >
                         <circle
@@ -58,16 +58,16 @@ export default function Loading() {
                 </div>
 
                 {/* grid of skeleton cards */}
-                <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {Array.from({ length: 4 }).map((_, i) => (
                         <article
                             key={i}
-                            className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-transparent dark:border-gray-700/40 animate-pulse"
+                            className="animate-pulse rounded-lg border border-transparent bg-white p-4 shadow-sm dark:border-gray-700/40 dark:bg-gray-800"
                             aria-hidden
                         >
-                            <div className="h-40 bg-gray-200 dark:bg-gray-700 rounded-md" />
-                            <div className="mt-4 h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-                            <div className="mt-2 h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+                            <div className="h-40 rounded-md bg-gray-200 dark:bg-gray-700" />
+                            <div className="mt-4 h-4 w-3/4 rounded bg-gray-200 dark:bg-gray-700" />
+                            <div className="mt-2 h-3 w-1/2 rounded bg-gray-200 dark:bg-gray-700" />
                         </article>
                     ))}
                 </section>
@@ -75,9 +75,9 @@ export default function Loading() {
                 {/* subtle progress + status */}
                 <div className="flex items-center gap-4">
                     <div className="flex-1">
-                        <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2 overflow-hidden">
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
                             <div
-                                className="h-2 bg-indigo-600/80 rounded-full transition-all"
+                                className="h-2 rounded-full bg-indigo-600/80 transition-all"
                                 style={{ width: `${progress}%` }}
                                 aria-hidden
                             />
@@ -87,10 +87,10 @@ export default function Loading() {
                         </div>
                     </div>
 
-                    <div className="hidden sm:flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-indigo-600 animate-pulse" />
-                        <div className="w-3 h-3 rounded-full bg-indigo-600/70 animate-pulse" />
-                        <div className="w-3 h-3 rounded-full bg-indigo-600/50 animate-pulse" />
+                    <div className="hidden items-center gap-2 sm:flex">
+                        <div className="h-3 w-3 animate-pulse rounded-full bg-indigo-600" />
+                        <div className="h-3 w-3 animate-pulse rounded-full bg-indigo-600/70" />
+                        <div className="h-3 w-3 animate-pulse rounded-full bg-indigo-600/50" />
                     </div>
                 </div>
             </main>

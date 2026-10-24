@@ -1,4 +1,4 @@
-import React, { ComponentProps } from "react";
+import { ComponentProps } from "react";
 import { buildYear, githubUrl } from "@/utils/stdvar";
 import {
     TypographyProps,

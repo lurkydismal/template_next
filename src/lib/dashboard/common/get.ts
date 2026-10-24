@@ -63,18 +63,18 @@ export async function getRows(
         }
 
         // Check if "id" already exists
-        const hasId = "id" in validRows[0];
+        const hasId = 0 in validRows ? "id" in validRows[0] : false;
 
         type Row = (typeof validRows)[number];
 
         const result = hasId
             ? validRows
             : validRows.map((row: Row) => ({
-                  ...row,
-                  id:
-                      row[toCamelCase(id.name) as keyof Row] ??
-                      row[id.name as keyof Row], // fallback to original name
-              }));
+                ...row,
+                id:
+                    row[toCamelCase(id.name) as keyof Row] ??
+                    row[id.name as keyof Row], // fallback to original name
+            }));
 
         return {
             ok: true,

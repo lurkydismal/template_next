@@ -16,7 +16,7 @@
 import "server-only";
 import { Client } from "minio";
 import log from "@/utils/stdlog";
-import { encodePath, getEnv, parseBool } from "@/utils/stdfunc";
+import { delay, encodePath, getEnv, parseBool } from "@/utils/stdfunc";
 import { pathSchema, filenameSchema } from "@/utils/validate/schemas";
 
 /**
@@ -129,6 +129,77 @@ function policyEquals(aStr: string, bStr: string): boolean {
     }
 }
 
+async function retry<T>(
+    fn: () => Promise<T>,
+    retries = 3,
+    baseDelayMs = 500,
+): Promise<T> {
+    let lastErr: unknown;
+
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            return await fn();
+        } catch (err) {
+            lastErr = err;
+
+            if (attempt === retries) {
+                throw err;
+            }
+
+            await delay(baseDelayMs * attempt);
+        }
+    }
+
+    throw lastErr;
+}
+
+async function ensureBucketReady(
+    bucket: string,
+    retries = 3,
+    baseDelayMs = 500,
+): Promise<void> {
+    await retry(
+        async () => {
+            const exists = await client.bucketExists(bucket);
+
+            if (!exists) {
+                await client.makeBucket(bucket, "");
+            }
+        },
+        retries,
+        baseDelayMs,
+    );
+}
+
+async function getCurrentBucketPolicy(bucket: string): Promise<string | null> {
+    try {
+        // some SDKs throw if no policy; catch and treat as missing
+        // method name: getBucketPolicy(bucket) -> returns string policy
+        // if your minio SDK version uses a different name, adapt this call.
+        // (most JS clients expose `getBucketPolicy` / `setBucketPolicy`).
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        return await client.getBucketPolicy(bucket);
+    } catch (err) {
+        // If error indicates "no policy" / 404-like, treat as missing and continue.
+        log.error(
+            typeof err === "object"
+                ? "MinIO: getBucketPolicy failed"
+                : "MinIO: getBucketPolicy failed",
+            err,
+        );
+
+        return null;
+    }
+}
+
+async function setBucketPolicy(bucket: string, policy: string): Promise<void> {
+    // some SDKs expose setBucketPolicy / setBucketAcl names; this is the common call.
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    await client.setBucketPolicy(bucket, policy);
+}
+
 /**
  * Ensure bucket exists with simple retry/backoff.
  * Exported so other modules can await readiness if desired.
@@ -148,70 +219,25 @@ function policyEquals(aStr: string, bStr: string): boolean {
  * @param retries - number of attempts for bucket check/create (default 3)
  * @param baseDelayMs - base delay in ms used for backoff (multiplied by attempt index)
  */
-async function ensureBucketExists(retries = 3, baseDelayMs = 500) {
-    for (let attempt = 1; attempt <= retries; attempt++) {
-        try {
-            const exists = await client.bucketExists(bucket);
-
-            if (!exists) {
-                await client.makeBucket(bucket, "");
-            }
-
-            break;
-        } catch (err) {
-            log.error("MinIO: bucket check failed", err);
-
-            if (attempt === retries) throw err;
-
-            await new Promise((res) => setTimeout(res, baseDelayMs * attempt));
-        }
-    }
+async function ensureBucketExists(
+    retries = 3,
+    baseDelayMs = 500,
+): Promise<void> {
+    await ensureBucketReady(bucket, retries, baseDelayMs);
 
     // try to get existing policy
-    let currentPolicyStr: string | null = null;
+    const currentPolicyStr = await getCurrentBucketPolicy(bucket);
 
-    try {
-        // some SDKs throw if no policy; catch and treat as missing
-        // method name: getBucketPolicy(bucket) -> returns string policy
-        // if your minio SDK version uses a different name, adapt this call.
-        // (most JS clients expose `getBucketPolicy` / `setBucketPolicy`).
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        currentPolicyStr = await client.getBucketPolicy(bucket);
-    } catch (err) {
-        // If error indicates "no policy" / 404-like, treat as missing and continue.
-        log.error(
-            typeof err === "object"
-                ? "MinIO: getBucketPolicy failed"
-                : "MinIO: getBucketPolicy failed",
-            err,
-        );
-
-        currentPolicyStr = null;
+    if (currentPolicyStr && policyEquals(currentPolicyStr, desiredPolicyStr)) {
+        log.info(`MinIO: bucket policy for "${bucket}" already up-to-date`);
+        return;
     }
 
     // if missing or different, set policy
-    if (
-        !currentPolicyStr ||
-        !policyEquals(currentPolicyStr, desiredPolicyStr)
-    ) {
-        try {
-            // some SDKs expose setBucketPolicy / setBucketAcl names; this is the common call.
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            await client.setBucketPolicy(bucket, desiredPolicyStr);
-
-            log.info(
-                `MinIO: bucket policy applied to "${bucket}" (public-read for objects)`,
-            );
-        } catch (err) {
-            log.error("MinIO: setBucketPolicy failed", err);
-
-            throw err;
-        }
-    } else {
-        log.info(`MinIO: bucket policy for "${bucket}" already up-to-date`);
-    }
+    await setBucketPolicy(bucket, desiredPolicyStr);
+    log.info(
+        `MinIO: bucket policy applied to "${bucket}" (public-read for objects)`,
+    );
 }
 
 /* ---- initialization promise ----

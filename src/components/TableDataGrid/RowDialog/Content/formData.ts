@@ -1,14 +1,16 @@
 import { isBlob } from "@/utils/stdfunc";
+
 import { FieldConfig } from "../types";
 import { toFieldValue } from "./helpers";
 
 /**
  * Appends an editable field value to the form payload expected by update actions.
  */
-function setFormDataField<
-    R extends Record<string, unknown>,
-    RI extends Record<string, unknown>,
->(fd: FormData, field: FieldConfig<R, RI>, sourceValues: Partial<RI>) {
+function setFormDataField<R extends Record<string, unknown>, RI extends Record<string, unknown>>(
+    fd: FormData,
+    field: FieldConfig<R, RI>,
+    sourceValues: Partial<RI>,
+) {
     const name = field.name ?? String(field.key);
     if (field.readOnly && !field.interconnected) {
         fd.delete(name);
@@ -38,11 +40,7 @@ function setFormDataField<
 export function buildUpdateFormData<
     R extends Record<string, unknown>,
     RI extends Record<string, unknown>,
->(
-    form: HTMLFormElement | null,
-    fields: FieldConfig<R, RI>[],
-    values: Partial<RI>,
-) {
+>(form: HTMLFormElement | null, fields: FieldConfig<R, RI>[], values: Partial<RI>) {
     const fd = new FormData(form ?? undefined);
 
     for (const field of fields) {

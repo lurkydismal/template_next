@@ -5,8 +5,8 @@ import { desc, eq } from "drizzle-orm";
 import db from "@/db";
 import { users } from "@/db/schema";
 import { cacheDbRequest } from "@/lib/cache";
-import log from "@/utils/stdlog";
 import { normalizeArrayOrValue } from "@/utils/stdfunc";
+import log from "@/utils/stdlog";
 import { userSelectPublicSchema } from "@/utils/validate/schemas";
 
 /**
@@ -47,8 +47,7 @@ export async function requestUser(uid: string | number) {
 
     log.trace("requestUser called", { uid, uidType: typeof uid });
 
-    const field =
-        typeof uid === "string" ? users.username_normalized : users.id;
+    const field = typeof uid === "string" ? users.username_normalized : users.id;
 
     return db
         .select({

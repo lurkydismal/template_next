@@ -1,5 +1,27 @@
 packages:
   - .
+allowBuilds:
+  argon2: false
+  esbuild: false
+  unrs-resolver: false
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
+minimumReleaseAgeExclude:
+  - '@next/env@16.3.7 || 16.4.3'
+  - "@next/eslint-plugin-next@16.3.7"
+  - '@next/swc-darwin-arm64@16.3.7 || 16.4.3'
+  - '@next/swc-darwin-x64@16.3.7 || 16.4.3'
+  - '@next/swc-linux-arm64-gnu@16.3.7 || 16.4.3'
+  - '@next/swc-linux-arm64-musl@16.3.7 || 16.4.3'
+  - '@next/swc-linux-x64-gnu@16.3.7 || 16.4.3'
+  - '@next/swc-linux-x64-musl@16.3.7 || 16.4.3'
+  - '@next/swc-win32-arm64-msvc@16.3.7 || 16.4.3'
+  - '@next/swc-win32-x64-msvc@16.3.7 || 16.4.3'
+  - eslint-config-next@16.3.7
+  - next@16.3.7 || 16.4.3
+  - "@vitest/mocker@5.0.4"
+  - "@vitest/spy@5.0.4"
+  - vitest@5.0.4
+  - zod@4.6.7
+  - react-hook-form@7.91.0

@@ -29,21 +29,23 @@
  */
 
 import type { StringValue } from "ms";
+
 import argon2 from "argon2";
+import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
+import ms from "ms";
 import { cookies } from "next/headers";
+import { unauthorized } from "next/navigation";
+import z from "zod";
+
 import db from "@/db";
 import { users } from "@/db/schema";
 import { UsersRowPublic } from "@/db/types";
 import { updateDbCacheTags } from "@/lib/cache";
-import { eq } from "drizzle-orm";
 import { getEnv, normalizeArrayOrValue } from "@/utils/stdfunc";
-import { userSelectPublicSchema } from "@/utils/validate/schemas";
-import z from "zod";
-import ms from "ms";
-import { storageKeys } from "@/utils/stdvar";
 import log from "@/utils/stdlog";
-import { unauthorized } from "next/navigation";
+import { storageKeys } from "@/utils/stdvar";
+import { userSelectPublicSchema } from "@/utils/validate/schemas";
 
 /*
  * Environment-configured values.
@@ -64,10 +66,7 @@ const cookieSecure = getEnv("COOKIE_SECURE") === "true";
  * NOTE: This is stored in-memory and will not work across multiple server instances
  * or function cold starts. For robust protection use a centralized store (Redis).
  */
-const LOGIN_ATTEMPTS = new Map<
-    string,
-    { count: number; firstAttemptTs: number }
->();
+const LOGIN_ATTEMPTS = new Map<string, { count: number; firstAttemptTs: number }>();
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
@@ -150,10 +149,7 @@ async function hashPassword(password: string) {
  *
  * NOTE: ms() returns milliseconds; cookie maxAge expects seconds.
  */
-function signJwt(
-    payload: Partial<UsersRowPublic> | { username: string },
-    remember: boolean,
-) {
+function signJwt(payload: Partial<UsersRowPublic> | { username: string }, remember: boolean) {
     log.trace("signJwt called", { remember });
     const expiresIn = Math.floor(ms(remember ? "100d" : jwtExpiresIn) / 1000);
 
@@ -228,11 +224,7 @@ type CookieStore = Awaited<ReturnType<typeof cookies>>;
  *
  * NOTE: ms() returns milliseconds; cookie maxAge expects seconds.
  */
-async function cookieForToken(
-    cookieStore: CookieStore,
-    token: string,
-    remember: boolean,
-) {
+async function cookieForToken(cookieStore: CookieStore, token: string, remember: boolean) {
     log.trace("cookieForToken called", { remember });
     const maxAge = Math.floor(ms(remember ? "100d" : jwtExpiresIn) / 1000);
 

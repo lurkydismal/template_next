@@ -42,8 +42,8 @@ const createSlideTransition = (direction: "up" | "down" | "left" | "right") =>
         return <Slide direction={direction} ref={ref} {...props} />;
     });
 
-export const TransitionRight = createSlideTransition("right");
-export const TransitionUp = createSlideTransition("up");
+const TransitionRight = createSlideTransition("right");
+const TransitionUp = createSlideTransition("up");
 
 function PaperComponent(props: PaperProps) {
     const nodeRef = useRef<HTMLDivElement>(null);
@@ -72,6 +72,7 @@ export default function RowDialog<
     dashboardKey,
     createRowAction,
     updateRowAction,
+    getFileAction,
     onUpdated,
     fields,
     idKey = "id" as keyof R,
@@ -83,6 +84,7 @@ export default function RowDialog<
     dashboardKey: string;
     createRowAction: CreateRowAction<RI>;
     updateRowAction: UpdateRowAction;
+    getFileAction: (filename: string) => Promise<string>;
     onUpdated?: () => Promise<void> | void;
     fields: FieldConfig<R, RI>[];
     idKey?: keyof R;
@@ -214,6 +216,7 @@ export default function RowDialog<
                             registerDiscardDraft={registerDiscardDraft}
                             createRowAction={createRowAction}
                             updateRowAction={updateRowAction}
+                            getFileAction={getFileAction}
                             onUpdated={onUpdated}
                             idKey={idKey}
                         />

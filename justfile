@@ -15,8 +15,24 @@ run-release port='3000':
     pnpm start -p '{{ port }}'
 
 # Run the test suite.
-run-tests:
+run-unit-tests:
     pnpm test --run
+
+# Install Chromium and the Chromium headless shell required by Playwright E2E tests.
+install-e2e-tests-deps:
+    pnpm playwright install chromium chromium-headless-shell
+
+# Run Playwright E2E tests using the Chromium project in headless mode.
+run-e2e-tests:
+    pnpm playwright test --project=chromium
+
+# Run Playwright E2E tests using Chromium with the browser UI visible.
+run-e2e-tests-headed:
+    pnpm playwright test --project=chromium --headed
+
+# Run Playwright E2E tests using Playwright's interactive UI mode.
+run-e2e-tests-with-ui:
+    pnpm playwright test --project=chromium --ui
 
 # Format source files using the project's formatter configuration.
 format:
@@ -24,7 +40,7 @@ format:
 
 # Run static analysis and lint checks.
 lint:
-    pnpm lint
+    pnpm lint -f markdown > fallow.txt
 
 # Run better static analysis and lint checks.
 hard-lint:

@@ -1,3 +1,7 @@
+import {
+    Bookmark as BookmarkIcon,
+    BookmarkBorder as BookmarkBorderIcon,
+} from "@mui/icons-material";
 import { TextField } from "@mui/material";
 import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
 import {
@@ -51,14 +55,14 @@ function tableLookupExists(value: unknown): boolean {
 // Demo fields include every built-in row-dialog field type once.
 const fields: FieldConfig<TableRow, TableRowInsert>[] = [
     {
-        key: "textField",
+        key: "text_field",
         label: "Text",
         type: "text",
         size: 6,
         placeholder: "Single-line text",
     },
     {
-        key: "content",
+        key: "multiline_field",
         label: "Multiline",
         type: "multiline",
         name: "content", // name in FormData. Optional, defaults to key
@@ -69,15 +73,16 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         toFormValue: (v) => (v == null ? "" : String(v)),
     },
     {
-        key: "markdownField",
+        key: "markdown_field",
         label: "Markdown",
         type: "markdown",
+        default: true,
         size: 12,
         placeholder: "**Markdown** _preview_",
-        markdownToggleCorner: "top-right",
+        toggleCorner: "top-right",
     },
     {
-        key: "customField",
+        key: "custom_field",
         label: "Custom",
         type: "custom",
         size: 6,
@@ -85,7 +90,7 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         render: renderCustomField,
     },
     {
-        key: "autocompleteField",
+        key: "autocomplete_field",
         label: "Autocomplete",
         type: "autocomplete",
         size: 6,
@@ -93,28 +98,28 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         autocompleteOptions: ["Option A", "Option B", "Option C"],
     },
     {
-        key: "dateField",
+        key: "date_field",
         label: "Date",
         type: "date",
         size: 4,
         placeholder: "2026-05-28",
     },
     {
-        key: "timeField",
+        key: "time_field",
         label: "Time",
         type: "time",
         size: 4,
         placeholder: "12:00:00",
     },
     {
-        key: "datetimeField",
+        key: "datetime_field",
         label: "Datetime",
         type: "datetime",
         size: 4,
         placeholder: "2026-05-28T12:00:00.000Z",
     },
     {
-        key: "numberField",
+        key: "number_field",
         label: "Number",
         type: "number",
         size: 4,
@@ -123,21 +128,21 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         max: 100,
     },
     {
-        key: "uuidField",
+        key: "uuid_field",
         label: "UUID",
         type: "uuid",
         size: 8,
         placeholder: "123e4567-e89b-42d3-a456-426614174000",
     },
     {
-        key: "hexField",
+        key: "hex_field",
         label: "Hex",
         type: "hex",
         size: 4,
         placeholder: "0xCAFE",
     },
     {
-        key: "inetField",
+        key: "inet_field",
         label: "Inet",
         type: "inet",
         size: 4,
@@ -145,24 +150,56 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         inetAllowPort: true,
     },
     {
-        key: "tableLookupField",
+        key: "table_lookup_field",
         label: "Table lookup",
-        type: "tableLookup",
+        type: "table-lookup",
         size: 4,
         placeholder: "alpha",
-        tableLookup: tableLookupExists,
+        lookup: tableLookupExists,
         tableLookupErrorMessage:
             "Use alpha, bravo, or charlie for this demo lookup",
     },
     {
-        key: "fileField",
+        key: "file_field",
         label: "File",
         type: "file",
         size: 4,
-        placeholder: "demo.txt",
+        width: 200,
+        height: 200,
         fileAccept: [".txt", "image/jpeg"],
         toFormValue: fileNameToFormValue,
         onValueChange: syncSelectedFileName,
+    },
+    {
+        key: "checkbox_field",
+        label: "Checkbox",
+        type: "boolean",
+        variant: "checkbox",
+        size: 4,
+    },
+    {
+        key: "checkbox_icon_field",
+        label: "Checkbox Icon",
+        type: "boolean",
+        variant: "icon",
+        default: true,
+        icon: <BookmarkBorderIcon />,
+        checkedIcon: <BookmarkIcon />,
+        size: 4,
+    },
+    {
+        key: "switch_field",
+        label: "Switch",
+        type: "boolean",
+        variant: "switch",
+        default: true,
+        size: 4,
+    },
+    {
+        key: "radio_group_field",
+        label: "Radio group",
+        type: "radio-group",
+        size: 4,
     },
 ];
 

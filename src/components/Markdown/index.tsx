@@ -16,11 +16,12 @@
  * - Links could be sanitized further to prevent unsafe URLs
  */
 
+import { Box } from "@mui/material";
 import ReactMarkdown from "react-markdown";
 import rehypeKatex from "rehype-katex";
 import remarkGFM from "remark-gfm";
 import remarkMath from "remark-math";
-import { Box } from "@mui/material";
+
 import MarkdownComponents from "./MarkdownComponents";
 
 /**

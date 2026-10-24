@@ -1,12 +1,11 @@
 import NextImage from "next/image";
-import { DragEvent, useState } from "react";
+import { DragEvent, useEffect, useState, useTransition } from "react";
 import {
     Box,
     Button,
     CircularProgress,
     Dialog,
     DialogContent,
-    DialogTitle,
     Stack,
     Typography,
 } from "@mui/material";
@@ -18,6 +17,9 @@ type ImagePreviewDialogProps = {
     onClose: () => void;
     onFileDrop?: (file: File) => void;
     accept?: string;
+    width?: number | `${number}` | undefined;
+    height?: number | `${number}` | undefined;
+    getFileAction: (filename: string) => Promise<string>;
 };
 
 type UseImagePreviewResult = {
@@ -59,13 +61,31 @@ export function useImagePreview(): UseImagePreviewResult {
 function ImagePreviewContent({
     sourceValue,
     label,
+    width,
+    height,
+    getFileAction,
 }: {
     sourceValue: string;
     label: string;
+    width?: number | `${number}` | undefined;
+    height?: number | `${number}` | undefined;
+    getFileAction: (filename: string) => Promise<string>;
 }) {
     const [isLoadingPreview, setIsLoadingPreview] = useState(true);
     const [hasPreviewError, setHasPreviewError] = useState(false);
     const [imageRetryKey, setImageRetryKey] = useState(0);
+    const [resolvedSourceValue, setResolvedSourceValue] = useState<
+        string | null
+    >(null);
+    const [isPending, startTransition] = useTransition();
+
+    useEffect(() => {
+        startTransition(async () => {
+            const value = await getFileAction(sourceValue);
+
+            setResolvedSourceValue(value);
+        });
+    }, [sourceValue, getFileAction]);
 
     /**
      * Marks the preview as successfully loaded.
@@ -93,7 +113,7 @@ function ImagePreviewContent({
 
     return (
         <DialogContent>
-            {isLoadingPreview ? (
+            {isLoadingPreview || isPending ? (
                 <Box
                     sx={{
                         display: "flex",
@@ -104,7 +124,7 @@ function ImagePreviewContent({
                     <CircularProgress aria-label="Loading image preview" />
                 </Box>
             ) : null}
-            {!isLoadingPreview && hasPreviewError ? (
+            {!isLoadingPreview && hasPreviewError && resolvedSourceValue ? (
                 <Stack
                     sx={{
                         spacing: 1,
@@ -122,7 +142,7 @@ function ImagePreviewContent({
                         <Button
                             variant="text"
                             component="a"
-                            href={sourceValue}
+                            href={resolvedSourceValue}
                             target="_blank"
                             rel="noreferrer"
                         >
@@ -131,17 +151,18 @@ function ImagePreviewContent({
                     </Stack>
                 </Stack>
             ) : null}
-            {!hasPreviewError ? (
+            {!hasPreviewError && resolvedSourceValue && !isPending ? (
                 <NextImage
                     key={`${sourceValue}-${imageRetryKey}`}
-                    src={sourceValue}
+                    src={resolvedSourceValue}
                     alt={label}
                     onLoad={handlePreviewLoad}
                     onError={handlePreviewError}
+                    {...(width ? { width } : {})}
+                    {...(height ? { height } : {})}
                     style={{
-                        width: "100%",
-                        height: "auto",
-                        display: isLoadingPreview ? "none" : "block",
+                        display: isPending ? "none" : "block",
+                        margin: "auto",
                     }}
                 />
             ) : null}
@@ -159,6 +180,9 @@ export function ImagePreviewDialog({
     onClose,
     onFileDrop,
     accept,
+    width,
+    height,
+    getFileAction,
 }: ImagePreviewDialogProps) {
     /**
      * Resolves whether a dropped file should be accepted for upload.
@@ -209,15 +233,16 @@ export function ImagePreviewDialog({
             open={open}
             onClose={onClose}
             maxWidth="md"
-            fullWidth
             onDragOver={(event) => event.preventDefault()}
             onDrop={handleDrop}
         >
-            <DialogTitle>{label}</DialogTitle>
             <ImagePreviewContent
                 key={`${open ? "open" : "closed"}-${sourceValue}`}
                 sourceValue={sourceValue}
                 label={label}
+                width={width}
+                height={height}
+                getFileAction={getFileAction}
             />
         </Dialog>
     );

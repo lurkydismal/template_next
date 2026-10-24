@@ -38,6 +38,9 @@ importers:
       '@next-safe-action/adapter-better-auth':
         specifier: ^0.1.7
         version: 0.1.7(01cc6d56a75c063f4cd3d29a3b025fd6)
+      '@next-safe-action/adapter-react-hook-form':
+        specifier: ^2.1.0
+        version: 2.1.0(@hookform/resolvers@6.0.0(@standard-schema/spec@1.1.0)(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.1))(zod@4.6.7))(next-safe-action@8.7.3(next@16.4.3(@babel/core@7.28.6)(@playwright/test@1.64.1)(@types/node@26.6.3)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(next@16.4.3(@babel/core@7.28.6)(@playwright/test@1.64.1)(@types/node@26.6.3)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)
       '@reactour/tour':
         specifier: ^3.8.0
         version: 3.8.0(react@19.3.1)
@@ -1186,6 +1189,17 @@ packages:
       better-auth: '>= 1.5.0'
       next: '>= 15.1.0'
       next-safe-action: '>= 8.4.0'
+
+  '@next-safe-action/adapter-react-hook-form@2.1.0':
+    resolution: {integrity: sha512-mnLPinCDh83nY0GUJK32IFHyHMTOMpV9bjKXlv/btqlUzp0w/VsY5k+yLYnFNhxj5OC7Cv7xnt3tLpCa7YOK0Q==}
+    engines: {node: '>=18.17'}
+    peerDependencies:
+      '@hookform/resolvers': '>= 5.0.0'
+      next: '>= 14.0.0'
+      next-safe-action: '>=8.1.10'
+      react: '>= 18.2.0'
+      react-dom: '>= 18.2.0'
+      react-hook-form: '>= 7.0.0'
 
   '@next/env@16.4.3':
     resolution: {integrity: sha512-a7tz1QCcWWkwC/rPJcPMJk/UNRu9CFhDd3OHYE5hddbJrs8BqRTalxI6GlKCWEGzRLHN+S/B7a4PAHCtm25aBQ==}
@@ -4745,6 +4759,15 @@ snapshots:
       better-auth: 1.7.12(drizzle-kit@1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@types/mssql@9.1.9(@azure/core-client@1.10.1))(@types/pg@8.23.1)(mssql@11.0.1(@azure/core-client@1.10.1))(pg@8.23.1)(zod@4.6.7)))(drizzle-orm@1.0.0-rc.5(@types/mssql@9.1.9(@azure/core-client@1.10.1))(@types/pg@8.23.1)(mssql@11.0.1(@azure/core-client@1.10.1))(pg@8.23.1)(zod@4.6.7))(next@16.4.3(@babel/core@7.28.6)(@playwright/test@1.64.1)(@types/node@26.6.3)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(pg@8.23.1)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(vitest@5.0.5(@types/node@26.6.3)(vite@7.3.1(@types/node@26.6.3)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0)))
       next: 16.4.3(@babel/core@7.28.6)(@playwright/test@1.64.1)(@types/node@26.6.3)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       next-safe-action: 8.7.3(next@16.4.3(@babel/core@7.28.6)(@playwright/test@1.64.1)(@types/node@26.6.3)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+
+  '@next-safe-action/adapter-react-hook-form@2.1.0(@hookform/resolvers@6.0.0(@standard-schema/spec@1.1.0)(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.1))(zod@4.6.7))(next-safe-action@8.7.3(next@16.4.3(@babel/core@7.28.6)(@playwright/test@1.64.1)(@types/node@26.6.3)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(next@16.4.3(@babel/core@7.28.6)(@playwright/test@1.64.1)(@types/node@26.6.3)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)':
+    dependencies:
+      '@hookform/resolvers': 6.0.0(@standard-schema/spec@1.1.0)(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.1))(zod@4.6.7)
+      next: 16.4.3(@babel/core@7.28.6)(@playwright/test@1.64.1)(@types/node@26.6.3)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      next-safe-action: 8.7.3(next@16.4.3(@babel/core@7.28.6)(@playwright/test@1.64.1)(@types/node@26.6.3)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
+      react-hook-form: 7.91.0(@types/react@19.3.0)(react@19.3.1)
 
   '@next/env@16.4.3': {}
 

@@ -27,6 +27,7 @@
         "@mui/x-data-grid": "^9.16.0",
         "@mui/x-date-pickers": "^9.16.0",
         "@next-safe-action/adapter-better-auth": "^0.1.7",
+        "@next-safe-action/adapter-react-hook-form": "^2.1.0",
         "@reactour/tour": "^3.8.0",
         "argon2": "^0.45.1",
         "autosuggest-highlight": "^3.3.4",

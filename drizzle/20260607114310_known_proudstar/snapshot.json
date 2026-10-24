@@ -1,685 +1,565 @@
 {
-    "version": "8",
-    "dialect": "postgres",
-    "id": "700d809b-ab18-43b3-bb92-f55cac12ce7f",
-    "prevIds": ["c9a4d7f4-3632-4c60-a7fb-1950d28c6454"],
-    "ddl": [
-        {
-            "isRlsEnabled": false,
-            "name": "notifications",
-            "entityType": "tables",
-            "schema": "public"
-        },
-        {
-            "isRlsEnabled": false,
-            "name": "tables",
-            "entityType": "tables",
-            "schema": "public"
-        },
-        {
-            "isRlsEnabled": false,
-            "name": "users",
-            "entityType": "tables",
-            "schema": "public"
-        },
-        {
-            "type": "serial",
-            "typeSchema": null,
-            "notNull": true,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "id",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "notifications"
-        },
-        {
-            "type": "varchar(16)",
-            "typeSchema": null,
-            "notNull": true,
-            "dimensions": 0,
-            "default": "'default'",
-            "generated": null,
-            "identity": null,
-            "name": "type",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "notifications"
-        },
-        {
-            "type": "text",
-            "typeSchema": null,
-            "notNull": true,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "message",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "notifications"
-        },
-        {
-            "type": "boolean",
-            "typeSchema": null,
-            "notNull": true,
-            "dimensions": 0,
-            "default": "false",
-            "generated": null,
-            "identity": null,
-            "name": "is_read",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "notifications"
-        },
-        {
-            "type": "timestamp with time zone",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "read_at",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "notifications"
-        },
-        {
-            "type": "timestamp with time zone",
-            "typeSchema": null,
-            "notNull": true,
-            "dimensions": 0,
-            "default": "now()",
-            "generated": null,
-            "identity": null,
-            "name": "created_at",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "notifications"
-        },
-        {
-            "type": "serial",
-            "typeSchema": null,
-            "notNull": true,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "id",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "text",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "textField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "text",
-            "typeSchema": null,
-            "notNull": true,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "multilineField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "text",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "markdownField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "text",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "customField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "text",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "autocompleteField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "text",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "dateField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "text",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "timeField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "text",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "datetimeField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "integer",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "numberField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "text",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "uuidField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "text",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "hexField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "text",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "inetField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "text",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "tableLookupField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "text",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "fileField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "boolean",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "checkboxField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "boolean",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "checkboxIconField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "boolean",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "switchField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "boolean",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "radioGroupField",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "integer",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "author_id",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "integer",
-            "typeSchema": null,
-            "notNull": false,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "last_editor_id",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "timestamp(0) with time zone",
-            "typeSchema": null,
-            "notNull": true,
-            "dimensions": 0,
-            "default": "now()",
-            "generated": null,
-            "identity": null,
-            "name": "updated_at",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "timestamp(0) with time zone",
-            "typeSchema": null,
-            "notNull": true,
-            "dimensions": 0,
-            "default": "now()",
-            "generated": null,
-            "identity": null,
-            "name": "created_at",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "type": "serial",
-            "typeSchema": null,
-            "notNull": true,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "id",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "users"
-        },
-        {
-            "type": "varchar(32)",
-            "typeSchema": null,
-            "notNull": true,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "username",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "users"
-        },
-        {
-            "type": "varchar(32)",
-            "typeSchema": null,
-            "notNull": true,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "username_normalized",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "users"
-        },
-        {
-            "type": "text",
-            "typeSchema": null,
-            "notNull": true,
-            "dimensions": 0,
-            "default": null,
-            "generated": null,
-            "identity": null,
-            "name": "password_hash",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "users"
-        },
-        {
-            "type": "timestamp(0) with time zone",
-            "typeSchema": null,
-            "notNull": true,
-            "dimensions": 0,
-            "default": "now()",
-            "generated": null,
-            "identity": null,
-            "name": "updated_at",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "users"
-        },
-        {
-            "type": "timestamp(0) with time zone",
-            "typeSchema": null,
-            "notNull": true,
-            "dimensions": 0,
-            "default": "now()",
-            "generated": null,
-            "identity": null,
-            "name": "created_at",
-            "entityType": "columns",
-            "schema": "public",
-            "table": "users"
-        },
-        {
-            "nameExplicit": false,
-            "columns": [
-                {
-                    "value": "is_read",
-                    "isExpression": false,
-                    "asc": true,
-                    "nullsFirst": false,
-                    "opclass": null
-                }
-            ],
-            "isUnique": false,
-            "where": null,
-            "with": "",
-            "method": "btree",
-            "concurrently": false,
-            "name": "notifications_is_read_index",
-            "entityType": "indexes",
-            "schema": "public",
-            "table": "notifications"
-        },
-        {
-            "nameExplicit": false,
-            "columns": [
-                {
-                    "value": "created_at",
-                    "isExpression": false,
-                    "asc": true,
-                    "nullsFirst": false,
-                    "opclass": null
-                }
-            ],
-            "isUnique": false,
-            "where": null,
-            "with": "",
-            "method": "btree",
-            "concurrently": false,
-            "name": "notifications_created_at_index",
-            "entityType": "indexes",
-            "schema": "public",
-            "table": "notifications"
-        },
-        {
-            "nameExplicit": false,
-            "columns": [
-                {
-                    "value": "author_id",
-                    "isExpression": false,
-                    "asc": true,
-                    "nullsFirst": false,
-                    "opclass": null
-                }
-            ],
-            "isUnique": false,
-            "where": null,
-            "with": "",
-            "method": "btree",
-            "concurrently": false,
-            "name": "tables_author_id_index",
-            "entityType": "indexes",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "nameExplicit": false,
-            "columns": [
-                {
-                    "value": "last_editor_id",
-                    "isExpression": false,
-                    "asc": true,
-                    "nullsFirst": false,
-                    "opclass": null
-                }
-            ],
-            "isUnique": false,
-            "where": null,
-            "with": "",
-            "method": "btree",
-            "concurrently": false,
-            "name": "tables_last_editor_id_index",
-            "entityType": "indexes",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "nameExplicit": false,
-            "columns": ["author_id"],
-            "schemaTo": "public",
-            "tableTo": "users",
-            "columnsTo": ["id"],
-            "onUpdate": "NO ACTION",
-            "onDelete": "SET NULL",
-            "name": "tables_author_id_users_id_fkey",
-            "entityType": "fks",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "nameExplicit": false,
-            "columns": ["last_editor_id"],
-            "schemaTo": "public",
-            "tableTo": "users",
-            "columnsTo": ["id"],
-            "onUpdate": "NO ACTION",
-            "onDelete": "SET NULL",
-            "name": "tables_last_editor_id_users_id_fkey",
-            "entityType": "fks",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "columns": ["id"],
-            "nameExplicit": false,
-            "name": "notifications_pkey",
-            "schema": "public",
-            "table": "notifications",
-            "entityType": "pks"
-        },
-        {
-            "columns": ["id"],
-            "nameExplicit": false,
-            "name": "tables_pkey",
-            "schema": "public",
-            "table": "tables",
-            "entityType": "pks"
-        },
-        {
-            "columns": ["id"],
-            "nameExplicit": false,
-            "name": "users_pkey",
-            "schema": "public",
-            "table": "users",
-            "entityType": "pks"
-        },
-        {
-            "nameExplicit": false,
-            "columns": ["username"],
-            "nullsNotDistinct": false,
-            "name": "users_username_key",
-            "schema": "public",
-            "table": "users",
-            "entityType": "uniques"
-        },
-        {
-            "nameExplicit": false,
-            "columns": ["username_normalized"],
-            "nullsNotDistinct": false,
-            "name": "users_username_normalized_key",
-            "schema": "public",
-            "table": "users",
-            "entityType": "uniques"
-        },
-        {
-            "value": "length(trim(\"message\")) > 0",
-            "name": "notification_message_not_blank",
-            "entityType": "checks",
-            "schema": "public",
-            "table": "notifications"
-        },
-        {
-            "value": "length(trim(\"multilineField\")) > 0",
-            "name": "multilineField_not_blank",
-            "entityType": "checks",
-            "schema": "public",
-            "table": "tables"
-        },
-        {
-            "value": "length(trim(\"username\")) > 0",
-            "name": "username_not_blank",
-            "entityType": "checks",
-            "schema": "public",
-            "table": "users"
-        },
-        {
-            "value": "length(trim(\"username_normalized\")) > 0",
-            "name": "username_normalized_not_blank",
-            "entityType": "checks",
-            "schema": "public",
-            "table": "users"
-        },
-        {
-            "value": "\"username_normalized\" = lower(\"username_normalized\")",
-            "name": "username_normalized_lowercase",
-            "entityType": "checks",
-            "schema": "public",
-            "table": "users"
-        }
-    ],
-    "renames": [
-        "public.tables.text_field->public.tables.textField",
-        "public.tables.content->public.tables.multilineField",
-        "public.tables.markdown_field->public.tables.markdownField",
-        "public.tables.custom_field->public.tables.customField",
-        "public.tables.autocomplete_field->public.tables.autocompleteField",
-        "public.tables.date_field->public.tables.dateField",
-        "public.tables.time_field->public.tables.timeField",
-        "public.tables.datetime_field->public.tables.datetimeField",
-        "public.tables.number_field->public.tables.numberField",
-        "public.tables.uuid_field->public.tables.uuidField",
-        "public.tables.hex_field->public.tables.hexField",
-        "public.tables.inet_field->public.tables.inetField",
-        "public.tables.table_lookup_field->public.tables.tableLookupField",
-        "public.tables.file_field->public.tables.fileField",
-        "public.tables.content_not_blank->public.tables.multilineField_not_blank"
-    ]
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "700d809b-ab18-43b3-bb92-f55cac12ce7f",
+  "prevIds": [
+    "c9a4d7f4-3632-4c60-a7fb-1950d28c6454"
+  ],
+  "footprints": [
+    {
+      "statementType": "rename_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "text_field"
+      ],
+      "writes": [
+        "s|col|public.tables.text_field",
+        "n|col|public.tables.text_field",
+        "s|col|public.tables.textField",
+        "n|col|public.tables.textField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "rename_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "content"
+      ],
+      "writes": [
+        "s|col|public.tables.content",
+        "n|col|public.tables.content",
+        "s|col|public.tables.multilineField",
+        "n|col|public.tables.multilineField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "rename_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "markdown_field"
+      ],
+      "writes": [
+        "s|col|public.tables.markdown_field",
+        "n|col|public.tables.markdown_field",
+        "s|col|public.tables.markdownField",
+        "n|col|public.tables.markdownField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "rename_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "custom_field"
+      ],
+      "writes": [
+        "s|col|public.tables.custom_field",
+        "n|col|public.tables.custom_field",
+        "s|col|public.tables.customField",
+        "n|col|public.tables.customField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "rename_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "autocomplete_field"
+      ],
+      "writes": [
+        "s|col|public.tables.autocomplete_field",
+        "n|col|public.tables.autocomplete_field",
+        "s|col|public.tables.autocompleteField",
+        "n|col|public.tables.autocompleteField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "rename_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "date_field"
+      ],
+      "writes": [
+        "s|col|public.tables.date_field",
+        "n|col|public.tables.date_field",
+        "s|col|public.tables.dateField",
+        "n|col|public.tables.dateField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "rename_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "time_field"
+      ],
+      "writes": [
+        "s|col|public.tables.time_field",
+        "n|col|public.tables.time_field",
+        "s|col|public.tables.timeField",
+        "n|col|public.tables.timeField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "rename_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "datetime_field"
+      ],
+      "writes": [
+        "s|col|public.tables.datetime_field",
+        "n|col|public.tables.datetime_field",
+        "s|col|public.tables.datetimeField",
+        "n|col|public.tables.datetimeField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "rename_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "number_field"
+      ],
+      "writes": [
+        "s|col|public.tables.number_field",
+        "n|col|public.tables.number_field",
+        "s|col|public.tables.numberField",
+        "n|col|public.tables.numberField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "rename_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "uuid_field"
+      ],
+      "writes": [
+        "s|col|public.tables.uuid_field",
+        "n|col|public.tables.uuid_field",
+        "s|col|public.tables.uuidField",
+        "n|col|public.tables.uuidField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "rename_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "hex_field"
+      ],
+      "writes": [
+        "s|col|public.tables.hex_field",
+        "n|col|public.tables.hex_field",
+        "s|col|public.tables.hexField",
+        "n|col|public.tables.hexField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "rename_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "inet_field"
+      ],
+      "writes": [
+        "s|col|public.tables.inet_field",
+        "n|col|public.tables.inet_field",
+        "s|col|public.tables.inetField",
+        "n|col|public.tables.inetField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "rename_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "table_lookup_field"
+      ],
+      "writes": [
+        "s|col|public.tables.table_lookup_field",
+        "n|col|public.tables.table_lookup_field",
+        "s|col|public.tables.tableLookupField",
+        "n|col|public.tables.tableLookupField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "rename_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "file_field"
+      ],
+      "writes": [
+        "s|col|public.tables.file_field",
+        "n|col|public.tables.file_field",
+        "s|col|public.tables.fileField",
+        "n|col|public.tables.fileField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "rename_constraint",
+      "statementTarget": [
+        "table",
+        "public",
+        "tables"
+      ],
+      "writes": [
+        "s|ck|public.tables.content_not_blank",
+        "n|ck|public.tables.content_not_blank",
+        "n|con|public.tables.content_not_blank",
+        "s|ck|public.tables.multilineField_not_blank",
+        "n|ck|public.tables.multilineField_not_blank",
+        "n|con|public.tables.multilineField_not_blank"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public",
+        "e|col|public.tables.multilineField"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "checkboxField"
+      ],
+      "writes": [
+        "s|col|public.tables.checkboxField",
+        "n|col|public.tables.checkboxField",
+        "e|col|public.tables.checkboxField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "checkboxIconField"
+      ],
+      "writes": [
+        "s|col|public.tables.checkboxIconField",
+        "n|col|public.tables.checkboxIconField",
+        "e|col|public.tables.checkboxIconField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "switchField"
+      ],
+      "writes": [
+        "s|col|public.tables.switchField",
+        "n|col|public.tables.switchField",
+        "e|col|public.tables.switchField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "radioGroupField"
+      ],
+      "writes": [
+        "s|col|public.tables.radioGroupField",
+        "n|col|public.tables.radioGroupField",
+        "e|col|public.tables.radioGroupField"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "alter_check",
+      "statementTarget": [
+        "table",
+        "public",
+        "tables"
+      ],
+      "writes": [
+        "s|ck|public.tables.multilineField_not_blank"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public",
+        "n|col|public.tables.multilineField"
+      ],
+      "sqlHash": "0e7b6cb1dc0f32cb"
+    }
+  ],
+  "deltas": [
+    {
+      "op": "rename",
+      "key": "columns\u0000[\"public\",\"tables\",\"text_field\"]",
+      "set": {
+        "name": "textField"
+      }
+    },
+    {
+      "op": "rename",
+      "key": "columns\u0000[\"public\",\"tables\",\"content\"]",
+      "set": {
+        "name": "multilineField"
+      }
+    },
+    {
+      "op": "rename",
+      "key": "columns\u0000[\"public\",\"tables\",\"markdown_field\"]",
+      "set": {
+        "name": "markdownField"
+      }
+    },
+    {
+      "op": "rename",
+      "key": "columns\u0000[\"public\",\"tables\",\"custom_field\"]",
+      "set": {
+        "name": "customField"
+      }
+    },
+    {
+      "op": "rename",
+      "key": "columns\u0000[\"public\",\"tables\",\"autocomplete_field\"]",
+      "set": {
+        "name": "autocompleteField"
+      }
+    },
+    {
+      "op": "rename",
+      "key": "columns\u0000[\"public\",\"tables\",\"date_field\"]",
+      "set": {
+        "name": "dateField"
+      }
+    },
+    {
+      "op": "rename",
+      "key": "columns\u0000[\"public\",\"tables\",\"time_field\"]",
+      "set": {
+        "name": "timeField"
+      }
+    },
+    {
+      "op": "rename",
+      "key": "columns\u0000[\"public\",\"tables\",\"datetime_field\"]",
+      "set": {
+        "name": "datetimeField"
+      }
+    },
+    {
+      "op": "rename",
+      "key": "columns\u0000[\"public\",\"tables\",\"number_field\"]",
+      "set": {
+        "name": "numberField"
+      }
+    },
+    {
+      "op": "rename",
+      "key": "columns\u0000[\"public\",\"tables\",\"uuid_field\"]",
+      "set": {
+        "name": "uuidField"
+      }
+    },
+    {
+      "op": "rename",
+      "key": "columns\u0000[\"public\",\"tables\",\"hex_field\"]",
+      "set": {
+        "name": "hexField"
+      }
+    },
+    {
+      "op": "rename",
+      "key": "columns\u0000[\"public\",\"tables\",\"inet_field\"]",
+      "set": {
+        "name": "inetField"
+      }
+    },
+    {
+      "op": "rename",
+      "key": "columns\u0000[\"public\",\"tables\",\"table_lookup_field\"]",
+      "set": {
+        "name": "tableLookupField"
+      }
+    },
+    {
+      "op": "rename",
+      "key": "columns\u0000[\"public\",\"tables\",\"file_field\"]",
+      "set": {
+        "name": "fileField"
+      }
+    },
+    {
+      "op": "rename",
+      "key": "checks\u0000[\"public\",\"tables\",\"content_not_blank\"]",
+      "set": {
+        "name": "multilineField_not_blank"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "tables",
+        "name": "checkboxField",
+        "type": "boolean",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "tables",
+        "name": "checkboxIconField",
+        "type": "boolean",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "tables",
+        "name": "switchField",
+        "type": "boolean",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "tables",
+        "name": "radioGroupField",
+        "type": "boolean",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "checks\u0000[\"public\",\"tables\",\"multilineField_not_blank\"]",
+      "set": {
+        "value": "length(trim(\"multilineField\")) > 0"
+      }
+    }
+  ]
 }

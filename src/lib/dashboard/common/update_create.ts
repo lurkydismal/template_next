@@ -176,8 +176,8 @@ export async function save(
             typeof (updateResult as { rowCount?: number }).rowCount === "number"
                 ? (updateResult as { rowCount: number }).rowCount
                 : Array.isArray(updateResult)
-                  ? updateResult.length
-                  : undefined;
+                    ? updateResult.length
+                    : undefined;
 
         if (affectedRows === undefined) {
             throw new Error(
@@ -187,7 +187,10 @@ export async function save(
             throw new Error("Update target no longer exists");
         }
     } else {
-        await db.insert(table).values(row).execute();
+        await db
+            .insert(table)
+            .values(row as any)
+            .execute();
     }
 
     // Runs only after a successful mutation so cached DB reads do not stay stale.

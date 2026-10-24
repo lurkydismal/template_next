@@ -1,0 +1,35 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "d2728ee0-ab39-4a44-b91a-4cb641b401b1",
+  "prevIds": [
+    "2579e950-2258-49d0-b0e1-f9884adc5481"
+  ],
+  "footprints": [
+    {
+      "statementType": "drop_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "file_field"
+      ],
+      "writes": [
+        "s|col|public.tables.file_field",
+        "n|col|public.tables.file_field",
+        "e|col|public.tables.file_field"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "drop",
+      "key": "columns\u0000[\"public\",\"tables\",\"file_field\"]"
+    }
+  ]
+}

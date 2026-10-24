@@ -3,75 +3,25 @@ packages:
 allowBuilds:
   argon2: false
   esbuild: false
-  sharp: false
   unrs-resolver: false
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
 minimumReleaseAgeExclude:
-  - '@fallow-cli/darwin-arm64@2.88.3'
-  - '@fallow-cli/darwin-x64@2.88.3'
-  - '@fallow-cli/linux-arm64-gnu@2.88.3'
-  - '@fallow-cli/linux-arm64-musl@2.88.3'
-  - '@fallow-cli/linux-x64-gnu@2.88.3'
-  - '@fallow-cli/linux-x64-musl@2.88.3'
-  - '@fallow-cli/win32-arm64-msvc@2.88.3'
-  - '@fallow-cli/win32-x64-msvc@2.88.3'
-  - '@mui/x-data-grid@9.4.0'
-  - '@mui/x-date-pickers@9.4.0'
-  - '@mui/x-virtualizer@9.0.0-alpha.8'
-  - fallow@2.88.3
-  - '@mui/core-downloads-tracker@9.1.0'
-  - '@mui/icons-material@9.1.0'
-  - '@mui/material-nextjs@9.1.0'
-  - '@mui/material@9.1.0'
-  - '@mui/private-theming@9.1.0'
-  - '@mui/styled-engine@9.1.0'
-  - '@mui/system@9.1.0'
-  - '@mui/utils@9.1.0'
-  - '@typescript-eslint/eslint-plugin@8.61.0'
-  - '@typescript-eslint/parser@8.61.0'
-  - '@typescript-eslint/project-service@8.61.0'
-  - '@typescript-eslint/scope-manager@8.61.0'
-  - '@typescript-eslint/tsconfig-utils@8.61.0'
-  - '@typescript-eslint/type-utils@8.61.0'
-  - '@typescript-eslint/types@8.61.0'
-  - '@typescript-eslint/typescript-estree@8.61.0'
-  - '@typescript-eslint/utils@8.61.0'
-  - '@typescript-eslint/visitor-keys@8.61.0'
-  - '@better-auth/core@1.6.16'
-  - '@better-auth/drizzle-adapter@1.6.16'
-  - '@better-auth/kysely-adapter@1.6.16'
-  - '@better-auth/memory-adapter@1.6.16'
-  - '@better-auth/mongo-adapter@1.6.16'
-  - '@better-auth/prisma-adapter@1.6.16'
-  - '@better-auth/telemetry@1.6.16'
-  - '@fallow-cli/darwin-arm64@2.92.1'
-  - '@fallow-cli/darwin-x64@2.92.1'
-  - '@fallow-cli/linux-arm64-gnu@2.92.1'
-  - '@fallow-cli/linux-arm64-musl@2.92.1'
-  - '@fallow-cli/linux-x64-gnu@2.92.1'
-  - '@fallow-cli/linux-x64-musl@2.92.1'
-  - '@fallow-cli/win32-arm64-msvc@2.92.1'
-  - '@fallow-cli/win32-x64-msvc@2.92.1'
-  - better-auth@1.6.16
-  - fallow@2.92.1
-  - '@better-auth/core@1.6.17'
-  - '@better-auth/drizzle-adapter@1.6.17'
-  - '@better-auth/kysely-adapter@1.6.17'
-  - '@better-auth/memory-adapter@1.6.17'
-  - '@better-auth/mongo-adapter@1.6.17'
-  - '@better-auth/prisma-adapter@1.6.17'
-  - '@better-auth/telemetry@1.6.17'
-  - '@fallow-cli/darwin-arm64@2.94.0'
-  - '@fallow-cli/darwin-x64@2.94.0'
-  - '@fallow-cli/linux-arm64-gnu@2.94.0'
-  - '@fallow-cli/linux-arm64-musl@2.94.0'
-  - '@fallow-cli/linux-x64-gnu@2.94.0'
-  - '@fallow-cli/linux-x64-musl@2.94.0'
-  - '@fallow-cli/win32-arm64-msvc@2.94.0'
-  - '@fallow-cli/win32-x64-msvc@2.94.0'
-  - '@mui/x-data-grid@9.5.0'
-  - '@mui/x-date-pickers@9.5.0'
-  - better-auth@1.6.17
-  - fallow@2.94.0
+  - '@next/env@16.3.7 || 16.4.3'
+  - "@next/eslint-plugin-next@16.3.7"
+  - '@next/swc-darwin-arm64@16.3.7 || 16.4.3'
+  - '@next/swc-darwin-x64@16.3.7 || 16.4.3'
+  - '@next/swc-linux-arm64-gnu@16.3.7 || 16.4.3'
+  - '@next/swc-linux-arm64-musl@16.3.7 || 16.4.3'
+  - '@next/swc-linux-x64-gnu@16.3.7 || 16.4.3'
+  - '@next/swc-linux-x64-musl@16.3.7 || 16.4.3'
+  - '@next/swc-win32-arm64-msvc@16.3.7 || 16.4.3'
+  - '@next/swc-win32-x64-msvc@16.3.7 || 16.4.3'
+  - eslint-config-next@16.3.7
+  - next@16.3.7 || 16.4.3
+  - "@vitest/mocker@5.0.4"
+  - "@vitest/spy@5.0.4"
+  - vitest@5.0.4
+  - zod@4.6.7
+  - react-hook-form@7.91.0

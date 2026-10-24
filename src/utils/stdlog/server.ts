@@ -21,5 +21,7 @@ const logLevel = needTrace ? 1 : isDev ? 2 : 3;
 export const serverLogger = new Logger({
     type: "pretty",
     minLevel: logLevel,
-    prettyLogTemplate: "{{dateIsoStr}} {{logLevelName}}\t",
+    pretty: {
+        template: "{{dateIsoStr}} {{logLevelName}}\t",
+    },
 });

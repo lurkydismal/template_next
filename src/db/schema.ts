@@ -1,6 +1,5 @@
 import { sql } from "drizzle-orm";
 import {
-    pgTable,
     check,
     serial,
     varchar,
@@ -8,19 +7,22 @@ import {
     index,
     boolean,
     timestamp,
+    snakeCase,
 } from "drizzle-orm/pg-core";
 
 import { timestampsColumns } from "./helpers";
 import * as templates from "./templates";
 
-export const tables = pgTable("tables", templates.table, (t) => [
+const table = snakeCase.table;
+
+export const tables = table("tables", templates.table, (t) => [
     check("multilineField_not_blank", sql`length(trim(${t.multiline_field})) > 0`),
 
     index().on(t.author_id),
     index().on(t.last_editor_id),
 ]);
 
-export const users = pgTable(
+export const users = table(
     "users",
     {
         id: serial().primaryKey(),
@@ -39,7 +41,7 @@ export const users = pgTable(
     ],
 );
 
-export const notifications = pgTable(
+export const notifications = table(
     "notifications",
     {
         id: serial().primaryKey(),
@@ -62,7 +64,7 @@ export const notifications = pgTable(
 );
 
 // * NOTE: Better Auth
-export const user = pgTable("user", {
+export const user = table("user", {
     id: text("id").primaryKey(),
     name: text("name").notNull(),
     email: text("email").notNull().unique(),
@@ -75,7 +77,7 @@ export const user = pgTable("user", {
         .notNull(),
 });
 
-export const session = pgTable(
+export const session = table(
     "session",
     {
         id: text("id").primaryKey(),
@@ -94,7 +96,7 @@ export const session = pgTable(
     (table) => [index("session_userId_idx").on(table.userId)],
 );
 
-export const account = pgTable(
+export const account = table(
     "account",
     {
         id: text("id").primaryKey(),
@@ -118,7 +120,7 @@ export const account = pgTable(
     (table) => [index("account_userId_idx").on(table.userId)],
 );
 
-export const verification = pgTable(
+export const verification = table(
     "verification",
     {
         id: text("id").primaryKey(),

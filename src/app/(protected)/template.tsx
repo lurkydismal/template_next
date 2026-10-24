@@ -1,4 +1,4 @@
-import { getSessionDataOrUnauthorized } from "@/lib/auth";
+import { getSessionDataOrUnauthorized } from "@/lib/dal/auth";
 
 /**
  * Renders the protected route template wrapper.

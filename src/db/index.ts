@@ -39,7 +39,6 @@ const db = drizzle({
         host: process.env["DB_HOST"]!,
         port: Number(process.env["DB_PORT"]!),
     },
-    casing: "snake_case",
     logger,
     relations: relations,
 });

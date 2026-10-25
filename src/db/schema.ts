@@ -10,7 +10,6 @@ import {
     snakeCase,
 } from "drizzle-orm/pg-core";
 
-import { timestampsColumns } from "./helpers";
 import * as templates from "./templates";
 
 const table = snakeCase.table;

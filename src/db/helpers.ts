@@ -1,4 +1,4 @@
-import { integer, timestamp } from "drizzle-orm/pg-core";
+import { text, timestamp } from "drizzle-orm/pg-core";
 
 import { user } from "./schema";
 
@@ -55,8 +55,8 @@ EXECUTE FUNCTION update_updated_at_column();
  * });
  */
 export const auditColumns = {
-    author_id: integer().references(() => user.id, { onDelete: "set null" }),
-    last_editor_id: integer().references(() => user.id, {
+    author_id: text().references(() => user.id, { onDelete: "set null" }),
+    last_editor_id: text().references(() => user.id, {
         onDelete: "set null",
     }),
 };

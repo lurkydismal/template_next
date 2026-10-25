@@ -7,6 +7,9 @@
 - [General Information](#general-information)
 - [Technologies Used](#technologies-used)
 - [Features](#features)
+
+* [Screenshots](#screenshots)
+
 - [Setup](#setup)
 - [Usage](#usage)
 - [Development Commands](#development-commands)
@@ -44,6 +47,19 @@ The project is a configurable framework for developers, not a finished visual da
 - **Live updates and notifications:** SSE events notify connected clients about dashboard mutations and notification events.
 - **Authentication:** Email/password registration and login through Better Auth, with protected dashboard routes and session-aware server-side operations.
 - **Development and testing tools:** Unit tests, a Playwright end-to-end test configuration, and Docker-based PostgreSQL setup.
+
+## Screenshots
+
+![1 screenshot](./screenshots/1.png)
+![2 screenshot](./screenshots/2.png)
+![3 screenshot](./screenshots/3.png)
+![4 screenshot](./screenshots/4.png)
+![5 screenshot](./screenshots/5.png)
+![6 screenshot](./screenshots/6.png)
+![7 screenshot](./screenshots/7.png)
+![8 screenshot](./screenshots/8.png)
+![9 screenshot](./screenshots/9.png)
+![10 screenshot](./screenshots/10.png)
 
 ## Setup
 
@@ -142,20 +158,20 @@ This separates table-specific definitions from the reusable UI and data-handling
 
 Run these commands from the project root.
 
-| Command | Description |
-| --- | --- |
-| `pnpm dev` | Start the Next.js development server. |
-| `pnpm build` | Build the production application. |
-| `pnpm start` | Start the built application. |
-| `pnpm test --run` | Run the Vitest suite once. |
-| `pnpm format` | Format source files using Oxfmt. |
-| `pnpm format:check` | Check formatting without modifying files. |
-| `pnpm lint` | Run Fallow static analysis. |
-| `pnpm exec tsc --noEmit` | Run TypeScript type checking. |
-| `pnpm generate` | Generate Drizzle migrations from schema changes. |
-| `pnpm migrate` | Apply pending Drizzle migrations. |
-| `pnpm push` | Synchronize the schema directly with the database. |
-| `pnpm pull` | Pull the database schema into the Drizzle schema definition. |
+| Command                  | Description                                                  |
+| ------------------------ | ------------------------------------------------------------ |
+| `pnpm dev`               | Start the Next.js development server.                        |
+| `pnpm build`             | Build the production application.                            |
+| `pnpm start`             | Start the built application.                                 |
+| `pnpm test --run`        | Run the Vitest suite once.                                   |
+| `pnpm format`            | Format source files using Oxfmt.                             |
+| `pnpm format:check`      | Check formatting without modifying files.                    |
+| `pnpm lint`              | Run Fallow static analysis.                                  |
+| `pnpm exec tsc --noEmit` | Run TypeScript type checking.                                |
+| `pnpm generate`          | Generate Drizzle migrations from schema changes.             |
+| `pnpm migrate`           | Apply pending Drizzle migrations.                            |
+| `pnpm push`              | Synchronize the schema directly with the database.           |
+| `pnpm pull`              | Pull the database schema into the Drizzle schema definition. |
 
 Playwright end-to-end tests are configured in `playwright.config.ts`. Install the required Chromium binaries and run the Chromium project with:
 

@@ -22,25 +22,6 @@ export const tables = table("tables", templates.table, (t) => [
     index().on(t.last_editor_id),
 ]);
 
-export const users = table(
-    "users",
-    {
-        id: serial().primaryKey(),
-        username: varchar({ length: 32 }).unique().notNull(),
-        username_normalized: varchar({ length: 32 }).unique().notNull(),
-        password_hash: text().notNull(),
-        ...timestampsColumns,
-    },
-    (t) => [
-        check("username_not_blank", sql`length(trim(${t.username})) > 0`),
-        check("username_normalized_not_blank", sql`length(trim(${t.username_normalized})) > 0`),
-        check(
-            "username_normalized_lowercase",
-            sql`${t.username_normalized} = lower(${t.username_normalized})`,
-        ),
-    ],
-);
-
 export const notifications = table(
     "notifications",
     {

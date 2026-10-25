@@ -3,7 +3,7 @@
 import { desc, eq } from "drizzle-orm";
 
 import db from "@/db";
-import { users } from "@/db/schema";
+import { user } from "@/db/schema";
 import { cacheDbRequest } from "@/lib/cache";
 import { normalizeArrayOrValue } from "@/utils/stdfunc";
 import log from "@/utils/stdlog";
@@ -12,18 +12,13 @@ import { userSelectPublicSchema } from "@/utils/validate/schemas";
 /**
  * Requests user id from the database.
  */
-export async function requestUserId(usernameNormalized: string) {
+export async function requestUserId(name: string) {
     "use cache";
-    cacheDbRequest(["users"]);
+    cacheDbRequest(["user"]);
 
-    log.trace("requestUserId called", { usernameNormalized });
+    log.trace("requestUserId called", { name });
 
-    return db
-        .select({ id: users.id })
-        .from(users)
-        .where(eq(users.username_normalized, usernameNormalized))
-        .limit(1)
-        .execute();
+    return db.select({ id: user.id }).from(user).where(eq(user.name, name)).limit(1).execute();
 }
 
 /**
@@ -41,20 +36,19 @@ export async function getUserId(request: ReturnType<typeof requestUserId>) {
 /**
  * Requests user from the database.
  */
-export async function requestUser(uid: string | number) {
+export async function requestUser(uid: string) {
     "use cache";
-    cacheDbRequest(["users"]);
+    cacheDbRequest(["user"]);
 
     log.trace("requestUser called", { uid, uidType: typeof uid });
 
-    const field = typeof uid === "string" ? users.username_normalized : users.id;
+    const field = user.id;
 
     return db
         .select({
-            username: users.username,
-            username_normalized: users.username_normalized,
+            name: user.name,
         })
-        .from(users)
+        .from(user)
         .where(eq(field, uid))
         .limit(1)
         .execute();
@@ -73,17 +67,16 @@ export async function getUser(request: ReturnType<typeof requestUser>) {
  */
 export async function requestAllUsers() {
     "use cache";
-    cacheDbRequest(["users"]);
+    cacheDbRequest(["user"]);
 
     log.trace("requestAllUsers called");
 
     return db
         .select({
-            username: users.username,
-            username_normalized: users.username_normalized,
+            name: user.name,
         })
-        .from(users)
-        .orderBy(desc(users.username_normalized))
+        .from(user)
+        .orderBy(desc(user.name))
         .execute();
 }
 

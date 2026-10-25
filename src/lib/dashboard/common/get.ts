@@ -7,7 +7,7 @@ import { createSelectSchema } from "drizzle-orm/zod";
 import z from "zod";
 
 import db from "@/db";
-import { users } from "@/db/schema";
+import { user } from "@/db/schema";
 import { cacheDbRequest } from "@/lib/cache";
 import { ActionResult, DbTarget, parseRawTarget } from "@/lib/types";
 import { toCamelCase } from "@/utils/stdfunc";
@@ -32,14 +32,14 @@ export async function getRows(
             return { ok: false, error: "Unknown id column" };
         }
 
-        const author = alias(users, "author");
-        const last_editor = alias(users, "last_editor");
+        const author = alias(user, "author");
+        const last_editor = alias(user, "last_editor");
 
         const rows = await db
             .select({
                 ...columns,
-                author: author.username,
-                last_editor: last_editor.username,
+                author: author.name,
+                last_editor: last_editor.name,
             })
             .from(table)
             .leftJoin(author, eq(table.author_id, author.id))
@@ -67,9 +67,9 @@ export async function getRows(
         const result = hasId
             ? validRows
             : validRows.map((row: Row) => ({
-                  ...row,
-                  id: row[toCamelCase(id.name) as keyof Row] ?? row[id.name as keyof Row], // fallback to original name
-              }));
+                ...row,
+                id: row[toCamelCase(id.name) as keyof Row] ?? row[id.name as keyof Row], // fallback to original name
+            }));
 
         return {
             ok: true,

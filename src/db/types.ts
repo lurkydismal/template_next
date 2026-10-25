@@ -1,11 +1,11 @@
-import { notifications, tables, users } from "./schema";
+import { notifications, tables, user } from "./schema";
 
 export type TablesRow = typeof tables.$inferSelect;
 export type TablesRowInsert = typeof tables.$inferInsert;
 
-export type UsersRow = typeof users.$inferSelect;
-export type UsersRowInsert = typeof users.$inferInsert;
-export type UsersRowPublic = Omit<UsersRow, "id" | "password_hash" | "created_at" | "updated_at">;
+export type UserRow = typeof user.$inferSelect;
+export type UserRowInsert = typeof user.$inferInsert;
+export type UserRowPublic = Omit<UserRow, "id" | "createdAt" | "updatedAt">;
 
 export type NotificationsRow = typeof notifications.$inferSelect;
 export type NotificationsRowInsert = typeof notifications.$inferInsert;

@@ -2,7 +2,7 @@ import { Dayjs } from "dayjs";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/zod";
 import z from "zod";
 
-import { users } from "@/db/schema";
+import { user } from "@/db/schema";
 import { DbTarget, TABLES } from "@/lib/types";
 import dayjs from "@/utils/dayjs";
 
@@ -31,19 +31,17 @@ export const normalizedString = z.preprocess(
     z.string(),
 );
 
-export const userSelectSchema = createSelectSchema(users);
-export const userInsertSchema = createInsertSchema(users);
-export const userUpdateSchema = createUpdateSchema(users);
+export const userSelectSchema = createSelectSchema(user);
+export const userInsertSchema = createInsertSchema(user);
+export const userUpdateSchema = createUpdateSchema(user);
 export const userSelectPublicSchema = userSelectSchema
     .omit({
         id: true,
-        password_hash: true,
-        created_at: true,
-        updated_at: true,
+        createdAt: true,
+        updatedAt: true,
     })
     .extend({
-        username: z.string().trim().min(1),
-        username_normalized: z.string().trim().min(1).lowercase(),
+        name: z.string().trim().min(1),
     });
 
 export const mutationInputSchema = z.record(z.string(), z.unknown()).and(

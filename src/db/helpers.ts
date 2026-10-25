@@ -1,6 +1,6 @@
 import { integer, timestamp } from "drizzle-orm/pg-core";
 
-import { users } from "./schema";
+import { user } from "./schema";
 
 /**
  * timestamps
@@ -16,8 +16,8 @@ import { users } from "./schema";
  * consistent created/updated timestamps for all tables.
  *
  * Example:
- * const users = pgTable("users", {
- *     id: serial("id").primaryKey(),
+ * const user = pgTable("user", {
+ *     id: text("id").primaryKey(),
  *     name: text("name").notNull(),
  *     ...timestampsColumns,
  * });
@@ -55,8 +55,8 @@ EXECUTE FUNCTION update_updated_at_column();
  * });
  */
 export const auditColumns = {
-    author_id: integer().references(() => users.id, { onDelete: "set null" }),
-    last_editor_id: integer().references(() => users.id, {
+    author_id: integer().references(() => user.id, { onDelete: "set null" }),
+    last_editor_id: integer().references(() => user.id, {
         onDelete: "set null",
     }),
 };

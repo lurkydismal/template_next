@@ -24,7 +24,7 @@ type SaveOptions = {
 /**
  * Converts input into db mutation.
  */
-function toDbMutation(parsedRow: MutationRow, actorId: number, opts: SaveOptions): MutationRow {
+function toDbMutation(parsedRow: MutationRow, actorId: string, opts: SaveOptions): MutationRow {
     const base = { ...parsedRow };
 
     if (opts.isUpdate) {

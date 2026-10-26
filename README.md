@@ -7,9 +7,7 @@
 - [General Information](#general-information)
 - [Technologies Used](#technologies-used)
 - [Features](#features)
-
-* [Screenshots](#screenshots)
-
+- [Screenshots](#screenshots)
 - [Setup](#setup)
 - [Usage](#usage)
 - [Development Commands](#development-commands)

@@ -15,7 +15,7 @@ export async function getSessionDataOrUnauthorized() {
     const session = await getSession();
 
     if (!session) {
-        unauthorized();
+        return unauthorized();
     }
 
     return session;

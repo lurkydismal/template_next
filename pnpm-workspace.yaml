@@ -25,3 +25,4 @@ minimumReleaseAgeExclude:
     - vitest@5.0.4
     - zod@4.6.7
     - react-hook-form@7.91.0
+    - "@hookform/resolvers@6.0.2"

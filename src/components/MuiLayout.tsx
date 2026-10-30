@@ -19,7 +19,7 @@ import { Box, CircularProgress, CssBaseline } from "@mui/material";
 import { Suspense } from "react";
 
 import SnackbarProvider from "@/providers/snackbar";
-import AppTheme from "@/theme/theme";
+import AppTheme from "@/theme";
 
 /**
  * Renders the mui layout component.

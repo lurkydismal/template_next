@@ -214,11 +214,9 @@ const MarkdownComponents: Components = {
     /**
      * Renders Markdown strikethrough text.
      */
-    del: ({
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        node,
-        ...props
-    }: HTMLAttributes<HTMLModElement> & { node?: unknown }) => <del {...props}></del>,
+    del: ({ node, ...props }: HTMLAttributes<HTMLModElement> & { node?: unknown }) => (
+        <del {...props}></del>
+    ),
 };
 
 export default MarkdownComponents;

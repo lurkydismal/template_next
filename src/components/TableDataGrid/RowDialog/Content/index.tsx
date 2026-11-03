@@ -55,7 +55,6 @@ export default function RowDialogContent<
         const initialValues = buildInitialValues(row, fields);
         setValues(initialValues);
         form.reset(initialValues);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [row]);
 
     /**

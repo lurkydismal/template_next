@@ -40,7 +40,7 @@ format:
 
 # Run static analysis and lint checks.
 lint:
-    pnpm lint -f markdown > fallow.txt
+    pnpm lint -f markdown > fallow.md
 
 # Run better static analysis and lint checks.
 hard-lint:

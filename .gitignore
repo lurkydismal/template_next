@@ -54,3 +54,4 @@ node_modules/
 /playwright/.cache/
 /playwright/.auth/
 /fallow.txt
+.fallow/

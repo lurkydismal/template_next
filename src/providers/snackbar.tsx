@@ -20,7 +20,7 @@ import { createContext, useContext } from "react";
 
 import log from "@/utils/stdlog";
 import { LogFn } from "@/utils/stdlog/types";
-import { maxSnackbarCount } from "@/utils/stdvar";
+import { isDev, isProd, maxSnackbarCount } from "@/utils/stdvar";
 
 type SnackbarOptions = Pick<OptionsObject, "persist" | "onClose">;
 
@@ -78,7 +78,11 @@ export default function CustomSnackbarProvider({
 
         switch (variant) {
             case "error":
-                logVariant = log.error;
+                if (isProd) {
+                    logVariant = log.error;
+                } else {
+                    logVariant = log.info;
+                }
                 break;
 
             case "warning":

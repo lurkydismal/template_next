@@ -1,4 +1,5 @@
-import { CheckboxProps, RadioProps } from "@mui/material";
+import type { CheckboxProps, RadioProps, SwitchProps } from "@mui/material";
+import type { ReactNode } from "react";
 
 export type AutocompleteOption =
     | string
@@ -167,48 +168,53 @@ export type TableLookupFieldConfig<
         tableLookupErrorMessage?: string;
     };
 
-type CommonBooleanFieldConfig = {
-    type: "boolean";
-    color?: CheckboxProps["color"];
-    scale?: CheckboxProps["size"];
-};
-
-type CommonBooleanSingleFieldConfig = {
-    default?: boolean;
-};
-
 export type CheckboxFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
-> = CommonFieldConfig<R, RI, K> &
-    CommonBooleanFieldConfig &
-    CommonBooleanSingleFieldConfig & {
-        variant: "checkbox";
-    };
+> = CommonFieldConfig<R, RI, K> & {
+    type: "boolean";
+    variant: "checkbox";
+    default?: boolean;
+    color?: CheckboxProps["color"];
+    scale?: CheckboxProps["size"];
+};
 
 export type IconCheckboxFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
     I extends CheckboxProps["icon"] = CheckboxProps["icon"],
-> = CommonFieldConfig<R, RI, K> &
-    CommonBooleanFieldConfig &
-    CommonBooleanSingleFieldConfig & {
-        variant: "icon";
-        icon: I;
-        checkedIcon: I;
-    };
+> = CommonFieldConfig<R, RI, K> & {
+    type: "boolean";
+    variant: "icon";
+    default?: boolean;
+    color?: CheckboxProps["color"];
+    scale?: CheckboxProps["size"];
+    icon: I;
+    checkedIcon: I;
+};
 
 export type SwitchFieldConfig<
     R,
     RI = unknown,
     K extends PropertyKey = keyof R | keyof RI | string,
-> = CommonFieldConfig<R, RI, K> &
-    CommonBooleanFieldConfig &
-    CommonBooleanSingleFieldConfig & {
-        variant: "switch";
-    };
+> = CommonFieldConfig<R, RI, K> & {
+    type: "boolean";
+    variant: "switch";
+    default?: boolean;
+    color?: SwitchProps["color"];
+    scale?: SwitchProps["size"];
+};
+
+export type RadioGroupOption =
+    | string
+    | number
+    | {
+          value: string | number;
+          label: ReactNode;
+          disabled?: boolean;
+      };
 
 export type RadioGroupFieldConfig<
     R,
@@ -216,6 +222,9 @@ export type RadioGroupFieldConfig<
     K extends PropertyKey = keyof R | keyof RI | string,
 > = CommonFieldConfig<R, RI, K> & {
     type: "radio-group";
+    options: readonly RadioGroupOption[];
+    default?: string | number;
+    row?: boolean;
     color?: RadioProps["color"];
     scale?: RadioProps["size"];
 };

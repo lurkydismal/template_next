@@ -163,7 +163,10 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         key: "radio_group_field",
         label: "Radio group",
         type: "radio-group",
-        size: 4,
+        options: ["Option A", "Option B", { value: 3, label: "Option C (numeric)" }],
+        default: "Option A",
+        row: true,
+        size: 12,
     },
 ];
 

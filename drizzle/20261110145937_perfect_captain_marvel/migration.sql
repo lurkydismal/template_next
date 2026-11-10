@@ -53,7 +53,7 @@ CREATE TABLE "tables" (
 	"checkbox_field" boolean,
 	"checkbox_icon_field" boolean,
 	"switch_field" boolean,
-	"radio_group_field" boolean,
+	"radio_group_field" jsonb,
 	"author_id" text,
 	"last_editor_id" text,
 	"updated_at" timestamp(0) with time zone DEFAULT now() NOT NULL,

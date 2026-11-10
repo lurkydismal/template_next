@@ -260,6 +260,13 @@ function parseColumnFormValue(value: FormDataEntryValue, column: AnyColumn): unk
     const normalizedValue = value.trim();
 
     const isInteger = INTEGER_COLUMN_TYPES.has(columnType) || INTEGER_SQL_TYPES.has(sqlType);
+    const isJson = dataType === "json" || sqlType === "json" || sqlType === "jsonb";
+
+    // JSON and JSONB columns receive JSON-encoded FormData values. Checking the
+    // SQL type as well as Drizzle metadata keeps this working across RC versions.
+    if (isJson) {
+        return parseJsonValue(normalizedValue, column, "valid JSON");
+    }
 
     // Do not silently return numeric form values as strings when Drizzle's
     // runtime dataType differs across RC versions.
@@ -313,9 +320,6 @@ function parseColumnFormValue(value: FormDataEntryValue, column: AnyColumn): unk
             }
             return parsed;
         }
-
-        case "json":
-            return parseJsonValue(normalizedValue, column, "valid JSON");
 
         case "array": {
             const parsed = parseJsonValue(normalizedValue, column, "a JSON array");

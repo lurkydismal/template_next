@@ -41,6 +41,10 @@ function setFormDataField<R extends Record<string, unknown>, RI extends Record<s
         fd.set(key, "");
     } else if (isBlob(value)) {
         fd.set(key, value);
+    } else if (field.type === "radio-group") {
+        // FormData is string-only. JSON encoding preserves numeric option values
+        // instead of converting them to strings before the JSONB column parser.
+        fd.set(key, JSON.stringify(value));
     } else {
         fd.set(key, String(value));
     }

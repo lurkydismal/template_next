@@ -45,7 +45,14 @@ export const buildInitialValues = <R extends Record<string, unknown>, RI>(
 
     for (const field of fields) {
         const key = String(field.key);
-        const value = (row as Record<string, unknown>)[key] ?? null;
+        const rowValue = (row as Record<string, unknown>)[key];
+        const defaultValue =
+            field.type === "boolean"
+                ? (field.default ?? false)
+                : field.type === "radio-group"
+                  ? (field.default ?? null)
+                  : null;
+        const value = rowValue ?? defaultValue;
         out[key] = field.formatValue ? field.formatValue(value) : value;
     }
 

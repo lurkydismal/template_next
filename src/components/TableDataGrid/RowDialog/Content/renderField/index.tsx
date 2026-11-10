@@ -3,10 +3,12 @@ import { memo, useCallback, useMemo } from "react";
 import { FieldError, useFormState } from "react-hook-form";
 
 import AutocompleteFieldInput from "../../AutocompleteFieldInput";
+import BooleanFieldInput from "../../BooleanFieldInput";
 import CustomFieldInput from "../../CustomFieldInput";
 import DateTimeFieldInput from "../../DateTimeFieldInput";
 import MarkdownFieldInput from "../../MarkdownFieldInput";
 import NumberSpinnerInput from "../../NumberSpinnerInput";
+import RadioGroupFieldInput from "../../RadioGroupFieldInput";
 import { MultilineFieldInput, TextFieldInput } from "../../TextFieldInput";
 import { isFieldReadOnly } from "../interconnected";
 import { getFieldRules } from "../validation";
@@ -116,6 +118,34 @@ function RowDialogField<R extends Record<string, unknown>, RI extends Record<str
                 );
                 break;
             }
+
+            case "boolean":
+                input = (
+                    <BooleanFieldInput
+                        {...commonProps}
+                        variant={field.variant}
+                        color={field.color}
+                        size={field.scale}
+                        icon={field.variant === "icon" ? field.icon : undefined}
+                        checkedIcon={field.variant === "icon" ? field.checkedIcon : undefined}
+                        onValueChange={handleChange}
+                    />
+                );
+                break;
+
+            case "radio-group":
+                input = (
+                    <RadioGroupFieldInput
+                        {...commonProps}
+                        options={field.options}
+                        row={field.row}
+                        color={field.color}
+                        size={field.scale}
+                        defaultValue={field.default}
+                        onValueChange={handleChange}
+                    />
+                );
+                break;
 
             case "number":
                 input = (

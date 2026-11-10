@@ -1,4 +1,4 @@
-import { boolean, integer, serial, text } from "drizzle-orm/pg-core";
+import { boolean, integer, jsonb, serial, text } from "drizzle-orm/pg-core";
 
 import { metadataColumns } from "./helpers";
 
@@ -20,6 +20,7 @@ export const table = {
     checkbox_field: boolean(),
     checkbox_icon_field: boolean(),
     switch_field: boolean(),
-    radio_group_field: boolean(),
+    // Radio-group options may be strings or numbers; JSONB preserves either type.
+    radio_group_field: jsonb().$type<string | number>(),
     ...metadataColumns,
 };

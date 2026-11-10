@@ -11,12 +11,18 @@ function setFormDataField<R extends Record<string, unknown>, RI extends Record<s
     field: FieldConfig<R, RI>,
     sourceValues: Partial<RI>,
 ) {
-    const name = field.name ?? String(field.key);
+    const key = String(field.key);
+    const name = field.name ?? key;
+
+    // Form controls may use a presentation-specific name. Send the canonical
+    // schema property key to the server, where it is checked against Drizzle.
+    if (name !== key) fd.delete(name);
+
     if (field.readOnly && !field.interconnected) {
-        fd.delete(name);
+        fd.delete(key);
         return;
     }
-    const key = String(field.key);
+
     const value = toFieldValue(
         field as FieldConfig<Record<string, unknown>, Record<string, unknown>>,
         (sourceValues as Record<string, unknown>)[key],
@@ -24,13 +30,19 @@ function setFormDataField<R extends Record<string, unknown>, RI extends Record<s
 
     if (field.toFormValue) {
         const mappedValue = field.toFormValue(value);
-        if (mappedValue !== undefined) fd.set(name, mappedValue);
+        if (mappedValue !== undefined) {
+            fd.set(key, mappedValue);
+        } else {
+            fd.delete(key);
+        }
     } else if (value === null || value === undefined) {
-        if (!fd.has(name)) fd.set(name, "");
+        // Always overwrite a possible native form-control value (for example,
+        // "on" from an unchecked/partially initialized checkbox).
+        fd.set(key, "");
     } else if (isBlob(value)) {
-        fd.set(name, value);
+        fd.set(key, value);
     } else {
-        fd.set(name, String(value));
+        fd.set(key, String(value));
     }
 }
 

@@ -11,6 +11,6 @@ export async function updateAction(
     idColumnName: string | string[],
     formData: FormData,
 ) {
-    const input = await parseForm(formData);
+    const input = await parseForm(formData, rawTarget);
     return save(rawTarget, input, { isUpdate: true, idColumnName });
 }

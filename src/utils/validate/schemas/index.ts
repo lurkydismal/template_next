@@ -44,11 +44,7 @@ export const userSelectPublicSchema = userSelectSchema
         name: z.string().trim().min(1),
     });
 
-export const mutationInputSchema = z.record(z.string(), z.unknown()).and(
-    z.object({
-        id: z.coerce.number().int().positive().optional(),
-    }),
-);
+export const mutationInputSchema = z.record(z.string(), z.unknown());
 
 export const registerUserSchema = z.object({
     name: z.string(),

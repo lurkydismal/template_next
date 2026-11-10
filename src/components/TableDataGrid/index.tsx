@@ -1,26 +1,21 @@
 "use client";
 
+import type { GridRowsProp } from "@mui/x-data-grid";
+
 import { Box, CircularProgress } from "@mui/material";
-import { useGridApiRef, GridRowsProp, GridRowParams } from "@mui/x-data-grid";
-import { useCallback, useEffect, useState, cloneElement, isValidElement, useMemo } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { useSnackbar } from "@/providers/snackbar";
-import { columnsFromFields } from "@/utils/columns";
 
-import CustomDataGrid from "./CustomDataGrid";
-import RowDialog, { FieldConfig } from "./RowDialog";
-import CustomToolbar from "./Toolbar";
+import type { FieldConfig } from "./RowDialog";
 
-const dataGridSx = {
-    "& .MuiDataGrid-row": {
-        cursor: "pointer",
-    },
-} as const;
-
-const dataGridSlots = { toolbar: CustomToolbar };
+import GridView from "./GridView";
+import RowDialogHost from "./RowDialogHost";
 
 /**
- * Renders the table data grid component.
+ * Renders the table data grid and loads its data/field configuration.
+ * Dialog state is delegated to RowDialogHost, preventing dialog interactions
+ * from re-rendering this component or the grid.
  */
 export default function TableDataGrid<
     R extends Record<string, unknown>,
@@ -36,29 +31,14 @@ export default function TableDataGrid<
     getRowsAction: () => Promise<Readonly<GridRowsProp>>;
     createRowAction: (row: RI) => Promise<void>;
     updateRowAction: (fd: FormData) => Promise<void>;
-    extraButtons?: React.ReactNode; // optionally a ReactElement expecting props
+    extraButtons?: ReactNode; // optionally a ReactElement expecting props
     fields: FieldConfig<R, RI>[];
     dashboardKey: string;
 }>) {
     const { showError } = useSnackbar();
-    const apiRef = useGridApiRef();
     const [currentRows, setCurrentRows] = useState<Readonly<GridRowsProp> | null>(null);
     const [resolvedFields, setResolvedFields] = useState(fields);
     const [fieldsResolving, setFieldsResolving] = useState(false);
-    const [selectedRow, setSelectedRow] = useState<R | null>(null);
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const emptyRow = useMemo(
-        () =>
-            resolvedFields.reduce((row, field) => {
-                row[field.key as keyof RI] = (
-                    field.type !== "boolean" && field.type !== "radio-group"
-                        ? (field.placeholder ?? null)
-                        : null
-                ) as RI[keyof RI];
-                return row;
-            }, {} as RI),
-        [resolvedFields],
-    );
 
     useEffect(() => {
         let active = true;
@@ -89,7 +69,7 @@ export default function TableDataGrid<
                                 autocompleteOptions: await field.loadOptions(),
                             };
                         } catch {
-                            // Preserve field without resolved options on individual failure
+                            // Preserve field without resolved options on individual failure.
                             return field;
                         }
                     }),
@@ -110,12 +90,14 @@ export default function TableDataGrid<
         };
     }, [fields, showError]);
 
-    // Getting rows
-    const _getRows = useCallback(async () => {
+    /**
+     * Fetches the current table rows and reports failures through the snackbar.
+     */
+    const getRows = useCallback(async () => {
         try {
             setCurrentRows(await getRowsAction());
-        } catch (err) {
-            showError(err);
+        } catch (error) {
+            showError(error);
         }
     }, [getRowsAction, showError]);
 
@@ -126,142 +108,54 @@ export default function TableDataGrid<
         const source = new EventSource("/api/dashboard/changes");
         let refreshTimeout: ReturnType<typeof setTimeout> | null = null;
 
-        /**
-         * Schedules a near-immediate single refresh to coalesce rapid events.
-         */
         const scheduleRefresh = () => {
-            if (refreshTimeout) {
-                clearTimeout(refreshTimeout);
-            }
+            if (refreshTimeout) clearTimeout(refreshTimeout);
 
             refreshTimeout = setTimeout(() => {
-                void _getRows();
+                void getRows();
                 refreshTimeout = null;
             }, 120);
         };
 
         source.onmessage = (event) => {
             try {
-                const payload = JSON.parse(event.data) as { type?: string } | undefined;
-                if ((payload as { event?: string })?.event === "dashboard-change") {
-                    scheduleRefresh();
-                }
+                const payload = JSON.parse(event.data) as { event?: string } | undefined;
+                if (payload?.event === "dashboard-change") scheduleRefresh();
             } catch {
                 // Ignore malformed messages and keep listening.
             }
         };
 
         source.onerror = () => {
-            // EventSource reconnects automatically; no manual retry required.
+            // EventSource reconnects automatically; no manual retry is required.
         };
 
         return () => {
-            if (refreshTimeout) {
-                clearTimeout(refreshTimeout);
-            }
+            if (refreshTimeout) clearTimeout(refreshTimeout);
             source.close();
         };
-    }, [_getRows]);
+    }, [getRows]);
 
     useEffect(() => {
-        _getRows();
-    }, [_getRows]);
+        void getRows();
+    }, [getRows]);
 
     useEffect(() => subscribeToRowChanges(), [subscribeToRowChanges]);
 
-    // the original createRowAction wrapped so we always refresh UI after create
+    /**
+     * Wraps create so a successful mutation refreshes the displayed rows.
+     */
     const createAndRefresh = useCallback(
         async (row: RI) => {
             try {
                 await createRowAction(row);
-                // Option A: re-fetch full list (safe)
-                await _getRows();
-
-                // Option B (optimistic): if create returns the created row with id, you can:
-                // if (created && created.id !== undefined && apiRef?.current?.updateRows) {
-                //   apiRef.current.updateRows([{ id: created.id, ...created }]);
-                // }
-            } catch (err) {
-                showError(err);
-                throw err;
+                await getRows();
+            } catch (error) {
+                showError(error);
+                throw error;
             }
         },
-        [createRowAction, _getRows, showError],
-    );
-
-    const openCreateDialog = useCallback(() => {
-        setSelectedRow(emptyRow as unknown as R);
-        setDialogOpen(true);
-    }, [emptyRow]);
-
-    // Keyboard shortcut opens create dialog with empty defaults
-    useEffect(() => {
-        /**
-         * Submits the current form or dialog state.
-         */
-        const submit = () => {
-            if (!currentRows) return;
-            openCreateDialog();
-            // scroll to top row (you might want to select the created row if you can get its id)
-            setTimeout(() => apiRef.current?.scrollToIndexes?.({ rowIndex: 0 }), 0);
-        };
-
-        /**
-         * Handles keyboard shortcuts for the editable data grid.
-         */
-        const onKeyDown = (e: KeyboardEvent) => {
-            if (!((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "m")) return;
-
-            const active = document.activeElement;
-            if (
-                active &&
-                (active.tagName === "INPUT" ||
-                    active.tagName === "TEXTAREA" ||
-                    (active as HTMLElement).isContentEditable)
-            ) {
-                return;
-            }
-
-            e.preventDefault();
-            submit();
-        };
-
-        window.addEventListener("keydown", onKeyDown);
-        return () => window.removeEventListener("keydown", onKeyDown);
-    }, [currentRows, openCreateDialog, apiRef]);
-
-    /**
-     * Handles row click.
-     */
-    const handleRowClick = useCallback((params: GridRowParams) => {
-        setSelectedRow(params.row as R);
-        setDialogOpen(true);
-    }, []);
-
-    /**
-     * Handles close.
-     */
-    const handleClose = useCallback(() => setDialogOpen(false), []);
-
-    // If extraButtons is a React element, clone it and inject createRowAction + emptyRow.
-    const injectedExtraButtons = useMemo(
-        () =>
-            isValidElement(extraButtons)
-                ? cloneElement(extraButtons as React.ReactElement<Record<string, unknown>>, {
-                      createRowAction: {
-                          type: "dialog",
-                          action: openCreateDialog,
-                      },
-                      emptyRow,
-                  })
-                : extraButtons,
-        [emptyRow, extraButtons, openCreateDialog],
-    );
-
-    const columns = useMemo(() => columnsFromFields(resolvedFields), [resolvedFields]);
-    const slotProps = useMemo(
-        () => ({ toolbar: { extraButtons: injectedExtraButtons } }),
-        [injectedExtraButtons],
+        [createRowAction, getRows, showError],
     );
 
     if (currentRows === null || fieldsResolving) {
@@ -280,28 +174,18 @@ export default function TableDataGrid<
     }
 
     return (
-        <>
-            <CustomDataGrid
-                apiRef={apiRef}
-                columns={columns}
+        <RowDialogHost<R, RI>
+            fields={resolvedFields}
+            dashboardKey={dashboardKey}
+            createRowAction={createAndRefresh}
+            updateRowAction={updateRowAction}
+            onUpdated={getRows}
+        >
+            <GridView<R, RI>
                 rows={currentRows}
-                sx={dataGridSx}
-                onRowClick={handleRowClick}
-                slots={dataGridSlots}
-                slotProps={slotProps}
-            />
-
-            <RowDialog<R, RI>
-                dialogOpen={dialogOpen}
                 fields={resolvedFields}
-                handleClose={handleClose}
-                selectedRow={selectedRow}
-                setSelectedRow={setSelectedRow}
-                dashboardKey={dashboardKey}
-                createRowAction={createAndRefresh}
-                updateRowAction={updateRowAction}
-                onUpdated={_getRows}
+                extraButtons={extraButtons}
             />
-        </>
+        </RowDialogHost>
     );
 }

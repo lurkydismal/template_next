@@ -14,8 +14,10 @@
  */
 
 import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import { createElement } from "react";
 
 import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
+import BooleanFieldControl from "@/components/TableDataGrid/RowDialog/BooleanFieldControl";
 import { toCamelCase } from "@/utils/stdfunc";
 
 type NormalizeOptions = {
@@ -89,7 +91,23 @@ export function columnsFromFields<
                           renderCell: (params: GridRenderCellParams) =>
                               String(field.formatValue!(params.value) ?? ""),
                       }
-                    : {}),
+                    : field.type === "boolean"
+                      ? {
+                            // Reuse the dialog's exact control styling, but keep table cells read-only.
+                            renderCell: (params: GridRenderCellParams) =>
+                                createElement(BooleanFieldControl, {
+                                    label: field.label,
+                                    checked: params.value === true,
+                                    variant: field.variant,
+                                    readOnly: true,
+                                    color: field.color,
+                                    size: field.scale,
+                                    icon: field.variant === "icon" ? field.icon : undefined,
+                                    checkedIcon:
+                                        field.variant === "icon" ? field.checkedIcon : undefined,
+                                }),
+                        }
+                      : {}),
             })),
     );
 }

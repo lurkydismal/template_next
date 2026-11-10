@@ -1,10 +1,10 @@
 import type { CheckboxProps, SwitchProps } from "@mui/material";
 import type { ReactNode } from "react";
 
-import { Checkbox, FormControl, FormControlLabel, FormHelperText, Switch } from "@mui/material";
+import { FormControl, FormControlLabel, FormHelperText } from "@mui/material";
 import { Controller, type Control, type FieldError, type RegisterOptions } from "react-hook-form";
 
-type BooleanVariant = "checkbox" | "icon" | "switch";
+import BooleanFieldControl, { type BooleanControlVariant } from "./BooleanFieldControl";
 
 type BooleanFieldInputProps = {
     fieldKey: string;
@@ -16,7 +16,7 @@ type BooleanFieldInputProps = {
     control: Control<Record<string, unknown>>;
     error?: FieldError;
     rules?: RegisterOptions<Record<string, unknown>, string>;
-    variant: BooleanVariant;
+    variant: BooleanControlVariant;
     color?: CheckboxProps["color"] | SwitchProps["color"];
     size?: CheckboxProps["size"] | SwitchProps["size"];
     icon?: ReactNode;
@@ -61,40 +61,22 @@ export default function BooleanFieldInput({
                         onValueChange(nextChecked);
                     };
 
-                    const controlElement =
-                        variant === "switch" ? (
-                            <Switch
-                                name={name}
-                                checked={checked}
-                                color={color as SwitchProps["color"]}
-                                size={size as SwitchProps["size"]}
-                                disabled={readOnly}
-                                onChange={(_, nextChecked) => handleChange(nextChecked)}
-                                slotProps={{
-                                    input: {
-                                        id: `${fieldKey}-switch`,
-                                        "aria-label": label,
-                                    },
-                                }}
-                            />
-                        ) : (
-                            <Checkbox
-                                name={name}
-                                checked={checked}
-                                color={color as CheckboxProps["color"]}
-                                size={size as CheckboxProps["size"]}
-                                disabled={readOnly}
-                                icon={variant === "icon" ? icon : undefined}
-                                checkedIcon={variant === "icon" ? checkedIcon : undefined}
-                                onChange={(event) => handleChange(event.target.checked)}
-                                slotProps={{
-                                    input: {
-                                        id: `${fieldKey}-checkbox`,
-                                        "aria-label": label,
-                                    },
-                                }}
-                            />
-                        );
+                    const controlElement = (
+                        <BooleanFieldControl
+                            label={label}
+                            name={name}
+                            checked={checked}
+                            variant={variant}
+                            readOnly={readOnly}
+                            disabled={readOnly}
+                            color={color}
+                            size={size}
+                            icon={icon}
+                            checkedIcon={checkedIcon}
+                            id={`${fieldKey}-${variant === "switch" ? "switch" : "checkbox"}`}
+                            onChange={handleChange}
+                        />
+                    );
 
                     return (
                         <>

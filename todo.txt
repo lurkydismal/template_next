@@ -10,3 +10,4 @@ toggle for some field
 Save diff for all text field changes and store it in some format that takes
 less size
 Restore SSE connection on crash
+fix: auth not showing errors from bad credentials

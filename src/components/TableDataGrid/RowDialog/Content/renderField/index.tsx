@@ -1,4 +1,6 @@
-import { FieldError, FieldErrors } from "react-hook-form";
+import { Grid } from "@mui/material";
+import { memo, useCallback, useMemo } from "react";
+import { FieldError, useFormState } from "react-hook-form";
 
 import AutocompleteFieldInput from "../../AutocompleteFieldInput";
 import CustomFieldInput from "../../CustomFieldInput";
@@ -7,6 +9,7 @@ import MarkdownFieldInput from "../../MarkdownFieldInput";
 import NumberSpinnerInput from "../../NumberSpinnerInput";
 import { MultilineFieldInput, TextFieldInput } from "../../TextFieldInput";
 import { isFieldReadOnly } from "../interconnected";
+import { getFieldRules } from "../validation";
 import {
     getFilteredAutocompleteOptions,
     getPackedValuesFromAutocomplete,
@@ -14,29 +17,42 @@ import {
 import { RenderFieldParams } from "./types";
 
 /**
- * Renders a field input based on the configured field type and behavior.
+ * Renders one row field and its grid item. Memoization prevents edits to an
+ * unrelated field from re-rendering this input.
  */
-export const renderField = <R extends Record<string, unknown>, RI extends Record<string, unknown>>({
+function RowDialogField<R extends Record<string, unknown>, RI extends Record<string, unknown>>({
     field,
     idx,
     row,
     values,
     form,
-    getRules,
+    fields,
     handleFieldValueChange,
-}: RenderFieldParams<R, RI>) => {
+}: RenderFieldParams<R, RI>) {
     const key = String(field.key);
     const name = field.name ?? key;
     const value = values[key];
     const readOnly = isFieldReadOnly(field);
-    const error = (form.formState.errors as FieldErrors<Record<string, unknown>>)[name] as
-        | FieldError
-        | undefined;
-    const rules = getRules(field);
+    const { errors } = useFormState({
+        control: form.control,
+        name,
+        exact: true,
+    });
+    const error = errors[name] as FieldError | undefined;
 
-    const handleChange = (nextValue: unknown, packedValues?: Record<string, unknown>) => {
-        handleFieldValueChange(field, nextValue, packedValues);
-    };
+    // Validation reads current values from RHF at validation time, so the
+    // rules object does not need to be recreated after every field change.
+    const rules = useMemo(
+        () => getFieldRules(field, fields, form, row),
+        [field, fields, form, row],
+    );
+
+    const handleChange = useCallback(
+        (nextValue: unknown, packedValues?: Record<string, unknown>) => {
+            handleFieldValueChange(field, nextValue, packedValues);
+        },
+        [field, handleFieldValueChange],
+    );
 
     const commonProps = {
         fieldKey: key,
@@ -50,87 +66,130 @@ export const renderField = <R extends Record<string, unknown>, RI extends Record
         rules,
     };
 
+    let input: React.ReactNode;
+
     if (field.type === "custom" && typeof field.render === "function") {
-        return (
+        input = (
             <CustomFieldInput
-                key={`${key}-${idx}`}
                 field={field}
                 value={value}
                 row={row}
                 onValueChange={(nextValue) => handleChange(nextValue)}
             />
         );
-    }
+    } else {
+        switch (field.type) {
+            case "multiline":
+                input = (
+                    <MultilineFieldInput
+                        {...commonProps}
+                        onValueChange={(nextValue) => handleChange(nextValue)}
+                    />
+                );
+                break;
 
-    switch (field.type) {
-        case "multiline":
-            return (
-                <MultilineFieldInput
-                    {...commonProps}
-                    key={`${key}-${idx}`}
-                    onValueChange={(nextValue) => handleChange(nextValue)}
-                />
-            );
+            case "markdown":
+                input = (
+                    <MarkdownFieldInput
+                        {...commonProps}
+                        toggleCorner={field.toggleCorner}
+                        onValueChange={(nextValue) => handleChange(nextValue)}
+                    />
+                );
+                break;
 
-        case "markdown":
-            return (
-                <MarkdownFieldInput
-                    {...commonProps}
-                    key={`${key}-${idx}`}
-                    toggleCorner={field.toggleCorner}
-                    onValueChange={(nextValue) => handleChange(nextValue)}
-                />
-            );
+            case "autocomplete": {
+                const filteredOptions = getFilteredAutocompleteOptions(field, values);
 
-        case "autocomplete": {
-            const filteredOptions = getFilteredAutocompleteOptions(field, values);
+                input = (
+                    <AutocompleteFieldInput
+                        {...commonProps}
+                        options={filteredOptions}
+                        loading={field.autocompleteLoading}
+                        open={field.autocompleteOpen}
+                        onOpen={field.onAutocompleteOpen}
+                        onClose={field.onAutocompleteClose}
+                        onValueChange={(nextValue) =>
+                            handleChange(nextValue, getPackedValuesFromAutocomplete(nextValue))
+                        }
+                    />
+                );
+                break;
+            }
 
-            return (
-                <AutocompleteFieldInput
-                    {...commonProps}
-                    key={`${key}-${idx}`}
-                    options={filteredOptions}
-                    loading={field.autocompleteLoading}
-                    open={field.autocompleteOpen}
-                    onOpen={field.onAutocompleteOpen}
-                    onClose={field.onAutocompleteClose}
-                    onValueChange={(nextValue) =>
-                        handleChange(nextValue, getPackedValuesFromAutocomplete(nextValue))
-                    }
-                />
-            );
+            case "number":
+                input = (
+                    <NumberSpinnerInput
+                        {...commonProps}
+                        min={field.min}
+                        max={field.max}
+                        onValueChange={(nextValue) => handleChange(nextValue)}
+                    />
+                );
+                break;
+
+            case "date":
+            case "time":
+            case "datetime":
+                input = (
+                    <DateTimeFieldInput
+                        {...commonProps}
+                        type={field.type}
+                        onValueChange={(nextValue) => handleChange(nextValue)}
+                    />
+                );
+                break;
+
+            default:
+                input = (
+                    <TextFieldInput
+                        {...commonProps}
+                        onValueChange={(nextValue) => handleChange(nextValue)}
+                    />
+                );
         }
-
-        case "number":
-            return (
-                <NumberSpinnerInput
-                    {...commonProps}
-                    key={`${key}-${idx}`}
-                    min={field.min}
-                    max={field.max}
-                    onValueChange={(nextValue) => handleChange(nextValue)}
-                />
-            );
-
-        case "date":
-        case "time":
-        case "datetime":
-            return (
-                <DateTimeFieldInput
-                    {...commonProps}
-                    key={`${key}-${idx}`}
-                    type={field.type}
-                    onValueChange={(nextValue) => handleChange(nextValue)}
-                />
-            );
-
-        default:
-            return (
-                <TextFieldInput
-                    {...commonProps}
-                    key={`${key}-${idx}`}
-                    onValueChange={(nextValue) => handleChange(nextValue)}
-                />
-            );
     }
-};
+
+    return <Grid size={{ xs: 12, sm: field.size ?? 6 }}>{input}</Grid>;
+}
+
+/**
+ * The values object changes on every edit, but most fields only depend on
+ * their own value. Autocomplete fields additionally depend on the selected
+ * values of their mutually-exclusive siblings.
+ */
+function areFieldPropsEqual<R extends Record<string, unknown>, RI extends Record<string, unknown>>(
+    previous: RenderFieldParams<R, RI>,
+    next: RenderFieldParams<R, RI>,
+): boolean {
+    if (
+        previous.field !== next.field ||
+        previous.idx !== next.idx ||
+        previous.row !== next.row ||
+        previous.fields !== next.fields ||
+        previous.form !== next.form ||
+        previous.handleFieldValueChange !== next.handleFieldValueChange
+    ) {
+        return false;
+    }
+
+    const key = String(previous.field.key);
+    if (!Object.is(previous.values[key], next.values[key])) return false;
+
+    if (previous.field.type !== "autocomplete") return true;
+
+    return (previous.field.mutuallyExclusiveWith ?? []).every((siblingKey) =>
+        Object.is(previous.values[siblingKey], next.values[siblingKey]),
+    );
+}
+
+const MemoizedRowDialogField = memo(RowDialogField, areFieldPropsEqual) as typeof RowDialogField;
+
+/**
+ * Creates the memoized field element used by the row dialog form.
+ */
+export function renderField<R extends Record<string, unknown>, RI extends Record<string, unknown>>(
+    params: RenderFieldParams<R, RI>,
+) {
+    return <MemoizedRowDialogField {...params} />;
+}

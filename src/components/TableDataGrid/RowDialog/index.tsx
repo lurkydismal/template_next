@@ -13,6 +13,7 @@ import { TransitionProps } from "@mui/material/transitions";
 import {
     Dispatch,
     forwardRef,
+    memo,
     SetStateAction,
     useCallback,
     useEffect,
@@ -47,7 +48,7 @@ const createSlideTransition = (direction: "up" | "down" | "left" | "right") =>
 const TransitionRight = createSlideTransition("right");
 const TransitionUp = createSlideTransition("up");
 
-function PaperComponent(props: PaperProps) {
+const PaperComponent = memo(function PaperComponent(props: PaperProps) {
     const nodeRef = useRef<HTMLDivElement>(null);
     return (
         <Draggable
@@ -58,15 +59,12 @@ function PaperComponent(props: PaperProps) {
             <Paper {...props} ref={nodeRef} />
         </Draggable>
     );
-}
+});
 
 /**
  * Renders the row dialog component.
  */
-export default function RowDialog<
-    R extends Record<string, unknown>,
-    RI extends Record<string, unknown>,
->({
+function RowDialog<R extends Record<string, unknown>, RI extends Record<string, unknown>>({
     dialogOpen,
     handleClose,
     selectedRow,
@@ -129,21 +127,21 @@ export default function RowDialog<
     /**
      * Registers the row dialog submit callback exposed by the content form.
      */
-    const registerSubmit = (fn: (() => Promise<boolean>) | null) => {
+    const registerSubmit = useCallback((fn: (() => Promise<boolean>) | null) => {
         submitFnRef.current = fn;
-    };
+    }, []);
 
     /**
      * Registers the content callback that permanently drops the active saved draft.
      */
-    const registerDiscardDraft = (fn: (() => void) | null) => {
+    const registerDiscardDraft = useCallback((fn: (() => void) | null) => {
         discardDraftFnRef.current = fn;
-    };
+    }, []);
 
     /**
      * Attempts to submit the dialog before closing it.
      */
-    const onClose = async () => {
+    const onClose = useCallback(async () => {
         if (closeSubmissionInProgressRef.current) return;
 
         try {
@@ -165,7 +163,11 @@ export default function RowDialog<
             closeSubmissionInProgressRef.current = false;
             log.error("Failed to close row dialog", error);
         }
-    };
+    }, [clearValidationFailureCounter, handleClose, shouldShowForceCloseDialog]);
+
+    const handleDialogExited = useCallback(() => {
+        setSelectedRow(null);
+    }, [setSelectedRow]);
 
     /**
      * Closes both dialogs and discards pending validation errors.
@@ -200,9 +202,7 @@ export default function RowDialog<
                         /**
                          * Clears dialog state after the row dialog transition exits.
                          */
-                        onExited: () => {
-                            setSelectedRow(null);
-                        },
+                        onExited: handleDialogExited,
                     },
                 }}
             >
@@ -265,3 +265,5 @@ export default function RowDialog<
         </>
     );
 }
+
+export default memo(RowDialog) as typeof RowDialog;

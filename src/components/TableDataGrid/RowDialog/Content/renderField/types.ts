@@ -1,4 +1,4 @@
-import { RegisterOptions, UseFormReturn } from "react-hook-form";
+import { UseFormReturn } from "react-hook-form";
 
 import { FieldConfig } from "../../types";
 
@@ -13,8 +13,8 @@ export type RenderFieldParams<
     idx: number;
     row: R;
     values: Record<string, unknown>;
+    fields: FieldConfig<R, RI>[];
     form: UseFormReturn<Record<string, unknown>>;
-    getRules: (field: FieldConfig<R, RI>) => RegisterOptions<Record<string, unknown>, string>;
     handleFieldValueChange: (
         field: FieldConfig<R, RI>,
         value: unknown,

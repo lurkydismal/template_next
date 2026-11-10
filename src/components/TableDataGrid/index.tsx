@@ -11,6 +11,14 @@ import CustomDataGrid from "./CustomDataGrid";
 import RowDialog, { FieldConfig } from "./RowDialog";
 import CustomToolbar from "./Toolbar";
 
+const dataGridSx = {
+    "& .MuiDataGrid-row": {
+        cursor: "pointer",
+    },
+} as const;
+
+const dataGridSlots = { toolbar: CustomToolbar };
+
 /**
  * Renders the table data grid component.
  */
@@ -225,28 +233,36 @@ export default function TableDataGrid<
     /**
      * Handles row click.
      */
-    const handleRowClick = (params: GridRowParams) => {
+    const handleRowClick = useCallback((params: GridRowParams) => {
         setSelectedRow(params.row as R);
         setDialogOpen(true);
-    };
+    }, []);
 
     /**
      * Handles close.
      */
-    const handleClose = () => setDialogOpen(false);
+    const handleClose = useCallback(() => setDialogOpen(false), []);
 
-    // If extraButtons is a React element, clone it and inject createRowAction + emptyRow
-    const injectedExtraButtons = isValidElement(extraButtons)
-        ? cloneElement(extraButtons as React.ReactElement<Record<string, unknown>>, {
-              createRowAction: {
-                  type: "dialog",
-                  action: openCreateDialog,
-              },
-              emptyRow,
-          })
-        : extraButtons;
+    // If extraButtons is a React element, clone it and inject createRowAction + emptyRow.
+    const injectedExtraButtons = useMemo(
+        () =>
+            isValidElement(extraButtons)
+                ? cloneElement(extraButtons as React.ReactElement<Record<string, unknown>>, {
+                      createRowAction: {
+                          type: "dialog",
+                          action: openCreateDialog,
+                      },
+                      emptyRow,
+                  })
+                : extraButtons,
+        [emptyRow, extraButtons, openCreateDialog],
+    );
 
-    const columns = columnsFromFields(resolvedFields);
+    const columns = useMemo(() => columnsFromFields(resolvedFields), [resolvedFields]);
+    const slotProps = useMemo(
+        () => ({ toolbar: { extraButtons: injectedExtraButtons } }),
+        [injectedExtraButtons],
+    );
 
     if (currentRows === null || fieldsResolving) {
         return (
@@ -269,18 +285,10 @@ export default function TableDataGrid<
                 apiRef={apiRef}
                 columns={columns}
                 rows={currentRows}
-                sx={{
-                    "& .MuiDataGrid-row": {
-                        cursor: "pointer",
-                    },
-                }}
+                sx={dataGridSx}
                 onRowClick={handleRowClick}
-                slots={{ toolbar: CustomToolbar }}
-                slotProps={{
-                    toolbar: {
-                        extraButtons: injectedExtraButtons,
-                    },
-                }}
+                slots={dataGridSlots}
+                slotProps={slotProps}
             />
 
             <RowDialog<R, RI>

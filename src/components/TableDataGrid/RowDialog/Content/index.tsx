@@ -1,6 +1,6 @@
 import { Divider, Grid } from "@mui/material";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { RegisterOptions, useForm } from "react-hook-form";
+import { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 
 import { useSnackbar } from "@/providers/snackbar";
 
@@ -11,7 +11,6 @@ import { buildInitialValues } from "./helpers";
 import { resolveInterconnectedFieldUpdates } from "./interconnected";
 import MetadataFields from "./MetadataFields";
 import { renderField } from "./renderField";
-import { getFieldRules } from "./validation";
 
 type RowDialogContentProps<R, RI> = {
     row: R;
@@ -28,10 +27,7 @@ type RowDialogContentProps<R, RI> = {
 /**
  * Renders the row dialog content component.
  */
-export default function RowDialogContent<
-    R extends Record<string, unknown>,
-    RI extends Record<string, unknown>,
->({
+function RowDialogContent<R extends Record<string, unknown>, RI extends Record<string, unknown>>({
     row,
     fields,
     dashboardKey,
@@ -44,25 +40,35 @@ export default function RowDialogContent<
 }: RowDialogContentProps<R, RI>) {
     const { showError } = useSnackbar();
     const formRef = useRef<HTMLFormElement | null>(null);
+    const initialValues = useMemo(() => buildInitialValues(row, fields), [fields, row]);
     const form = useForm<Record<string, unknown>>({
-        defaultValues: buildInitialValues(row, fields),
+        defaultValues: initialValues,
         mode: "onSubmit",
     });
 
-    const [values, setValues] = useState<Record<string, unknown>>(buildInitialValues(row, fields));
+    const [values, setValues] = useState<Record<string, unknown>>(initialValues);
+    const valuesRef = useRef(values);
 
     useEffect(() => {
-        const initialValues = buildInitialValues(row, fields);
+        valuesRef.current = initialValues;
         setValues(initialValues);
         form.reset(initialValues);
-    }, [row]);
+    }, [form, initialValues, row]);
 
     /**
      * Stores multiple field values in local row dialog state and optionally mirrors them to React Hook Form.
      */
     const setValuesAndForm = useCallback(
         (nextValues: Record<string, unknown>, shouldDirty = true) => {
-            setValues((state) => ({ ...state, ...nextValues }));
+            // Keep the latest snapshot synchronously available to stable event
+            // callbacks, even before React commits the next render.
+            valuesRef.current = { ...valuesRef.current, ...nextValues };
+            setValues((state) => {
+                const changed = Object.entries(nextValues).some(
+                    ([key, value]) => !Object.is(state[key], value),
+                );
+                return changed ? { ...state, ...nextValues } : state;
+            });
 
             for (const [key, value] of Object.entries(nextValues)) {
                 form.setValue(key, value, {
@@ -116,7 +122,7 @@ export default function RowDialogContent<
             const changedValues = packedValues
                 ? { [key]: value, ...packedValues }
                 : { [key]: value };
-            const nextValues = { ...values, ...changedValues };
+            const nextValues = { ...valuesRef.current, ...changedValues };
             const requestEpoch = ++interconnectedRequestEpochRef.current;
 
             setValuesAndForm(changedValues);
@@ -140,7 +146,7 @@ export default function RowDialogContent<
                 }
             })();
         },
-        [fields, row, runFieldValueChange, setValuesAndForm, values],
+        [fields, row, runFieldValueChange, setValuesAndForm],
     );
 
     const updateRow = useCallback(
@@ -190,13 +196,6 @@ export default function RowDialogContent<
 
         return await updateRow(fd);
     }, [createRow, fields, form, idKey, row, updateRow]);
-
-    const getRules: (
-        field: FieldConfig<R, RI>,
-    ) => RegisterOptions<Record<string, unknown>, string> = useCallback(
-        (field) => getFieldRules(field, fields, form, row, values),
-        [fields, form, row, values],
-    );
 
     const initialRunRef = useRef<string | null>(null);
     const createSessionCounterRef = useRef(0);
@@ -358,20 +357,17 @@ export default function RowDialogContent<
                 )}
 
                 {fields.map((field, index) => (
-                    <Grid
-                        size={{ xs: 12, sm: field.size ?? 6 }}
-                        key={`${String(field.key)}-${index}`}
-                    >
+                    <Fragment key={`${String(field.key)}-${index}`}>
                         {renderField<R, RI>({
                             field,
                             idx: index,
                             row,
                             values,
+                            fields,
                             form,
-                            getRules,
                             handleFieldValueChange,
                         })}
-                    </Grid>
+                    </Fragment>
                 ))}
 
                 <Grid size={{ xs: 12 }}>
@@ -383,3 +379,5 @@ export default function RowDialogContent<
         </form>
     );
 }
+
+export default memo(RowDialogContent) as typeof RowDialogContent;

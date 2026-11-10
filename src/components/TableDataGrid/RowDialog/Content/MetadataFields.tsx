@@ -1,5 +1,6 @@
 import { Grid, Typography } from "@mui/material";
 import { Dayjs } from "dayjs";
+import { memo } from "react";
 
 import { formatDate } from "@/utils/dayjs";
 
@@ -26,7 +27,7 @@ function MetadataField({ label, value }: { label: string; value: React.ReactNode
 /**
  * Renders row audit metadata below the editable dialog fields.
  */
-export default function MetadataFields({ row }: MetadataFieldsProps) {
+function MetadataFields({ row }: MetadataFieldsProps) {
     return (
         <>
             <MetadataField
@@ -45,3 +46,5 @@ export default function MetadataFields({ row }: MetadataFieldsProps) {
         </>
     );
 }
+
+export default memo(MetadataFields);

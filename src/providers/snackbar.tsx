@@ -16,11 +16,11 @@ import {
     enqueueSnackbar,
     closeSnackbar,
 } from "notistack";
-import { createContext, useContext } from "react";
+import { createContext, useCallback, useContext, useMemo } from "react";
 
 import log from "@/utils/stdlog";
 import { LogFn } from "@/utils/stdlog/types";
-import { isDev, isProd, maxSnackbarCount } from "@/utils/stdvar";
+import { isProd, maxSnackbarCount } from "@/utils/stdvar";
 
 type SnackbarOptions = Pick<OptionsObject, "persist" | "onClose">;
 
@@ -71,81 +71,95 @@ export default function CustomSnackbarProvider({
     /**
      * Handles show message behavior.
      */
-    const _showMessage = (err: unknown, variant: VariantType, options?: SnackbarOptions) => {
-        const message = errorToMessage(err);
+    const _showMessage = useCallback(
+        (err: unknown, variant: VariantType, options?: SnackbarOptions) => {
+            const message = errorToMessage(err);
 
-        let logVariant: LogFn;
+            let logVariant: LogFn;
 
-        switch (variant) {
-            case "error":
-                if (isProd) {
-                    logVariant = log.error;
-                } else {
+            switch (variant) {
+                case "error":
+                    if (isProd) {
+                        logVariant = log.error;
+                    } else {
+                        logVariant = log.info;
+                    }
+                    break;
+
+                case "warning":
+                    logVariant = log.warn;
+                    break;
+
+                case "success":
+                case "info":
+                case "default":
+                default:
                     logVariant = log.info;
-                }
-                break;
+            }
 
-            case "warning":
-                logVariant = log.warn;
-                break;
-
-            case "success":
-            case "info":
-            case "default":
-            default:
-                logVariant = log.info;
-        }
-
-        logVariant(message);
-
-        enqueueSnackbar(message, { variant, ...options });
-    };
+            logVariant(message);
+            enqueueSnackbar(message, { variant, ...options });
+        },
+        [],
+    );
 
     /**
      * Handles show message behavior.
      */
-    const showMessage = (message: string, options?: SnackbarOptions) => {
-        _showMessage(message, "default", options);
-    };
+    const showMessage = useCallback(
+        (message: string, options?: SnackbarOptions) => {
+            _showMessage(message, "default", options);
+        },
+        [_showMessage],
+    );
 
     /**
      * Handles show success behavior.
      */
-    const showSuccess = (message: string, options?: SnackbarOptions) => {
-        _showMessage(message, "success", options);
-    };
+    const showSuccess = useCallback(
+        (message: string, options?: SnackbarOptions) => {
+            _showMessage(message, "success", options);
+        },
+        [_showMessage],
+    );
 
     /**
      * Handles show error behavior.
      */
-    const showError = (err: unknown, options?: SnackbarOptions) => {
-        _showMessage(err, "error", options);
-    };
+    const showError = useCallback(
+        (err: unknown, options?: SnackbarOptions) => {
+            _showMessage(err, "error", options);
+        },
+        [_showMessage],
+    );
 
     /**
      * Handles show warning behavior.
      */
-    const showWarning = (warn: unknown, options?: SnackbarOptions) => {
-        _showMessage(warn, "warning", options);
-    };
+    const showWarning = useCallback(
+        (warn: unknown, options?: SnackbarOptions) => {
+            _showMessage(warn, "warning", options);
+        },
+        [_showMessage],
+    );
 
     /**
      * Handles show info behavior.
      */
-    const showInfo = (message: string, options?: SnackbarOptions) => {
-        _showMessage(message, "info", options);
-    };
+    const showInfo = useCallback(
+        (message: string, options?: SnackbarOptions) => {
+            _showMessage(message, "info", options);
+        },
+        [_showMessage],
+    );
+
+    const contextValue = useMemo(
+        () => ({ showMessage, showSuccess, showError, showWarning, showInfo }),
+        [showError, showInfo, showMessage, showSuccess, showWarning],
+    );
 
     return (
-        <SnackbarContext.Provider
-            value={{
-                showMessage,
-                showSuccess,
-                showError,
-                showWarning,
-                showInfo,
-            }}
-        >
+        <SnackbarContext.Provider value={contextValue}>
             {children}
 
             <SnackbarProvider

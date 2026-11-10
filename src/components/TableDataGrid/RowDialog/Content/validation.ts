@@ -146,12 +146,7 @@ async function validateTableLookupValue<
 function validateRequiredGroup<
     R extends Record<string, unknown>,
     RI extends Record<string, unknown>,
->(
-    field: FieldConfig<R, RI>,
-    fields: FieldConfig<R, RI>[],
-    allValues: Record<string, unknown>,
-    values: Record<string, unknown>,
-) {
+>(field: FieldConfig<R, RI>, fields: FieldConfig<R, RI>[], allValues: Record<string, unknown>) {
     if (!field.requiredGroup) return null;
 
     const minCount = field.requiredGroupMin ?? 1;
@@ -159,7 +154,7 @@ function validateRequiredGroup<
         (candidate) => candidate.requiredGroup === field.requiredGroup,
     );
     const providedCount = groupFields.reduce((count, candidate) => {
-        const candidateValue = allValues[String(candidate.key)] ?? values[String(candidate.key)];
+        const candidateValue = allValues[String(candidate.key)];
 
         return count + (isEmptyValue(candidateValue) ? 0 : 1);
     }, 0);
@@ -212,7 +207,6 @@ export function getFieldRules<
     fields: FieldConfig<R, RI>[],
     form: UseFormReturn<Record<string, unknown>>,
     row: R,
-    values: Record<string, unknown>,
 ): RegisterOptions<Record<string, unknown>, string> {
     if (field.readOnly) return {};
 
@@ -220,7 +214,7 @@ export function getFieldRules<
         required: field.required ? `${field.label} is required` : false,
         validate: async (value) => {
             const allValues = form.getValues();
-            const groupError = validateRequiredGroup(field, fields, allValues, values);
+            const groupError = validateRequiredGroup(field, fields, allValues);
 
             if (groupError) return groupError;
 

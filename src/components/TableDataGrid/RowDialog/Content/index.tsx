@@ -11,8 +11,6 @@ import { buildInitialValues } from "./helpers";
 import { resolveInterconnectedFieldUpdates } from "./interconnected";
 import MetadataFields from "./MetadataFields";
 import { renderField } from "./renderField";
-import { FieldChangeOptions } from "./renderField/types";
-import { serializeRepeaterFields } from "./repeater";
 
 type RowDialogContentProps<R, RI> = {
     row: R;
@@ -61,7 +59,7 @@ function RowDialogContent<R extends Record<string, unknown>, RI extends Record<s
      * Stores multiple field values in local row dialog state and optionally mirrors them to React Hook Form.
      */
     const setValuesAndForm = useCallback(
-        (nextValues: Record<string, unknown>, shouldDirty = true, shouldValidate = shouldDirty) => {
+        (nextValues: Record<string, unknown>, shouldDirty = true) => {
             // Keep the latest snapshot synchronously available to stable event
             // callbacks, even before React commits the next render.
             valuesRef.current = { ...valuesRef.current, ...nextValues };
@@ -75,7 +73,7 @@ function RowDialogContent<R extends Record<string, unknown>, RI extends Record<s
             for (const [key, value] of Object.entries(nextValues)) {
                 form.setValue(key, value, {
                     shouldDirty,
-                    shouldValidate,
+                    shouldValidate: shouldDirty,
                 });
             }
         },
@@ -119,12 +117,7 @@ function RowDialogContent<R extends Record<string, unknown>, RI extends Record<s
      * Stores an edited value, then lets the field derive any dependent values.
      */
     const handleFieldValueChange = useCallback(
-        (
-            field: FieldConfig<R, RI>,
-            value: unknown,
-            packedValues?: Record<string, unknown>,
-            options?: FieldChangeOptions,
-        ) => {
+        (field: FieldConfig<R, RI>, value: unknown, packedValues?: Record<string, unknown>) => {
             const key = String(field.key);
             const changedValues = packedValues
                 ? { [key]: value, ...packedValues }
@@ -132,7 +125,7 @@ function RowDialogContent<R extends Record<string, unknown>, RI extends Record<s
             const nextValues = { ...valuesRef.current, ...changedValues };
             const requestEpoch = ++interconnectedRequestEpochRef.current;
 
-            setValuesAndForm(changedValues, true, options?.validate ?? true);
+            setValuesAndForm(changedValues);
 
             void (async () => {
                 const siblingUpdates = await runFieldValueChange(field, value, nextValues);
@@ -188,8 +181,7 @@ function RowDialogContent<R extends Record<string, unknown>, RI extends Record<s
         const valid = await form.trigger();
         if (!valid) return false;
 
-        // Repeaters hold a blank trailing entry while editing; store only real entries.
-        const currentValues = serializeRepeaterFields(fields, form.getValues()) as Partial<RI>;
+        const currentValues = form.getValues() as Partial<RI>;
         const hasId = rowHasId(row, idKey);
 
         if (hasId && !rowHasChanges(row, currentValues, fields)) {

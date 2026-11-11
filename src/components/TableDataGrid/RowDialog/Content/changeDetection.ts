@@ -1,5 +1,4 @@
 import { FieldConfig } from "../types";
-import { repeaterValuesEqual } from "./repeater";
 
 /**
  * Checks whether any editable row field differs from its original row value.
@@ -17,14 +16,6 @@ export function rowHasChanges<
 
         if (typeof field.isChanged === "function") {
             return field.isChanged(rowVal, newVal);
-        }
-
-        if (field.type === "repeater") {
-            return !repeaterValuesEqual(
-                field as unknown as Parameters<typeof repeaterValuesEqual>[0],
-                rowVal,
-                newVal,
-            );
         }
 
         return (

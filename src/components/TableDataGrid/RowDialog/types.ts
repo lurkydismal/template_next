@@ -245,38 +245,6 @@ export type CustomFieldConfig<
         render?: (value: unknown, setValue: (v: unknown) => void, row: R) => React.ReactNode;
     };
 
-/** One entry of a repeater: the values of its sub-fields, keyed by sub-field key. */
-export type RepeaterItem = Record<string, unknown>;
-
-/**
- * A field inside a repeater. Its "row" is the repeater entry, so `validate` and
- * `requiredGroup` see sibling values of the same entry. `onValueChange`,
- * `interconnected`, `runOnDialogOpen`, `toFormValue` and `name` are not applied
- * to sub-fields.
- */
-export type RepeaterSubField = FieldConfig<RepeaterItem, RepeaterItem>;
-
-/** Sub-fields, or a thunk returning them so a repeater can contain itself. */
-export type RepeaterSubFields = readonly RepeaterSubField[] | (() => readonly RepeaterSubField[]);
-
-/**
- * Composite list field. Shows its entries plus one blank entry; filling the blank
- * entry adds the next blank one. Each entry holds any mix of other field types,
- * including further repeaters (also the same one, via a `fields` thunk).
- * Stored as a JSONB array of objects; blank entries are never stored.
- */
-export type RepeaterFieldConfig<
-    R,
-    RI = unknown,
-    K extends PropertyKey = keyof R | keyof RI | string,
-> = CommonFieldConfig<R, RI, K> & {
-    type: "repeater";
-    fields: RepeaterSubFields;
-    minItems?: number; // minimum number of filled entries
-    maxItems?: number; // stops adding blank entries once this many are filled
-    itemLabel?: string; // title of each entry, numbered; defaults to the field label
-};
-
 export type FieldConfig<R, RI = unknown, K extends PropertyKey = keyof R | keyof RI | string> =
     | TextFieldConfig<R, RI, K>
     | NumberFieldConfig<R, RI, K>
@@ -289,8 +257,7 @@ export type FieldConfig<R, RI = unknown, K extends PropertyKey = keyof R | keyof
     | TableLookupFieldConfig<R, RI, K>
     | BooleanFieldConfig<R, RI, K>
     | RadioGroupFieldConfig<R, RI, K>
-    | CustomFieldConfig<R, RI, K>
-    | RepeaterFieldConfig<R, RI, K>;
+    | CustomFieldConfig<R, RI, K>;
 
 export type UpdateRowAction = (fd: FormData) => Promise<void>;
 export type CreateRowAction<RI> = (row: RI) => Promise<void>;

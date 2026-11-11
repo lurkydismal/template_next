@@ -17,14 +17,6 @@ const table = snakeCase.table;
 
 export const tables = table("tables", templates.table, (t) => [
     check("multilineField_not_blank", sql`length(trim(${t.multiline_field})) > 0`),
-    check(
-        "repeaterField_is_array",
-        sql`${t.repeater_field} is null or jsonb_typeof(${t.repeater_field}) = 'array'`,
-    ),
-    check(
-        "treeField_is_array",
-        sql`${t.tree_field} is null or jsonb_typeof(${t.tree_field}) = 'array'`,
-    ),
 
     index().on(t.author_id),
     index().on(t.last_editor_id),

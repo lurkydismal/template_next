@@ -18,7 +18,6 @@ import { createElement } from "react";
 
 import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
 import BooleanFieldControl from "@/components/TableDataGrid/RowDialog/BooleanFieldControl";
-import { formatRepeaterSummary } from "@/components/TableDataGrid/RowDialog/Content/repeater";
 import { toCamelCase } from "@/utils/stdfunc";
 
 type NormalizeOptions = {
@@ -108,18 +107,7 @@ export function columnsFromFields<
                                         field.variant === "icon" ? field.checkedIcon : undefined,
                                 }),
                         }
-                      : field.type === "repeater"
-                        ? {
-                              // Used for display, quick filter and CSV/print export.
-                              valueFormatter: (value: unknown) =>
-                                  formatRepeaterSummary(
-                                      field as unknown as Parameters<
-                                          typeof formatRepeaterSummary
-                                      >[0],
-                                      value,
-                                  ),
-                          }
-                        : {}),
+                      : {}),
             })),
     );
 }

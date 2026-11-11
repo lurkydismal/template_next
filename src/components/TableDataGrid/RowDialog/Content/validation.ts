@@ -3,13 +3,7 @@ import z from "zod";
 
 import { ipSchema, normalizedString, portSchema } from "@/utils/validate/schemas";
 
-import {
-    FieldConfig,
-    NumberFieldConfig,
-    RepeaterFieldConfig,
-    TableLookupFieldConfig,
-} from "../types";
-import { countFilledItems } from "./repeater";
+import { FieldConfig, NumberFieldConfig, TableLookupFieldConfig } from "../types";
 
 /**
  * Checks whether a value is considered empty for row dialog validation.
@@ -152,11 +146,7 @@ async function validateTableLookupValue<
 function validateRequiredGroup<
     R extends Record<string, unknown>,
     RI extends Record<string, unknown>,
->(
-    field: FieldConfig<R, RI>,
-    fields: readonly FieldConfig<R, RI>[],
-    allValues: Record<string, unknown>,
-) {
+>(field: FieldConfig<R, RI>, fields: FieldConfig<R, RI>[], allValues: Record<string, unknown>) {
     if (!field.requiredGroup) return null;
 
     const minCount = field.requiredGroupMin ?? 1;
@@ -176,32 +166,6 @@ function validateRequiredGroup<
     }
 
     return null;
-}
-
-/**
- * Validates entry counts of a repeater. Only filled entries count; the trailing
- * blank entry and any cleared entries are ignored.
- */
-function validateRepeaterValue<
-    R extends Record<string, unknown>,
-    RI extends Record<string, unknown>,
->(value: unknown, field: RepeaterFieldConfig<R, RI>) {
-    const filled = countFilledItems(
-        field as unknown as Parameters<typeof countFilledItems>[0],
-        value,
-    );
-
-    if (field.required && filled === 0) return `${field.label} is required`;
-
-    if (field.minItems !== undefined && filled < field.minItems) {
-        return `${field.label} needs at least ${field.minItems} filled ${filled === 1 && field.minItems === 1 ? "entry" : "entries"}`;
-    }
-
-    if (field.maxItems !== undefined && filled > field.maxItems) {
-        return `${field.label} allows at most ${field.maxItems} entries`;
-    }
-
-    return true;
 }
 
 /**
@@ -227,23 +191,10 @@ async function validateByFieldType<
         case "table-lookup":
             return validateTableLookupValue(value, field, row, allValues);
 
-        case "repeater":
-            return validateRepeaterValue(value, field);
-
         default:
             return true;
     }
 }
-
-/**
- * Describes the repeater entry a sub-field lives in. Sub-fields validate against
- * their entry's values, and validation is skipped while the entry is blank so
- * the always-present blank entry never reports errors.
- */
-export type FieldRuleScope = {
-    getValues: () => Record<string, unknown>;
-    isInactive: () => boolean;
-};
 
 /**
  * Builds react-hook-form rules for an editable row dialog field.
@@ -253,33 +204,16 @@ export function getFieldRules<
     RI extends Record<string, unknown>,
 >(
     field: FieldConfig<R, RI>,
-    fields: readonly FieldConfig<R, RI>[],
+    fields: FieldConfig<R, RI>[],
     form: UseFormReturn<Record<string, unknown>>,
     row: R,
-    scope?: FieldRuleScope,
 ): RegisterOptions<Record<string, unknown>, string> {
     if (field.readOnly) return {};
 
-    // Required-ness is checked in `validate` for sub-fields (blank entries are
-    // exempt) and for repeaters (an array is never "empty" while a blank entry exists).
-    const checksRequiredItself = scope !== undefined || field.type === "repeater";
-
     return {
-        required: field.required && !checksRequiredItself ? `${field.label} is required` : false,
+        required: field.required ? `${field.label} is required` : false,
         validate: async (value) => {
-            if (scope?.isInactive()) return true;
-
-            const allValues = scope ? scope.getValues() : form.getValues();
-
-            if (
-                scope &&
-                field.required &&
-                field.type !== "repeater" &&
-                (isEmptyValue(value) || value === false)
-            ) {
-                return `${field.label} is required`;
-            }
-
+            const allValues = form.getValues();
             const groupError = validateRequiredGroup(field, fields, allValues);
 
             if (groupError) return groupError;

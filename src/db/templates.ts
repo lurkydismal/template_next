@@ -22,8 +22,5 @@ export const table = {
     switch_field: boolean(),
     // Radio-group options may be strings or numbers; JSONB preserves either type.
     radio_group_field: jsonb().$type<string | number>(),
-    // Repeater entries: array of objects keyed by sub-field key. Blank entries are never stored.
-    repeater_field: jsonb().$type<Record<string, unknown>[]>(),
-    tree_field: jsonb().$type<Record<string, unknown>[]>(),
     ...metadataColumns,
 };

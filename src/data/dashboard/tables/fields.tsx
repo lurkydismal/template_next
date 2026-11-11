@@ -4,8 +4,6 @@ import {
 } from "@mui/icons-material";
 import { TextField } from "@mui/material";
 
-import type { RepeaterSubField } from "@/components/TableDataGrid/RowDialog/types";
-
 import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
 import { TablesRow as TableRow, TablesRowInsert as TableRowInsert } from "@/db/types";
 
@@ -29,16 +27,6 @@ function renderCustomField(value: unknown, setValue: (value: unknown) => void): 
 function tableLookupExists(value: unknown): boolean {
     return ["alpha", "bravo", "charlie"].includes(String(value));
 }
-
-// A repeater whose entries contain a repeater of their own entries: a tree of any depth.
-// `fields` is a thunk so the node can refer to itself.
-const treeNode: RepeaterSubField = {
-    key: "children",
-    label: "Children",
-    itemLabel: "Child",
-    type: "repeater",
-    fields: () => [{ key: "title", label: "Title", type: "text", size: 12 }, treeNode],
-};
 
 // Demo fields include every built-in row-dialog field type once.
 const fields: FieldConfig<TableRow, TableRowInsert>[] = [
@@ -179,43 +167,6 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         default: "Option A",
         row: true,
         size: 12,
-    },
-    {
-        // Composite list: each entry mixes field types and has its own nested list.
-        key: "repeater_field",
-        label: "Contacts",
-        itemLabel: "Contact",
-        type: "repeater",
-        size: 12,
-        fields: [
-            { key: "name", label: "Name", type: "text", required: true, size: 6 },
-            { key: "age", label: "Age", type: "number", min: 0, max: 130, size: 3 },
-            { key: "vip", label: "VIP", type: "boolean", variant: "switch", size: 3 },
-            {
-                key: "channel",
-                label: "Channel",
-                type: "radio-group",
-                options: ["Email", "Phone", "Post"],
-                default: "Email",
-                row: true,
-                size: 12,
-            },
-            {
-                key: "notes",
-                label: "Notes",
-                itemLabel: "Note",
-                type: "repeater",
-                fields: [{ key: "text", label: "Note", type: "text", size: 12 }],
-            },
-        ],
-    },
-    {
-        key: "tree_field",
-        label: "Tree",
-        itemLabel: "Node",
-        type: "repeater",
-        size: 12,
-        fields: () => [{ key: "title", label: "Title", type: "text", size: 12 }, treeNode],
     },
 ];
 

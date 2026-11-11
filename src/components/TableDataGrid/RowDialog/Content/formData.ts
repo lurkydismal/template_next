@@ -1,8 +1,7 @@
 import { isBlob } from "@/utils/stdfunc";
 
 import { FieldConfig } from "../types";
-import { toFieldValue } from "./fieldValues";
-import { serializeRepeaterValue } from "./repeater";
+import { toFieldValue } from "./helpers";
 
 /**
  * Appends an editable field value to the form payload expected by update actions.
@@ -18,17 +17,6 @@ function setFormDataField<R extends Record<string, unknown>, RI extends Record<s
     // Form controls may use a presentation-specific name. Send the canonical
     // schema property key to the server, where it is checked against Drizzle.
     if (name !== key) fd.delete(name);
-
-    if (field.type === "repeater") {
-        // Inputs inside a repeater are native controls named after their nested
-        // form paths ("list.0.title"). They are not columns, so drop them and
-        // send the whole list as one JSON value below.
-        for (const entryName of [...fd.keys()]) {
-            if (entryName.startsWith(`${name}.`) || entryName.startsWith(`${key}.`)) {
-                fd.delete(entryName);
-            }
-        }
-    }
 
     if (field.readOnly && !field.interconnected) {
         fd.delete(key);
@@ -47,16 +35,6 @@ function setFormDataField<R extends Record<string, unknown>, RI extends Record<s
         } else {
             fd.delete(key);
         }
-    } else if (field.type === "repeater") {
-        fd.set(
-            key,
-            JSON.stringify(
-                serializeRepeaterValue(
-                    field as unknown as Parameters<typeof serializeRepeaterValue>[0],
-                    value,
-                ),
-            ),
-        );
     } else if (value === null || value === undefined) {
         // Always overwrite a possible native form-control value (for example,
         // "on" from an unchecked/partially initialized checkbox).

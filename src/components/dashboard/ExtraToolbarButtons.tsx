@@ -13,6 +13,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import CustomDivider from "@/components/TableDataGrid/CustomDivider";
 import { NotificationsRow } from "@/db/types";
+import { connectDashboardEventStream } from "@/lib/dashboard/client-events";
 import { useSnackbar } from "@/providers/snackbar";
 import { isDev, maxSnackbarCount } from "@/utils/stdvar";
 import uuid from "@/utils/uuid";
@@ -189,23 +190,24 @@ export default function ExtraToolbarButtons<RI extends Record<string, unknown>>(
     }, [notifications, visibleUnreadIds, snackbar, handleNotificationDismiss]);
 
     useEffect(() => {
+        // Load persisted state independently of the stream's initial connection.
         void syncNotifications().catch(showError);
 
-        const source = new EventSource("/api/dashboard/changes");
-        source.onmessage = (event) => {
-            const payload = JSON.parse(event.data) as { type?: string };
-            if ((payload as { event?: string }).event !== "notification") {
-                return;
-            }
+        return connectDashboardEventStream({
+            onEvent: (payload) => {
+                if (payload.event !== "notification") return;
 
-            void syncNotifications()
-                .then(() => {
-                    showInfo("New notifications available");
-                })
-                .catch(showError);
-        };
-
-        return () => source.close();
+                void syncNotifications()
+                    .then(() => {
+                        showInfo("New notifications available");
+                    })
+                    .catch(showError);
+            },
+            // Re-fetch persisted notifications to cover events missed offline.
+            onReconnect: () => {
+                void syncNotifications().catch(showError);
+            },
+        });
     }, [syncNotifications, showInfo, showError]);
 
     return (

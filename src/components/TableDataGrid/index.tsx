@@ -5,6 +5,7 @@ import type { GridRowsProp } from "@mui/x-data-grid";
 import { Box, CircularProgress } from "@mui/material";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 
+import { connectDashboardEventStream } from "@/lib/dashboard/client-events";
 import { useSnackbar } from "@/providers/snackbar";
 
 import type { FieldConfig } from "./RowDialog";
@@ -105,11 +106,10 @@ export default function TableDataGrid<
      * Opens an SSE channel and refreshes rows when a mutation event is received.
      */
     const subscribeToRowChanges = useCallback(() => {
-        const source = new EventSource("/api/dashboard/changes");
         let refreshTimeout: ReturnType<typeof setTimeout> | null = null;
 
         const scheduleRefresh = () => {
-            if (refreshTimeout) clearTimeout(refreshTimeout);
+            if (refreshTimeout !== null) clearTimeout(refreshTimeout);
 
             refreshTimeout = setTimeout(() => {
                 void getRows();
@@ -117,22 +117,19 @@ export default function TableDataGrid<
             }, 120);
         };
 
-        source.onmessage = (event) => {
-            try {
-                const payload = JSON.parse(event.data) as { event?: string } | undefined;
-                if (payload?.event === "dashboard-change") scheduleRefresh();
-            } catch {
-                // Ignore malformed messages and keep listening.
-            }
-        };
-
-        source.onerror = () => {
-            // EventSource reconnects automatically; no manual retry is required.
-        };
+        const unsubscribe = connectDashboardEventStream({
+            onEvent: (payload) => {
+                if (payload.event === "dashboard-change") scheduleRefresh();
+            },
+            // A reconnect can happen after mutations whose SSE frames were lost.
+            onReconnect: () => {
+                void getRows();
+            },
+        });
 
         return () => {
-            if (refreshTimeout) clearTimeout(refreshTimeout);
-            source.close();
+            if (refreshTimeout !== null) clearTimeout(refreshTimeout);
+            unsubscribe();
         };
     }, [getRows]);
 

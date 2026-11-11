@@ -3,7 +3,10 @@ import { AnyColumn } from "drizzle-orm";
 import * as schema from "@/db/schema";
 import { DbTargetSchema } from "@/utils/validate/schemas";
 
-export const TABLES = schema;
+// The audit log is internal infrastructure and must not be exposed as a generic CRUD target.
+export const TABLES = Object.fromEntries(
+    Object.entries(schema).filter(([name]) => name !== "recordChanges"),
+) as Omit<typeof schema, "recordChanges">;
 
 export type DbTarget = keyof typeof TABLES;
 

@@ -1,4 +1,4 @@
-import { notifications, tables, user } from "./schema";
+import { notifications, recordChanges, tables, user } from "./schema";
 
 export type TablesRow = typeof tables.$inferSelect;
 export type TablesRowInsert = typeof tables.$inferInsert;
@@ -12,3 +12,6 @@ export type UserRowPublic = Omit<
 
 export type NotificationsRow = typeof notifications.$inferSelect;
 export type NotificationsRowInsert = typeof notifications.$inferInsert;
+
+export type RecordChangesRow = typeof recordChanges.$inferSelect;
+export type RecordChangesRowInsert = typeof recordChanges.$inferInsert;

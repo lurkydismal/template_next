@@ -1,13 +1,14 @@
 import { sql } from "drizzle-orm";
 import {
-    check,
-    serial,
-    varchar,
-    text,
-    index,
     boolean,
-    timestamp,
+    check,
+    index,
+    jsonb,
+    serial,
     snakeCase,
+    text,
+    timestamp,
+    varchar,
 } from "drizzle-orm/pg-core";
 
 import * as templates from "./templates";
@@ -115,3 +116,144 @@ export const verification = table(
     },
     (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
+
+/** JSON-compatible values stored in compact audit change tuples. */
+export type AuditJsonValue =
+    | string
+    | number
+    | boolean
+    | null
+    | AuditJsonValue[]
+    | { [key: string]: AuditJsonValue };
+
+/** [physical column name, previous value, next value]. */
+export type AuditFieldChange = [field: string, before: AuditJsonValue, after: AuditJsonValue];
+
+export type AuditOperation = "insert" | "update" | "delete";
+
+/**
+ * Append-only audit history for editable dashboard rows.
+ *
+ * `changes` is stored as compact JSONB tuples rather than full row snapshots:
+ * [["column_name", oldValue, newValue], ...].
+ */
+export const recordChanges = table(
+    "record_changes",
+    {
+        id: serial().primaryKey(),
+        target: varchar({ length: 64 }).notNull(),
+        record_key: jsonb().$type<Record<string, AuditJsonValue>>().notNull(),
+        operation: varchar({ length: 6, enum: ["insert", "update", "delete"] })
+            .$type<AuditOperation>()
+            .notNull(),
+        actor_id: text().references(() => user.id, { onDelete: "set null" }),
+        changes: jsonb().$type<AuditFieldChange[]>().notNull(),
+        created_at: timestamp({ precision: 0, withTimezone: true }).defaultNow().notNull(),
+    },
+    (t) => [
+        check(
+            "record_changes_operation_valid",
+            sql`${t.operation} in ('insert', 'update', 'delete')`,
+        ),
+        check("record_changes_changes_array", sql`jsonb_typeof(${t.changes}) = 'array'`),
+        index("record_changes_record_idx").on(t.target, t.record_key, t.created_at),
+        index("record_changes_actor_idx").on(t.actor_id),
+        index("record_changes_created_at_idx").on(t.created_at),
+    ],
+);
+
+/*
+-- A database trigger captures every INSERT/UPDATE/DELETE against `tables`,
+-- including writes that do not pass through the Next.js save() helper.
+CREATE OR REPLACE FUNCTION "record_tables_field_changes"()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    before_row jsonb;
+    after_row jsonb;
+    field_changes jsonb;
+    row_id integer;
+    actor_id_value text;
+    operation_name varchar(6);
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        after_row := to_jsonb(NEW);
+        row_id := NEW.id;
+        actor_id_value := NEW.last_editor_id;
+        operation_name := 'insert';
+
+        SELECT COALESCE(
+            jsonb_agg(
+                jsonb_build_array(fields.key, 'null'::jsonb, fields.value)
+                ORDER BY fields.key
+            ),
+            '[]'::jsonb
+        )
+        INTO field_changes
+        FROM jsonb_each(after_row) AS fields(key, value);
+
+    ELSIF TG_OP = 'UPDATE' THEN
+        before_row := to_jsonb(OLD);
+        after_row := to_jsonb(NEW);
+        row_id := NEW.id;
+        actor_id_value := NEW.last_editor_id;
+        operation_name := 'update';
+
+        SELECT COALESCE(
+            jsonb_agg(
+                jsonb_build_array(old_fields.key, old_fields.value, new_fields.value)
+                ORDER BY old_fields.key
+            ),
+            '[]'::jsonb
+        )
+        INTO field_changes
+        FROM jsonb_each(before_row) AS old_fields(key, value)
+        JOIN jsonb_each(after_row) AS new_fields USING (key)
+        WHERE old_fields.value IS DISTINCT FROM new_fields.value;
+
+    ELSE
+        before_row := to_jsonb(OLD);
+        row_id := OLD.id;
+        actor_id_value := OLD.last_editor_id;
+        operation_name := 'delete';
+
+        SELECT COALESCE(
+            jsonb_agg(
+                jsonb_build_array(fields.key, fields.value, 'null'::jsonb)
+                ORDER BY fields.key
+            ),
+            '[]'::jsonb
+        )
+        INTO field_changes
+        FROM jsonb_each(before_row) AS fields(key, value);
+    END IF;
+
+    -- Ignore no-op UPDATE statements so the history contains real field changes only.
+    IF jsonb_array_length(field_changes) > 0 THEN
+        INSERT INTO "record_changes" (
+            "target", "record_key", "operation", "actor_id", "changes"
+        )
+        VALUES (
+            'tables',
+            jsonb_build_object('id', row_id),
+            operation_name,
+            actor_id_value,
+            field_changes
+        );
+    END IF;
+
+    IF TG_OP = 'DELETE' THEN
+        RETURN OLD;
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS "tables_record_field_changes" ON "tables";
+CREATE TRIGGER "tables_record_field_changes"
+AFTER INSERT OR UPDATE OR DELETE ON "tables"
+FOR EACH ROW
+EXECUTE FUNCTION "record_tables_field_changes"();
+*/

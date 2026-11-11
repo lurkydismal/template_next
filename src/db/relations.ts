@@ -16,6 +16,13 @@ export const relations = defineRelations(schema, (r) => ({
     user: {
         sessions: r.many.session(),
         accounts: r.many.account(),
+        recordChanges: r.many.recordChanges(),
+    },
+    recordChanges: {
+        actor: r.one.user({
+            from: r.recordChanges.actor_id,
+            to: r.user.id,
+        }),
     },
     session: {
         user: r.one.user({

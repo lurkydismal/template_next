@@ -1,0 +1,139 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "1abfeaa5-f4dc-4536-b735-94b99add4a33",
+  "prevIds": [
+    "008b1e11-22be-4edf-9464-c9c52de8e301"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "repeater_field"
+      ],
+      "writes": [
+        "s|col|public.tables.repeater_field",
+        "n|col|public.tables.repeater_field",
+        "e|col|public.tables.repeater_field"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "tables",
+        "tree_field"
+      ],
+      "writes": [
+        "s|col|public.tables.tree_field",
+        "n|col|public.tables.tree_field",
+        "e|col|public.tables.tree_field"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_check",
+      "statementTarget": [
+        "table",
+        "public",
+        "tables"
+      ],
+      "writes": [
+        "s|ck|public.tables.repeaterField_is_array",
+        "n|ck|public.tables.repeaterField_is_array",
+        "e|ck|public.tables.repeaterField_is_array",
+        "n|con|public.tables.repeaterField_is_array"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public",
+        "n|col|public.tables.repeater_field"
+      ]
+    },
+    {
+      "statementType": "add_check",
+      "statementTarget": [
+        "table",
+        "public",
+        "tables"
+      ],
+      "writes": [
+        "s|ck|public.tables.treeField_is_array",
+        "n|ck|public.tables.treeField_is_array",
+        "e|ck|public.tables.treeField_is_array",
+        "n|con|public.tables.treeField_is_array"
+      ],
+      "reads": [
+        "n|tbl|public.tables",
+        "n|sch|public",
+        "n|col|public.tables.tree_field"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "tables",
+        "name": "repeater_field",
+        "type": "jsonb",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "tables",
+        "name": "tree_field",
+        "type": "jsonb",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "tables",
+        "name": "repeaterField_is_array",
+        "value": "\"repeater_field\" is null or jsonb_typeof(\"repeater_field\") = 'array'",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "tables",
+        "name": "treeField_is_array",
+        "value": "\"tree_field\" is null or jsonb_typeof(\"tree_field\") = 'array'",
+        "entityType": "checks"
+      }
+    }
+  ]
+}

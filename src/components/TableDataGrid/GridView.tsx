@@ -51,7 +51,9 @@ function GridView<R extends Record<string, unknown>, RI extends Record<string, u
         () =>
             fields.reduce((row, field) => {
                 row[field.key as keyof RI] = (
-                    field.type !== "boolean" && field.type !== "radio-group"
+                    field.type !== "boolean" &&
+                    field.type !== "radio-group" &&
+                    field.type !== "repeater"
                         ? (field.placeholder ?? null)
                         : null
                 ) as RI[keyof RI];

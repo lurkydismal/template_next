@@ -13,7 +13,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import CustomDivider from "@/components/TableDataGrid/CustomDivider";
 import { NotificationsRow } from "@/db/types";
-import { connectDashboardEventStream } from "@/lib/dashboard/client-events";
+import { useDashboardEventStream } from "@/lib/dashboard/client-events";
 import { useSnackbar } from "@/providers/snackbar";
 import { isDev, maxSnackbarCount } from "@/utils/stdvar";
 import uuid from "@/utils/uuid";
@@ -192,23 +192,27 @@ export default function ExtraToolbarButtons<RI extends Record<string, unknown>>(
     useEffect(() => {
         // Load persisted state independently of the stream's initial connection.
         void syncNotifications().catch(showError);
+    }, [syncNotifications, showError]);
 
-        return connectDashboardEventStream({
-            onEvent: (payload) => {
-                if (payload.event !== "notification") return;
+    const handleStreamEvent = useCallback(
+        (payload: { event?: string }) => {
+            if (payload.event !== "notification") return;
 
-                void syncNotifications()
-                    .then(() => {
-                        showInfo("New notifications available");
-                    })
-                    .catch(showError);
-            },
-            // Re-fetch persisted notifications to cover events missed offline.
-            onReconnect: () => {
-                void syncNotifications().catch(showError);
-            },
-        });
-    }, [syncNotifications, showInfo, showError]);
+            void syncNotifications()
+                .then(() => {
+                    showInfo("New notifications available");
+                })
+                .catch(showError);
+        },
+        [syncNotifications, showInfo, showError],
+    );
+
+    const handleReconnect = useCallback(() => {
+        // Re-fetch persisted notifications to cover events missed offline.
+        void syncNotifications().catch(showError);
+    }, [syncNotifications, showError]);
+
+    useDashboardEventStream({ onEvent: handleStreamEvent, onReconnect: handleReconnect });
 
     return (
         <>

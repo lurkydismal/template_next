@@ -3,9 +3,9 @@
 import type { GridRowsProp } from "@mui/x-data-grid";
 
 import { Box, CircularProgress } from "@mui/material";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
-import { connectDashboardEventStream } from "@/lib/dashboard/client-events";
+import { useDashboardEventStream } from "@/lib/dashboard/client-events";
 import { useSnackbar } from "@/providers/snackbar";
 
 import type { FieldConfig } from "./RowDialog";
@@ -102,42 +102,44 @@ export default function TableDataGrid<
         }
     }, [getRowsAction, showError]);
 
+    const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
     /**
-     * Opens an SSE channel and refreshes rows when a mutation event is received.
+     * Coalesces bursts of row-change events into a single data refresh.
      */
-    const subscribeToRowChanges = useCallback(() => {
-        let refreshTimeout: ReturnType<typeof setTimeout> | null = null;
+    const scheduleRefresh = useCallback(() => {
+        if (refreshTimeoutRef.current !== null) clearTimeout(refreshTimeoutRef.current);
 
-        const scheduleRefresh = () => {
-            if (refreshTimeout !== null) clearTimeout(refreshTimeout);
+        refreshTimeoutRef.current = setTimeout(() => {
+            void getRows();
+            refreshTimeoutRef.current = null;
+        }, 120);
+    }, [getRows]);
 
-            refreshTimeout = setTimeout(() => {
-                void getRows();
-                refreshTimeout = null;
-            }, 120);
-        };
+    const handleStreamEvent = useCallback(
+        (payload: { event?: string }) => {
+            if (payload.event === "dashboard-change") scheduleRefresh();
+        },
+        [scheduleRefresh],
+    );
 
-        const unsubscribe = connectDashboardEventStream({
-            onEvent: (payload) => {
-                if (payload.event === "dashboard-change") scheduleRefresh();
-            },
-            // A reconnect can happen after mutations whose SSE frames were lost.
-            onReconnect: () => {
-                void getRows();
-            },
-        });
-
-        return () => {
-            if (refreshTimeout !== null) clearTimeout(refreshTimeout);
-            unsubscribe();
-        };
+    const handleReconnect = useCallback(() => {
+        // A reconnect can happen after mutations whose SSE frames were lost.
+        void getRows();
     }, [getRows]);
 
     useEffect(() => {
         void getRows();
+
+        return () => {
+            if (refreshTimeoutRef.current !== null) {
+                clearTimeout(refreshTimeoutRef.current);
+                refreshTimeoutRef.current = null;
+            }
+        };
     }, [getRows]);
 
-    useEffect(() => subscribeToRowChanges(), [subscribeToRowChanges]);
+    useDashboardEventStream({ onEvent: handleStreamEvent, onReconnect: handleReconnect });
 
     /**
      * Wraps create so a successful mutation refreshes the displayed rows.

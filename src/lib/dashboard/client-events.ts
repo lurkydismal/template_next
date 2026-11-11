@@ -1,5 +1,8 @@
 "use client";
 
+import { useOffline } from "next/offline";
+import { useEffect, useRef } from "react";
+
 type DashboardStreamMessage = {
     event?: string;
     type?: string;
@@ -18,133 +21,134 @@ const STABLE_CONNECTION_TIME = 5_000;
 /**
  * Opens the dashboard SSE channel and restores it after connection failures.
  *
- * EventSource normally retries dropped connections itself, but it permanently
- * closes for some response failures (for example, an unavailable endpoint).
- * Recreating the source ourselves handles both cases consistently. Consumers
- * are notified after recovery so they can reload state that may have changed
- * while the stream was unavailable.
+ * Next.js' `useOffline` hook owns browser connectivity detection. SSE failures
+ * still use their own retry loop because EventSource requests are not covered
+ * by Next.js' navigation/Server Action retry handling. Consumers are notified
+ * after recovery so they can reload state that may have changed while offline.
  */
-export function connectDashboardEventStream({
+export function useDashboardEventStream({
     onEvent,
     onReconnect,
-}: DashboardEventStreamOptions): () => void {
-    let disposed = false;
-    let source: EventSource | null = null;
-    let retryTimer: ReturnType<typeof setTimeout> | null = null;
-    let stableTimer: ReturnType<typeof setTimeout> | null = null;
-    let retryAttempt = 0;
-    let needsResync = false;
+}: DashboardEventStreamOptions): void {
+    const isOffline = useOffline();
+    const callbacksRef = useRef({ onEvent, onReconnect });
+    const needsResyncRef = useRef(false);
 
-    const clearRetryTimer = () => {
-        if (retryTimer !== null) {
-            clearTimeout(retryTimer);
-            retryTimer = null;
+    // Keep callbacks current without reconnecting the stream when they change.
+    useEffect(() => {
+        callbacksRef.current = { onEvent, onReconnect };
+    }, [onEvent, onReconnect]);
+
+    useEffect(() => {
+        if (isOffline) {
+            // The initial data fetch may also have failed while offline. Refresh
+            // after the SSE stream is established again, even if it never opened.
+            needsResyncRef.current = true;
+            return;
         }
-    };
 
-    const clearStableTimer = () => {
-        if (stableTimer !== null) {
-            clearTimeout(stableTimer);
-            stableTimer = null;
-        }
-    };
+        let disposed = false;
+        let source: EventSource | null = null;
+        let retryTimer: ReturnType<typeof setTimeout> | null = null;
+        let stableTimer: ReturnType<typeof setTimeout> | null = null;
+        let retryAttempt = 0;
 
-    const scheduleReconnect = () => {
-        if (disposed || retryTimer !== null || !navigator.onLine) return;
+        const clearRetryTimer = () => {
+            if (retryTimer !== null) {
+                clearTimeout(retryTimer);
+                retryTimer = null;
+            }
+        };
 
-        const delay = Math.min(INITIAL_RETRY_DELAY * 2 ** retryAttempt, MAX_RETRY_DELAY);
-        retryAttempt = Math.min(retryAttempt + 1, 6);
-        // Spread retries from multiple clients to avoid reconnecting in lockstep.
-        const jitteredDelay = Math.round(delay * (0.8 + Math.random() * 0.4));
+        const clearStableTimer = () => {
+            if (stableTimer !== null) {
+                clearTimeout(stableTimer);
+                stableTimer = null;
+            }
+        };
 
-        retryTimer = setTimeout(() => {
-            retryTimer = null;
-            connect();
-        }, jitteredDelay);
-    };
+        const scheduleReconnect = () => {
+            if (disposed || retryTimer !== null) return;
 
-    const connect = () => {
-        if (disposed || source !== null || !navigator.onLine) return;
+            const delay = Math.min(INITIAL_RETRY_DELAY * 2 ** retryAttempt, MAX_RETRY_DELAY);
+            retryAttempt = Math.min(retryAttempt + 1, 6);
+            // Spread retries from multiple clients to avoid reconnecting in lockstep.
+            const jitteredDelay = Math.round(delay * (0.8 + Math.random() * 0.4));
 
-        try {
-            const nextSource = new EventSource("/api/dashboard/changes");
-            source = nextSource;
+            retryTimer = setTimeout(() => {
+                retryTimer = null;
+                connect();
+            }, jitteredDelay);
+        };
 
-            nextSource.onopen = () => {
-                if (disposed || source !== nextSource) return;
+        const connect = () => {
+            if (disposed || source !== null) return;
 
-                clearStableTimer();
-                stableTimer = setTimeout(() => {
-                    retryAttempt = 0;
-                    stableTimer = null;
-                }, STABLE_CONNECTION_TIME);
+            try {
+                const nextSource = new EventSource("/api/dashboard/changes");
+                source = nextSource;
 
-                if (needsResync) {
-                    needsResync = false;
-                    onReconnect?.();
-                }
-            };
+                nextSource.onopen = () => {
+                    if (disposed || source !== nextSource) return;
 
-            nextSource.onmessage = (message) => {
-                if (disposed || source !== nextSource) return;
+                    clearStableTimer();
+                    stableTimer = setTimeout(() => {
+                        retryAttempt = 0;
+                        stableTimer = null;
+                    }, STABLE_CONNECTION_TIME);
 
-                try {
-                    const payload: unknown = JSON.parse(message.data);
-                    if (
-                        payload !== null &&
-                        typeof payload === "object" &&
-                        !Array.isArray(payload)
-                    ) {
-                        onEvent(payload as DashboardStreamMessage);
+                    if (needsResyncRef.current) {
+                        needsResyncRef.current = false;
+                        callbacksRef.current.onReconnect?.();
                     }
-                } catch {
-                    // Ignore malformed frames and keep the connection alive.
-                }
-            };
+                };
 
-            nextSource.onerror = () => {
-                if (disposed || source !== nextSource) return;
+                nextSource.onmessage = (message) => {
+                    if (disposed || source !== nextSource) return;
 
-                needsResync = true;
-                clearStableTimer();
-                nextSource.close();
-                source = null;
+                    try {
+                        const payload: unknown = JSON.parse(message.data);
+                        if (
+                            payload !== null &&
+                            typeof payload === "object" &&
+                            !Array.isArray(payload)
+                        ) {
+                            callbacksRef.current.onEvent(payload as DashboardStreamMessage);
+                        }
+                    } catch {
+                        // Ignore malformed frames and keep the connection alive.
+                    }
+                };
+
+                nextSource.onerror = () => {
+                    if (disposed || source !== nextSource) return;
+
+                    needsResyncRef.current = true;
+                    clearStableTimer();
+                    nextSource.close();
+                    source = null;
+                    scheduleReconnect();
+                };
+            } catch {
+                // EventSource construction can fail; retry just as for a stream error.
+                needsResyncRef.current = true;
                 scheduleReconnect();
-            };
-        } catch {
-            // EventSource construction can fail; retry just as for a stream error.
-            needsResync = true;
-            scheduleReconnect();
-        }
-    };
+            }
+        };
 
-    const handleOffline = () => {
-        clearRetryTimer();
-        clearStableTimer();
-
-        if (source !== null) {
-            source.close();
-            source = null;
-            needsResync = true;
-        }
-    };
-
-    const handleOnline = () => {
-        clearRetryTimer();
         connect();
-    };
 
-    window.addEventListener("offline", handleOffline);
-    window.addEventListener("online", handleOnline);
-    connect();
+        return () => {
+            disposed = true;
+            clearRetryTimer();
+            clearStableTimer();
 
-    return () => {
-        disposed = true;
-        clearRetryTimer();
-        clearStableTimer();
-        window.removeEventListener("offline", handleOffline);
-        window.removeEventListener("online", handleOnline);
-        source?.close();
-        source = null;
-    };
+            if (source !== null) {
+                // This cleanup also runs when `useOffline` changes to true.
+                needsResyncRef.current = true;
+                source.close();
+                source = null;
+            }
+        };
+    }, [isOffline]);
 }

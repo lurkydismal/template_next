@@ -1,4 +1,4 @@
-import { FieldConfig } from "../types";
+import type { FieldConfig } from "../types";
 
 /**
  * Resolves an interconnected field value from a relation descriptor.
@@ -23,7 +23,7 @@ function resolveInterconnectedRelationValue(
 /**
  * Computes the value for a single interconnected field.
  */
-export async function resolveInterconnectedFieldValue<
+async function resolveInterconnectedFieldValue<
     R extends Record<string, unknown>,
     RI extends Record<string, unknown>,
 >(field: FieldConfig<R, RI>, row: R, values: Record<string, unknown>) {

@@ -24,7 +24,6 @@ export type RenderFieldParams<
     RI extends Record<string, unknown>,
 > = {
     field: FieldConfig<R, RI>;
-    idx: number;
     row: R;
     values: Record<string, unknown>;
     fields: FieldConfig<R, RI>[];

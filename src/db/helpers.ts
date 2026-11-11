@@ -1,6 +1,6 @@
 import { text, timestamp } from "drizzle-orm/pg-core";
 
-import { user } from "./schema";
+import { user } from "./auth-schema";
 
 /**
  * timestamps
@@ -22,7 +22,7 @@ import { user } from "./schema";
  *     ...timestampsColumns,
  * });
  */
-export const timestampsColumns = {
+const timestampsColumns = {
     updated_at: timestamp({ precision: 0, withTimezone: true }).defaultNow().notNull(),
     created_at: timestamp({ precision: 0, withTimezone: true }).defaultNow().notNull(),
 };
@@ -54,7 +54,7 @@ EXECUTE FUNCTION update_updated_at_column();
  *   ...auditColumns,
  * });
  */
-export const auditColumns = {
+const auditColumns = {
     author_id: text().references(() => user.id, { onDelete: "set null" }),
     last_editor_id: text().references(() => user.id, {
         onDelete: "set null",

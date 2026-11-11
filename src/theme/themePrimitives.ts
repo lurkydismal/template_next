@@ -35,7 +35,7 @@ declare module "@mui/material/styles" {
 const defaultTheme = createTheme();
 
 // Define color palettes for brand, gray, green, orange, red
-export const brand = {
+const brand = {
     50: "hsl(210, 100%, 95%)",
     100: "hsl(210, 100%, 92%)",
     200: "hsl(210, 100%, 80%)",
@@ -61,7 +61,7 @@ export const gray = {
     900: "hsl(220, 35%, 3%)",
 };
 
-export const green = {
+const green = {
     50: "hsl(120, 80%, 98%)",
     100: "hsl(120, 75%, 94%)",
     200: "hsl(120, 75%, 87%)",
@@ -74,7 +74,7 @@ export const green = {
     900: "hsl(120, 87%, 6%)",
 };
 
-export const orange = {
+const orange = {
     50: "hsl(45, 100%, 97%)",
     100: "hsl(45, 92%, 90%)",
     200: "hsl(45, 94%, 80%)",
@@ -87,7 +87,7 @@ export const orange = {
     900: "hsl(45, 93%, 12%)",
 };
 
-export const red = {
+const red = {
     50: "hsl(0, 100%, 97%)",
     100: "hsl(0, 92%, 90%)",
     200: "hsl(0, 94%, 80%)",

@@ -1,4 +1,4 @@
-import { FieldConfig } from "../types";
+import type { FieldConfig } from "../types";
 
 /**
  * Checks whether any editable row field differs from its original row value.

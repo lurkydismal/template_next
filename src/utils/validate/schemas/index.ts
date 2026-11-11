@@ -1,14 +1,7 @@
-import { Dayjs } from "dayjs";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/zod";
+import dayjs, { type Dayjs } from "dayjs";
 import z from "zod";
 
-import { user } from "@/db/schema";
-import { DbTarget, TABLES } from "@/lib/types";
-import dayjs from "@/utils/dayjs";
 import { userMessages } from "@/utils/messages";
-
-export const emptyToNull = <T extends z.ZodType>(schema: T) =>
-    z.preprocess((val) => (val === "" ? null : val), schema.nullable());
 
 export const dateInputSchema = z
     .union([z.string(), z.date(), z.custom<Dayjs>((v) => dayjs.isDayjs(v))])
@@ -32,19 +25,6 @@ export const normalizedString = z.preprocess(
     z.string(),
 );
 
-export const userSelectSchema = createSelectSchema(user);
-export const userInsertSchema = createInsertSchema(user);
-export const userUpdateSchema = createUpdateSchema(user);
-export const userSelectPublicSchema = userSelectSchema
-    .omit({
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-    })
-    .extend({
-        name: z.string().trim().min(1),
-    });
-
 export const mutationInputSchema = z.record(z.string(), z.unknown());
 
 const authEmailSchema = z
@@ -63,5 +43,3 @@ export const loginUserSchema = z.object({
     password: z.string().min(1, userMessages.validation.passwordRequired),
     remember: z.boolean().optional(),
 });
-
-export const DbTargetSchema = z.enum(Object.keys(TABLES) as [DbTarget, ...DbTarget[]]);

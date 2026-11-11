@@ -28,6 +28,15 @@ const dataGridSx = {
 
 const dataGridSlots = { toolbar: CustomToolbar };
 
+function isEditableTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) return false;
+    return target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
+}
+
+function isCreateDialogShortcut(event: KeyboardEvent): boolean {
+    return (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "m";
+}
+
 type GridViewProps<R extends Record<string, unknown>, RI extends Record<string, unknown>> = {
     rows: Readonly<GridRowsProp>;
     fields: FieldConfig<R, RI>[];
@@ -74,19 +83,7 @@ function GridView<R extends Record<string, unknown>, RI extends Record<string, u
     // Keyboard shortcut opens the create dialog with the same defaults as the toolbar.
     useEffect(() => {
         const onKeyDown = (event: KeyboardEvent) => {
-            if (!((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "m")) {
-                return;
-            }
-
-            const active = document.activeElement;
-            if (
-                active &&
-                (active.tagName === "INPUT" ||
-                    active.tagName === "TEXTAREA" ||
-                    (active as HTMLElement).isContentEditable)
-            ) {
-                return;
-            }
+            if (!isCreateDialogShortcut(event) || isEditableTarget(document.activeElement)) return;
 
             event.preventDefault();
             openCreateDialog();

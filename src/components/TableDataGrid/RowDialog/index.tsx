@@ -30,7 +30,7 @@ import log from "@/utils/stdlog";
 import RowDialogContent from "./rhf/RowDialogForm";
 import { CreateRowAction, FieldConfig, UpdateRowAction } from "./types";
 
-export type { FieldConfig, RadioGroupOption } from "./types";
+export type { FieldConfig } from "./types";
 
 const promptButtonSx = {
     transition: "all 0.2s ease",

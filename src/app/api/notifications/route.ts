@@ -9,136 +9,122 @@ import { userMessages } from "@/utils/messages";
 import log from "@/utils/stdlog";
 
 type NotificationType = NotificationsRow["type"];
+type JsonRecord = Record<string, unknown>;
+type JsonReadResult = { ok: true; data: JsonRecord } | { ok: false; response: Response };
 
-/**
- * Reads notifications and unread count for toolbar center state.
- */
-export async function GET(): Promise<Response> {
-    const getUnreadNotifications = async () => {
-        const rows = await db.select().from(notifications).orderBy(asc(notifications.created_at));
-        const unreadResult = await db
-            .select({ total: count() })
-            .from(notifications)
-            .where(eq(notifications.is_read, false));
-
-        return { rows, unreadResult };
-    };
-
-    try {
-        const { rows, unreadResult } = await getUnreadNotifications();
-        return Response.json({ rows, unreadCount: unreadResult[0]?.total ?? 0 });
-    } catch (error) {
-        log.error("Failed to read notifications", error);
-        return Response.json({ error: userMessages.errors.notificationsLoad }, { status: 500 });
-    }
+function errorResponse(message: string, status = 400): Response {
+    return Response.json({ error: message }, { status });
 }
 
-/**
- * Persists one notification and emits it through the shared SSE bus.
- */
-export async function POST(request: Request): Promise<Response> {
-    const invalidResponse = Response.json(
-        { error: userMessages.validation.invalidJson },
-        { status: 400 },
-    );
+function isJsonRecord(value: unknown): value is JsonRecord {
+    return value !== null && typeof value === "object" && !Array.isArray(value);
+}
 
+async function readJsonRecord(request: Request): Promise<JsonReadResult> {
     let payload: unknown;
     try {
         payload = await request.json();
     } catch {
-        return invalidResponse;
+        return { ok: false, response: errorResponse(userMessages.validation.invalidJson) };
     }
 
-    if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
-        return Response.json(
-            { error: userMessages.validation.invalidNotificationData },
-            { status: 400 },
-        );
+    if (!isJsonRecord(payload)) {
+        return {
+            ok: false,
+            response: errorResponse(userMessages.validation.invalidNotificationData),
+        };
     }
 
-    const data = payload as Record<string, unknown>;
-    const typeValue = data.type ?? "default";
-    const message = typeof data.message === "string" ? data.message.trim() : "";
-    const validTypes: NotificationType[] = ["default", "success", "error", "warning", "info"];
-
-    if (typeof typeValue !== "string" || !validTypes.includes(typeValue as NotificationType)) {
-        return Response.json(
-            { error: userMessages.validation.notificationTypeInvalid },
-            { status: 400 },
-        );
-    }
-
-    const type = typeValue as NotificationType;
-
-    if (!message) {
-        return Response.json(
-            { error: userMessages.validation.notificationMessageRequired },
-            { status: 400 },
-        );
-    }
-
-    try {
-        const [created] = await db.insert(notifications).values({ type, message }).returning();
-
-        if (created) {
-            await emitNotificationEvent({
-                event: "notification",
-                notificationId: created.id,
-                type: created.type,
-                message: created.message,
-                occurredAt: new Date().toISOString(),
-            });
-
-            return Response.json(created, { status: 201 });
-        }
-
-        return Response.json({ error: userMessages.errors.notificationsCreate }, { status: 500 });
-    } catch (error) {
-        log.error("Failed to create notification", error);
-        return Response.json({ error: userMessages.errors.notificationsCreate }, { status: 500 });
-    }
+    return { ok: true, data: payload };
 }
 
-/**
- * Marks a set of notifications as read/unread to keep badge state in sync.
- */
-export async function PATCH(request: Request): Promise<Response> {
-    let payload: unknown;
-    try {
-        payload = await request.json();
-    } catch {
-        return Response.json({ error: userMessages.validation.invalidJson }, { status: 400 });
-    }
+function parseNotificationType(value: unknown): NotificationType | null {
+    const candidate = value ?? "default";
+    const validTypes: readonly NotificationType[] = [
+        "default",
+        "success",
+        "error",
+        "warning",
+        "info",
+    ];
+    return typeof candidate === "string" && validTypes.includes(candidate as NotificationType)
+        ? (candidate as NotificationType)
+        : null;
+}
 
-    if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
-        return Response.json(
-            { error: userMessages.validation.invalidNotificationData },
-            { status: 400 },
-        );
-    }
+function parseNotificationIds(value: unknown): number[] {
+    if (!Array.isArray(value)) return [];
 
-    const data = payload as Record<string, unknown>;
-    const ids = Array.isArray(data.ids) ? data.ids : [];
-    const normalizedIds = [
+    return [
         ...new Set(
-            ids.filter(
+            value.filter(
                 (id): id is number => typeof id === "number" && Number.isInteger(id) && id > 0,
             ),
         ),
     ];
-    if (!normalizedIds.length) {
-        return Response.json(
-            { error: userMessages.validation.notificationIdsRequired },
-            { status: 400 },
-        );
+}
+
+/** Reads notifications and unread count for toolbar center state. */
+export async function GET(): Promise<Response> {
+    try {
+        const [rows, unreadResult] = await Promise.all([
+            db.select().from(notifications).orderBy(asc(notifications.created_at)),
+            db
+                .select({ total: count() })
+                .from(notifications)
+                .where(eq(notifications.is_read, false)),
+        ]);
+
+        return Response.json({ rows, unreadCount: unreadResult[0]?.total ?? 0 });
+    } catch (error) {
+        log.error("Failed to read notifications", error);
+        return errorResponse(userMessages.errors.notificationsLoad, 500);
+    }
+}
+
+/** Persists one notification and emits it through the shared SSE bus. */
+export async function POST(request: Request): Promise<Response> {
+    const parsed = await readJsonRecord(request);
+    if (!parsed.ok) return parsed.response;
+
+    const type = parseNotificationType(parsed.data.type);
+    if (!type) return errorResponse(userMessages.validation.notificationTypeInvalid);
+
+    const message = typeof parsed.data.message === "string" ? parsed.data.message.trim() : "";
+    if (!message) return errorResponse(userMessages.validation.notificationMessageRequired);
+
+    try {
+        const [created] = await db.insert(notifications).values({ type, message }).returning();
+        if (!created) return errorResponse(userMessages.errors.notificationsCreate, 500);
+
+        await emitNotificationEvent({
+            event: "notification",
+            notificationId: created.id,
+            type: created.type,
+            message: created.message,
+            occurredAt: new Date().toISOString(),
+        });
+
+        return Response.json(created, { status: 201 });
+    } catch (error) {
+        log.error("Failed to create notification", error);
+        return errorResponse(userMessages.errors.notificationsCreate, 500);
+    }
+}
+
+/** Marks a set of notifications as read/unread to keep badge state in sync. */
+export async function PATCH(request: Request): Promise<Response> {
+    const parsed = await readJsonRecord(request);
+    if (!parsed.ok) return parsed.response;
+
+    const ids = parseNotificationIds(parsed.data.ids);
+    if (ids.length === 0) {
+        return errorResponse(userMessages.validation.notificationIdsRequired);
     }
 
-    const isRead = data.isRead === undefined ? true : data.isRead;
+    const isRead = parsed.data.isRead === undefined ? true : parsed.data.isRead;
     if (typeof isRead !== "boolean") {
-        return Response.json(
-            { error: userMessages.validation.invalidNotificationData },
-            { status: 400 },
-        );
+        return errorResponse(userMessages.validation.invalidNotificationData);
     }
 
     try {
@@ -148,13 +134,11 @@ export async function PATCH(request: Request): Promise<Response> {
                 is_read: isRead,
                 read_at: isRead ? sql`now()` : null,
             })
-            .where(
-                and(inArray(notifications.id, normalizedIds), eq(notifications.is_read, !isRead)),
-            );
+            .where(and(inArray(notifications.id, ids), eq(notifications.is_read, !isRead)));
 
         return Response.json({ ok: true });
     } catch (error) {
         log.error("Failed to update notifications", error);
-        return Response.json({ error: userMessages.errors.notificationsUpdate }, { status: 500 });
+        return errorResponse(userMessages.errors.notificationsUpdate, 500);
     }
 }

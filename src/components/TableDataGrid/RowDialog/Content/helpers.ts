@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 
-import { FieldConfig } from "../types";
+import type { FieldConfig } from "../types";
 
 const toFormattedValue = (value: unknown, format: string): unknown => {
     if (dayjs.isDayjs(value)) return value.format(format);
@@ -37,24 +37,26 @@ export const toFieldValue = (
 /**
  * Builds initial values.
  */
-export const buildInitialValues = <R extends Record<string, unknown>, RI>(
+function getDefaultFieldValue<R extends Record<string, unknown>, RI>(
+    field: FieldConfig<R, RI>,
+): unknown {
+    if (field.type === "boolean") return field.default ?? false;
+    if (field.type === "radio-group") return field.default ?? null;
+    return null;
+}
+
+/**
+ * Builds initial values from row data, using field defaults only for missing values.
+ */
+export function buildInitialValues<R extends Record<string, unknown>, RI>(
     row: R,
     fields: FieldConfig<R, RI>[],
-) => {
-    const out: Record<string, unknown> = {};
-
-    for (const field of fields) {
-        const key = String(field.key);
-        const rowValue = (row as Record<string, unknown>)[key];
-        const defaultValue =
-            field.type === "boolean"
-                ? (field.default ?? false)
-                : field.type === "radio-group"
-                  ? (field.default ?? null)
-                  : null;
-        const value = rowValue ?? defaultValue;
-        out[key] = field.formatValue ? field.formatValue(value) : value;
-    }
-
-    return out;
-};
+): Record<string, unknown> {
+    return Object.fromEntries(
+        fields.map((field) => {
+            const key = String(field.key);
+            const value = (row as Record<string, unknown>)[key] ?? getDefaultFieldValue(field);
+            return [key, field.formatValue ? field.formatValue(value) : value];
+        }),
+    );
+}

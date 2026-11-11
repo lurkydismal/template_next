@@ -1,22 +1,9 @@
 "use client";
 
-import type {
-    CheckboxProps,
-    FormControlLabelProps,
-    OutlinedInputProps,
-    RadioGroupProps,
-    TextFieldProps,
-} from "@mui/material";
+import type { CheckboxProps, FormControlLabelProps, TextFieldProps } from "@mui/material";
 import type { ReactNode } from "react";
 
-import {
-    Checkbox,
-    FormControlLabel,
-    OutlinedInput,
-    Radio,
-    RadioGroup,
-    TextField,
-} from "@mui/material";
+import { Checkbox, FormControlLabel, TextField } from "@mui/material";
 
 import type { RHFFieldPath, RHFFieldValues } from "./types";
 
@@ -50,82 +37,6 @@ export function RHFTextField<T extends RHFFieldValues>({ name, ...props }: RHFTe
                     helperText={fieldState.error?.message}
                     color={fieldState.error ? "error" : props.color}
                 />
-            )}
-        />
-    );
-}
-
-type RHFOutlinedInputProps<T extends RHFFieldValues> = Omit<
-    OutlinedInputProps,
-    "name" | "value" | "defaultValue" | "onChange" | "onBlur" | "error"
-> & {
-    name: RHFFieldPath<T>;
-};
-
-/** An MUI OutlinedInput bound to the current RHF form context. */
-export function RHFOutlinedInput<T extends RHFFieldValues>({
-    name,
-    ...props
-}: RHFOutlinedInputProps<T>) {
-    const { control } = useRHFFormContext<T>();
-
-    return (
-        <RHFController
-            name={name}
-            control={control}
-            render={({ field, fieldState }) => (
-                <OutlinedInput
-                    {...props}
-                    name={field.name}
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    inputRef={field.ref}
-                    error={!!fieldState.error}
-                />
-            )}
-        />
-    );
-}
-
-type RHFRadioGroupProps<T extends RHFFieldValues> = Omit<
-    RadioGroupProps,
-    "name" | "value" | "defaultValue" | "onChange"
-> & {
-    name: RHFFieldPath<T>;
-    options: string[];
-    getLabel?: (value: string) => ReactNode;
-};
-
-/** An MUI RadioGroup bound to the current RHF form context. */
-export function RHFRadioGroup<T extends RHFFieldValues>({
-    name,
-    options,
-    getLabel,
-    ...props
-}: RHFRadioGroupProps<T>) {
-    const { control } = useRHFFormContext<T>();
-
-    return (
-        <RHFController
-            name={name}
-            control={control}
-            render={({ field }) => (
-                <RadioGroup
-                    {...props}
-                    name={field.name}
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                >
-                    {options.map((value) => (
-                        <FormControlLabel
-                            key={value}
-                            value={value}
-                            control={<Radio />}
-                            label={getLabel ? getLabel(value) : value}
-                        />
-                    ))}
-                </RadioGroup>
             )}
         />
     );

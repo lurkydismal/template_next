@@ -1,25 +1,65 @@
 import { isBlob } from "@/utils/stdfunc";
 
-import { FieldConfig } from "../types";
+import type { FieldConfig } from "../types";
+
 import { toFieldValue } from "./helpers";
 
-/**
- * Appends an editable field value to the form payload expected by update actions.
- */
+function setMappedFieldValue(
+    formData: FormData,
+    fieldKey: string,
+    field: FieldConfig<Record<string, unknown>, Record<string, unknown>>,
+    value: unknown,
+): boolean {
+    if (!field.toFormValue) return false;
+
+    const mappedValue = field.toFormValue(value);
+    if (mappedValue === undefined) {
+        formData.delete(fieldKey);
+    } else {
+        formData.set(fieldKey, mappedValue);
+    }
+
+    return true;
+}
+
+function setDefaultFieldValue(
+    formData: FormData,
+    fieldKey: string,
+    field: FieldConfig<Record<string, unknown>, Record<string, unknown>>,
+    value: unknown,
+): void {
+    if (value === null || value === undefined) {
+        // Replace possible native form-control values such as "on" for unchecked checkboxes.
+        formData.set(fieldKey, "");
+        return;
+    }
+
+    if (isBlob(value)) {
+        formData.set(fieldKey, value);
+        return;
+    }
+
+    if (field.type === "radio-group") {
+        // Preserve numeric JSONB options instead of coercing them to strings.
+        formData.set(fieldKey, JSON.stringify(value));
+        return;
+    }
+
+    formData.set(fieldKey, String(value));
+}
+
+/** Appends an editable field value to the update payload expected by server actions. */
 function setFormDataField<R extends Record<string, unknown>, RI extends Record<string, unknown>>(
-    fd: FormData,
+    formData: FormData,
     field: FieldConfig<R, RI>,
     sourceValues: Partial<RI>,
-) {
+): void {
     const key = String(field.key);
     const name = field.name ?? key;
 
-    // Form controls may use a presentation-specific name. Send the canonical
-    // schema property key to the server, where it is checked against Drizzle.
-    if (name !== key) fd.delete(name);
-
+    if (name !== key) formData.delete(name);
     if (field.readOnly && !field.interconnected) {
-        fd.delete(key);
+        formData.delete(key);
         return;
     }
 
@@ -28,40 +68,31 @@ function setFormDataField<R extends Record<string, unknown>, RI extends Record<s
         (sourceValues as Record<string, unknown>)[key],
     );
 
-    if (field.toFormValue) {
-        const mappedValue = field.toFormValue(value);
-        if (mappedValue !== undefined) {
-            fd.set(key, mappedValue);
-        } else {
-            fd.delete(key);
-        }
-    } else if (value === null || value === undefined) {
-        // Always overwrite a possible native form-control value (for example,
-        // "on" from an unchecked/partially initialized checkbox).
-        fd.set(key, "");
-    } else if (isBlob(value)) {
-        fd.set(key, value);
-    } else if (field.type === "radio-group") {
-        // FormData is string-only. JSON encoding preserves numeric option values
-        // instead of converting them to strings before the JSONB column parser.
-        fd.set(key, JSON.stringify(value));
-    } else {
-        fd.set(key, String(value));
+    if (
+        setMappedFieldValue(
+            formData,
+            key,
+            field as FieldConfig<Record<string, unknown>, Record<string, unknown>>,
+            value,
+        )
+    ) {
+        return;
     }
+
+    setDefaultFieldValue(
+        formData,
+        key,
+        field as FieldConfig<Record<string, unknown>, Record<string, unknown>>,
+        value,
+    );
 }
 
-/**
- * Builds the update form payload from the currently edited row values.
- */
+/** Builds the update form payload from the currently edited row values. */
 export function buildUpdateFormData<
     R extends Record<string, unknown>,
     RI extends Record<string, unknown>,
->(form: HTMLFormElement | null, fields: FieldConfig<R, RI>[], values: Partial<RI>) {
-    const fd = new FormData(form ?? undefined);
-
-    for (const field of fields) {
-        setFormDataField(fd, field, values);
-    }
-
-    return fd;
+>(form: HTMLFormElement | null, fields: FieldConfig<R, RI>[], values: Partial<RI>): FormData {
+    const formData = new FormData(form ?? undefined);
+    for (const field of fields) setFormDataField(formData, field, values);
+    return formData;
 }

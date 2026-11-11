@@ -1,3 +1,2 @@
 Implement option "multiple"(change) to auto-add new field when its filled to
 support any amount of this field and send it as array in form data
-Refactor all duplicate code across the whole project

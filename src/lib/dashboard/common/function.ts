@@ -8,7 +8,7 @@ import { DbTarget } from "@/lib/types";
 /**
  * Gets rows action.
  */
-export async function getRowsAction(target: DbTarget, idColumnName: string) {
+export async function getTargetRowsAction(target: DbTarget, idColumnName: string) {
     const result = await getRows(target, idColumnName);
 
     if (result.ok) {
@@ -25,7 +25,7 @@ export async function getRowsAction(target: DbTarget, idColumnName: string) {
 /**
  * Creates row action.
  */
-export async function createRowAction<RI extends Record<string, unknown>>(
+export async function createTargetRowAction<RI extends Record<string, unknown>>(
     target: DbTarget,
     row: RI,
 ) {
@@ -40,7 +40,7 @@ export async function createRowAction<RI extends Record<string, unknown>>(
 /**
  * Updates row action.
  */
-export async function updateRowAction(
+export async function updateTargetRowAction(
     target: DbTarget,
     idColumnName: string | string[],
     fd: FormData,

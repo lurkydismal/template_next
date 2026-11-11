@@ -8,23 +8,22 @@ export class UserFacingError extends Error {
     }
 }
 
-/** Converts expected user-safe errors to copy; unexpected exceptions stay generic. */
+function getAttachedUserMessage(error: object): string | undefined {
+    if (!("userMessage" in error)) return undefined;
+
+    const message = (error as { userMessage?: unknown }).userMessage;
+    return typeof message === "string" && message.trim() ? message.trim() : undefined;
+}
+
+/** Converts explicitly safe errors to copy; unexpected exceptions stay generic. */
 export function getErrorMessage(
     error: unknown,
     fallback: string = userMessages.errors.unexpected,
 ): string {
-    if (error instanceof UserFacingError) {
-        return error.message.trim() || fallback;
-    }
-
-    // Plain strings are used for persisted notifications and explicit messages.
-    if (typeof error === "string") {
-        return error.trim() || fallback;
-    }
-
-    if (typeof error === "object" && error !== null && "userMessage" in error) {
-        const message = (error as { userMessage?: unknown }).userMessage;
-        if (typeof message === "string" && message.trim()) return message.trim();
+    if (error instanceof UserFacingError) return error.message.trim() || fallback;
+    if (typeof error === "string") return error.trim() || fallback;
+    if (typeof error === "object" && error !== null) {
+        return getAttachedUserMessage(error) ?? fallback;
     }
 
     return fallback;

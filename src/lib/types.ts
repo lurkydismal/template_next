@@ -1,17 +1,23 @@
-import { AnyColumn } from "drizzle-orm";
+import type { AnyColumn } from "drizzle-orm";
+
+import { z } from "zod";
 
 import * as schema from "@/db/schema";
-import { DbTargetSchema } from "@/utils/validate/schemas";
 
 // The audit log is internal infrastructure and must not be exposed as a generic CRUD target.
 export const TABLES = Object.fromEntries(
     Object.entries(schema).filter(([name]) => name !== "recordChanges"),
 ) as Omit<typeof schema, "recordChanges">;
 
-export type DbTarget = keyof typeof TABLES;
+type TableName = keyof typeof TABLES;
+
+export const DbTargetSchema = z.enum(Object.keys(TABLES) as [TableName, ...TableName[]]);
+
+export type DbTarget = z.infer<typeof DbTargetSchema>;
 
 /**
- * Parses raw target.
+ * Parses a raw target and returns its Drizzle table, including the audit columns
+ * required by the dashboard mutation layer.
  */
 export function parseRawTarget(rawTarget: DbTarget): (typeof TABLES)[DbTarget] & {
     author_id: AnyColumn;

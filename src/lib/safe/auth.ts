@@ -17,42 +17,44 @@ import { actionClient } from "./client";
 
 function getAuthErrorCode(error: unknown): string | undefined {
     if (!isAPIError(error)) return undefined;
-
     const body = error.body;
     if (typeof body !== "object" || body === null || !("code" in body)) return undefined;
-
     return typeof body.code === "string" ? body.code : undefined;
 }
 
-function handleAuthError(error: unknown, operation: "login" | "register"): never {
-    if (!isAPIError(error)) {
-        throw error;
-    }
+function isDuplicateAccountError(error: unknown): boolean {
+    const code = getAuthErrorCode(error);
+    return code === "USER_ALREADY_EXISTS" || code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL";
+}
+
+function isInvalidCredentialsError(error: unknown): boolean {
+    if (!isAPIError(error)) return false;
 
     const code = getAuthErrorCode(error);
+    return (
+        code === "INVALID_EMAIL_OR_PASSWORD" ||
+        code === "INVALID_PASSWORD" ||
+        error.statusCode === 401 ||
+        error.statusCode === 403
+    );
+}
 
-    if (
-        operation === "register" &&
-        (code === "USER_ALREADY_EXISTS" || code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL")
-    ) {
+function handleAuthError(error: unknown, operation: "login" | "register"): never {
+    if (!isAPIError(error)) throw error;
+
+    if (operation === "register" && isDuplicateAccountError(error)) {
         return returnValidationErrors(registerUserSchema, {
             email: { _errors: [userMessages.auth.accountExists] },
         });
     }
 
-    if (
-        operation === "login" &&
-        (code === "INVALID_EMAIL_OR_PASSWORD" ||
-            code === "INVALID_PASSWORD" ||
-            error.statusCode === 401 ||
-            error.statusCode === 403)
-    ) {
+    if (operation === "login" && isInvalidCredentialsError(error)) {
         return returnServerError(userMessages.auth.invalidCredentials);
     }
 
-    return returnServerError(
-        operation === "login" ? userMessages.auth.signInFailed : userMessages.auth.signUpFailed,
-    );
+    const message =
+        operation === "login" ? userMessages.auth.signInFailed : userMessages.auth.signUpFailed;
+    return returnServerError(message);
 }
 
 export const register = actionClient
@@ -95,10 +97,6 @@ export const login = actionClient.inputSchema(loginUserSchema).action(async ({ p
     }
 
     redirect("/");
-});
-
-export const logout = authClient.action(async () => {
-    await auth.api.signOut();
 });
 
 export const getSession = authClient.action(async () => {

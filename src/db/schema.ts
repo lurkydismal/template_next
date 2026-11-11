@@ -11,7 +11,10 @@ import {
     varchar,
 } from "drizzle-orm/pg-core";
 
+import { user } from "./auth-schema";
 import * as templates from "./templates";
+
+export { user } from "./auth-schema";
 
 const table = snakeCase.table;
 
@@ -45,19 +48,6 @@ export const notifications = table(
 );
 
 // * NOTE: Better Auth
-export const user = table("user", {
-    id: text("id").primaryKey(),
-    name: text("name").notNull(),
-    email: text("email").notNull().unique(),
-    emailVerified: boolean("email_verified").default(false).notNull(),
-    image: text("image"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-        .defaultNow()
-        .$onUpdate(() => /* @__PURE__ */ new Date())
-        .notNull(),
-});
-
 export const session = table(
     "session",
     {

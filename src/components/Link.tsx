@@ -4,10 +4,9 @@
 // allowing it to be passed safely to MUI components (e.g. via `component={Link}`)
 
 import { Link as MuiLink, LinkProps as MuiLinkProps } from "@mui/material";
-import NextLink, { LinkProps } from "next/link";
+import NextLink from "next/link";
 import { ComponentProps } from "react";
 
-export type { LinkProps };
 export default NextLink;
 
 type NextLinkComposedProps = ComponentProps<typeof NextLink>;

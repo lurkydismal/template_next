@@ -16,7 +16,8 @@
 import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { createElement } from "react";
 
-import { FieldConfig } from "@/components/TableDataGrid/RowDialog";
+import type { FieldConfig } from "@/components/TableDataGrid/RowDialog";
+
 import BooleanFieldControl from "@/components/TableDataGrid/RowDialog/BooleanFieldControl";
 import { toCamelCase } from "@/utils/stdfunc";
 
@@ -29,44 +30,69 @@ type NormalizeOptions = {
     deriveField?: (headerName: GridColDef["headerName"]) => string; // how to derive missing `field`
 };
 
+type NormalizedColumnOptions = {
+    defaultFlex: number;
+    minWidthMultiplier: number;
+    defaultAlign: GridColDef["align"];
+    defaultHeaderAlign: GridColDef["headerAlign"];
+    defaultRenderCell: NormalizeOptions["defaultRenderCell"];
+    deriveField: NonNullable<NormalizeOptions["deriveField"]>;
+};
+
+function resolveField(
+    item: Partial<GridColDef>,
+    deriveField: NonNullable<NormalizeOptions["deriveField"]>,
+) {
+    if (item.field != null || item.headerName == null) return {};
+    return { field: deriveField(item.headerName) };
+}
+
+function resolveRenderCell(
+    item: Partial<GridColDef>,
+    defaultRenderCell: NormalizeOptions["defaultRenderCell"],
+) {
+    if (item.renderCell != null || defaultRenderCell == null) return {};
+    return { renderCell: defaultRenderCell };
+}
+
+function resolveDimensions(item: Partial<GridColDef>, options: NormalizedColumnOptions) {
+    const flex = item.flex ?? options.defaultFlex;
+    return {
+        ...(item.flex == null ? { flex } : {}),
+        ...(item.minWidth == null ? { minWidth: flex * options.minWidthMultiplier } : {}),
+    };
+}
+
+function normalizeColumn(item: Partial<GridColDef>, options: NormalizedColumnOptions): GridColDef {
+    return {
+        ...item,
+        headerAlign: item.headerAlign ?? options.defaultHeaderAlign,
+        align: item.align ?? options.defaultAlign,
+        ...resolveDimensions(item, options),
+        ...resolveField(item, options.deriveField),
+        ...resolveRenderCell(item, options.defaultRenderCell),
+    } as GridColDef;
+}
+
 /**
- * Normalize and enrich all column definitions:
- * - Center-align headers and cell content
- * - Ensure `flex` is set (default: 1)
- * - Ensure `minWidth` is set (derived from `flex`)
- * - Ensure `field` exists (derived from headerName if missing)
+ * Normalize and enrich all column definitions with consistent defaults.
  */
-export function normalizeColumns(
+function normalizeColumns(
     cols: readonly Partial<GridColDef>[],
     options: NormalizeOptions = {},
 ): readonly GridColDef[] {
-    const {
-        defaultFlex = 1,
-        minWidthMultiplier = 100,
-        defaultAlign = "center",
-        defaultHeaderAlign = "center",
-        defaultRenderCell,
-        deriveField = (h) => (typeof h === "string" ? toCamelCase(h) : ""),
-    } = options;
+    const normalizedOptions: NormalizedColumnOptions = {
+        defaultFlex: options.defaultFlex ?? 1,
+        minWidthMultiplier: options.minWidthMultiplier ?? 100,
+        defaultAlign: options.defaultAlign ?? "center",
+        defaultHeaderAlign: options.defaultHeaderAlign ?? "center",
+        defaultRenderCell: options.defaultRenderCell,
+        deriveField:
+            options.deriveField ??
+            ((headerName) => (typeof headerName === "string" ? toCamelCase(headerName) : "")),
+    };
 
-    return cols.map((item) => {
-        const flex = item.flex ?? defaultFlex;
-        const minWidth = item.minWidth ?? flex * minWidthMultiplier;
-
-        return {
-            ...item,
-            headerAlign: item.headerAlign ?? defaultHeaderAlign,
-            align: item.align ?? defaultAlign,
-            ...(item.flex == null ? { flex } : {}),
-            ...(item.minWidth == null ? { minWidth } : {}),
-            ...(item.field == null && item.headerName != null
-                ? { field: deriveField(item.headerName) }
-                : {}),
-            ...(item.renderCell == null && defaultRenderCell != null
-                ? { renderCell: defaultRenderCell }
-                : {}),
-        } as GridColDef;
-    }) as readonly GridColDef[];
+    return cols.map((item) => normalizeColumn(item, normalizedOptions));
 }
 
 /**

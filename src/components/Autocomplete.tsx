@@ -11,14 +11,17 @@ type OptionWithLabel = {
     label?: unknown;
 };
 
-/**
- * Gets option label.
- */
-function getOptionLabel(option: unknown): string {
+function getPrimitiveLabel(option: unknown): string | undefined {
     if (typeof option === "string") return option;
-    if (typeof option === "number" || typeof option === "boolean") {
-        return String(option);
-    }
+    if (typeof option === "number" || typeof option === "boolean") return String(option);
+    return undefined;
+}
+
+/** Gets a stable string label from primitive and object autocomplete options. */
+function getOptionLabel(option: unknown): string {
+    const primitiveLabel = getPrimitiveLabel(option);
+    if (primitiveLabel !== undefined) return primitiveLabel;
+
     if (option && typeof option === "object" && "label" in option) {
         return String((option as OptionWithLabel).label ?? option);
     }

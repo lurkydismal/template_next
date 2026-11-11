@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 /**
  * Provides the styled Material UI card used by authentication pages.
  */
-export const Card = styled(MuiCard)(({ theme }) => ({
+const Card = styled(MuiCard)(({ theme }) => ({
     display: "flex",
     flexDirection: "column",
     alignSelf: "center",
@@ -26,7 +26,7 @@ export const Card = styled(MuiCard)(({ theme }) => ({
 /**
  * Provides the centered responsive container for authentication content.
  */
-export const AuthContainer = styled(Stack)(({ theme }) => ({
+const AuthContainer = styled(Stack)(({ theme }) => ({
     position: "relative",
     height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
     minHeight: "100%",

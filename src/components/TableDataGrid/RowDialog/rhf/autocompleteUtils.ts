@@ -3,7 +3,7 @@ import type { AutocompleteFieldConfig, AutocompleteOption } from "../types";
 /**
  * Converts an autocomplete value into a stable primitive used for comparisons.
  */
-export const getAutocompleteComparableValue = (value: unknown): unknown => {
+const getAutocompleteComparableValue = (value: unknown): unknown => {
     if (value && typeof value === "object" && "label" in value) {
         return (value as { label?: unknown }).label;
     }

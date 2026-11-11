@@ -22,83 +22,91 @@ export type BooleanFieldControlProps = {
     onChange?: (checked: boolean) => void;
 };
 
-/**
- * Shared visual control for boolean fields. Dialog fields can be editable or
- * visually disabled, while grid cells use readOnly to retain normal colors
- * without allowing pointer or keyboard interaction.
- */
-export default function BooleanFieldControl({
-    label,
-    checked,
-    variant,
-    readOnly = false,
-    disabled = false,
-    color,
-    size,
-    icon,
-    checkedIcon,
-    id,
-    name,
-    onChange,
-}: BooleanFieldControlProps) {
-    const interactive = !readOnly && !disabled && !!onChange;
-
-    const inputProps = {
-        ...(id ? { id } : {}),
-        "aria-label": label,
-        "aria-readonly": readOnly && !disabled ? true : undefined,
-        tabIndex: interactive ? undefined : -1,
+type ControlBehavior = {
+    interactive: boolean;
+    inputProps: {
+        id?: string;
+        "aria-label": string;
+        "aria-readonly": true | undefined;
+        tabIndex: number | undefined;
     };
+    sx: { pointerEvents: "none" } | undefined;
+};
 
-    // Keep the controlled value fixed even if the underlying input is
-    // activated programmatically. The grid uses pointerEvents below so clicks
-    // pass through to the cell instead of activating this control.
-    const handleReadOnlyChange = (event: ChangeEvent<HTMLInputElement>) => {
-        event.preventDefault();
+function getControlBehavior(props: BooleanFieldControlProps): ControlBehavior {
+    const interactive = !props.readOnly && !props.disabled && Boolean(props.onChange);
+    return {
+        interactive,
+        inputProps: {
+            ...(props.id ? { id: props.id } : {}),
+            "aria-label": props.label,
+            "aria-readonly": props.readOnly && !props.disabled ? true : undefined,
+            tabIndex: interactive ? undefined : -1,
+        },
+        sx: interactive ? undefined : { pointerEvents: "none" },
     };
-    const handleReadOnlyClick = (event: MouseEvent<HTMLElement>) => {
+}
+
+function preventReadOnlyChange(event: ChangeEvent<HTMLInputElement>) {
+    event.preventDefault();
+}
+
+function preventNonInteractiveClick(interactive: boolean) {
+    return (event: MouseEvent<HTMLElement>) => {
         if (!interactive) event.preventDefault();
     };
+}
 
-    const nonInteractiveSx = interactive ? undefined : { pointerEvents: "none" as const };
+function SwitchFieldControl(props: BooleanFieldControlProps) {
+    const behavior = getControlBehavior(props);
+    const handleChange: SwitchProps["onChange"] = behavior.interactive
+        ? (_, checked) => props.onChange?.(checked)
+        : preventReadOnlyChange;
 
-    if (variant === "switch") {
-        return (
-            <Switch
-                name={name}
-                checked={checked}
-                color={color as SwitchProps["color"]}
-                size={size as SwitchProps["size"]}
-                disabled={disabled}
-                onChange={
-                    interactive && onChange
-                        ? (_, nextChecked) => onChange(nextChecked)
-                        : handleReadOnlyChange
-                }
-                onClick={handleReadOnlyClick}
-                sx={nonInteractiveSx}
-                slotProps={{ input: inputProps }}
-            />
-        );
-    }
+    return (
+        <Switch
+            name={props.name}
+            checked={props.checked}
+            color={props.color as SwitchProps["color"]}
+            size={props.size as SwitchProps["size"]}
+            disabled={props.disabled}
+            onChange={handleChange}
+            onClick={preventNonInteractiveClick(behavior.interactive)}
+            sx={behavior.sx}
+            slotProps={{ input: behavior.inputProps }}
+        />
+    );
+}
+
+function CheckboxFieldControl(props: BooleanFieldControlProps) {
+    const behavior = getControlBehavior(props);
+    const handleChange: CheckboxProps["onChange"] = behavior.interactive
+        ? (event) => props.onChange?.(event.target.checked)
+        : preventReadOnlyChange;
+    const isIcon = props.variant === "icon";
 
     return (
         <Checkbox
-            name={name}
-            checked={checked}
-            color={color as CheckboxProps["color"]}
-            size={size as CheckboxProps["size"]}
-            disabled={disabled}
-            icon={variant === "icon" ? icon : undefined}
-            checkedIcon={variant === "icon" ? checkedIcon : undefined}
-            onChange={
-                interactive && onChange
-                    ? (event) => onChange(event.target.checked)
-                    : handleReadOnlyChange
-            }
-            onClick={handleReadOnlyClick}
-            sx={nonInteractiveSx}
-            slotProps={{ input: inputProps }}
+            name={props.name}
+            checked={props.checked}
+            color={props.color as CheckboxProps["color"]}
+            size={props.size as CheckboxProps["size"]}
+            disabled={props.disabled}
+            icon={isIcon ? props.icon : undefined}
+            checkedIcon={isIcon ? props.checkedIcon : undefined}
+            onChange={handleChange}
+            onClick={preventNonInteractiveClick(behavior.interactive)}
+            sx={behavior.sx}
+            slotProps={{ input: behavior.inputProps }}
         />
+    );
+}
+
+/** Shared visual control for boolean fields. */
+export default function BooleanFieldControl(props: BooleanFieldControlProps) {
+    return props.variant === "switch" ? (
+        <SwitchFieldControl {...props} />
+    ) : (
+        <CheckboxFieldControl {...props} />
     );
 }

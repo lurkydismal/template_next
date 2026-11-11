@@ -13,6 +13,7 @@ export const userMessages = {
         rowCreate: "Unable to create the row. Please try again.",
         rowUpdate: "Unable to save your changes. Please try again.",
         rowSave: "Unable to save this row. Please try again.",
+        draftStorage: "Unable to save this form draft in this browser.",
         diagramRender: "Unable to render this diagram. Check its syntax and try again.",
     },
     auth: {

@@ -1,106 +1,122 @@
 "use client";
 
-import {
-    TextField,
-    OutlinedInput,
-    RadioGroup,
-    FormControlLabel,
-    Radio,
-    Checkbox,
+import type {
+    CheckboxProps,
+    FormControlLabelProps,
+    OutlinedInputProps,
+    RadioGroupProps,
     TextFieldProps,
 } from "@mui/material";
-import { ReactNode } from "react";
-import { Controller, useFormContext, FieldValues, Path } from "react-hook-form";
+import type { ReactNode } from "react";
 
-/* =========================
-   RHF TextField
-========================= */
+import {
+    Checkbox,
+    FormControlLabel,
+    OutlinedInput,
+    Radio,
+    RadioGroup,
+    TextField,
+} from "@mui/material";
 
-type RHFTextFieldProps<T extends FieldValues> = TextFieldProps & {
-    name: Path<T>;
+import type { RHFFieldPath, RHFFieldValues } from "./types";
+
+import { RHFController } from "./RHFController";
+import { useRHFFormContext } from "./RHFForm";
+
+type RHFTextFieldProps<T extends RHFFieldValues> = Omit<
+    TextFieldProps,
+    "name" | "value" | "defaultValue" | "onChange" | "onBlur" | "error" | "helperText" | "inputRef"
+> & {
+    name: RHFFieldPath<T>;
 };
 
-/**
- * Renders the rhf text field component.
- */
-export function RHFTextField<T extends FieldValues>({ name, ...props }: RHFTextFieldProps<T>) {
-    const { control } = useFormContext<T>();
+/** A MUI TextField bound to the current RHF form context. */
+export function RHFTextField<T extends RHFFieldValues>({ name, ...props }: RHFTextFieldProps<T>) {
+    const { control } = useRHFFormContext<T>();
 
     return (
-        <Controller
+        <RHFController
             name={name}
             control={control}
             render={({ field, fieldState }) => (
                 <TextField
-                    {...field}
                     {...props}
+                    name={field.name}
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    inputRef={field.ref}
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
+                    color={fieldState.error ? "error" : props.color}
                 />
             )}
         />
     );
 }
 
-/* =========================
-   RHF OutlinedInput
-========================= */
-
-type RHFOutlinedInputProps<T extends FieldValues> = {
-    name: Path<T>;
-    placeholder?: string;
-    autoComplete?: string;
-    size?: "small" | "medium";
+type RHFOutlinedInputProps<T extends RHFFieldValues> = Omit<
+    OutlinedInputProps,
+    "name" | "value" | "defaultValue" | "onChange" | "onBlur" | "error"
+> & {
+    name: RHFFieldPath<T>;
 };
 
-/**
- * Renders the rhf outlined input component.
- */
-export function RHFOutlinedInput<T extends FieldValues>({
+/** An MUI OutlinedInput bound to the current RHF form context. */
+export function RHFOutlinedInput<T extends RHFFieldValues>({
     name,
     ...props
 }: RHFOutlinedInputProps<T>) {
-    const { control } = useFormContext<T>();
+    const { control } = useRHFFormContext<T>();
 
     return (
-        <Controller
+        <RHFController
             name={name}
             control={control}
             render={({ field, fieldState }) => (
-                <OutlinedInput {...field} {...props} error={!!fieldState.error} />
+                <OutlinedInput
+                    {...props}
+                    name={field.name}
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    inputRef={field.ref}
+                    error={!!fieldState.error}
+                />
             )}
         />
     );
 }
 
-/* =========================
-   RHF Radio Group
-========================= */
-
-type RHFRadioGroupProps<T extends FieldValues> = {
-    name: Path<T>;
+type RHFRadioGroupProps<T extends RHFFieldValues> = Omit<
+    RadioGroupProps,
+    "name" | "value" | "defaultValue" | "onChange"
+> & {
+    name: RHFFieldPath<T>;
     options: string[];
     getLabel?: (value: string) => ReactNode;
-    row?: boolean;
 };
 
-/**
- * Renders the rhf radio group component.
- */
-export function RHFRadioGroup<T extends FieldValues>({
+/** An MUI RadioGroup bound to the current RHF form context. */
+export function RHFRadioGroup<T extends RHFFieldValues>({
     name,
     options,
     getLabel,
-    row = false,
+    ...props
 }: RHFRadioGroupProps<T>) {
-    const { control } = useFormContext<T>();
+    const { control } = useRHFFormContext<T>();
 
     return (
-        <Controller
+        <RHFController
             name={name}
             control={control}
             render={({ field }) => (
-                <RadioGroup {...field} row={row}>
+                <RadioGroup
+                    {...props}
+                    name={field.name}
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                >
                     {options.map((value) => (
                         <FormControlLabel
                             key={value}
@@ -115,34 +131,40 @@ export function RHFRadioGroup<T extends FieldValues>({
     );
 }
 
-/* =========================
-   RHF Checkbox
-========================= */
-
-type RHFCheckboxProps<T extends FieldValues> = {
-    name: Path<T>;
-    label: string;
+type RHFCheckboxProps<T extends RHFFieldValues> = {
+    name: RHFFieldPath<T>;
+    label: ReactNode;
+    checkboxProps?: Omit<CheckboxProps, "checked" | "defaultChecked" | "onChange" | "inputRef">;
+    labelProps?: Omit<FormControlLabelProps, "control" | "label">;
 };
 
-/**
- * Renders the rhf checkbox component.
- */
-export function RHFCheckbox<T extends FieldValues>({ name, label }: RHFCheckboxProps<T>) {
-    const { control } = useFormContext<T>();
+/** An MUI Checkbox bound to the current RHF form context. */
+export function RHFCheckbox<T extends RHFFieldValues>({
+    name,
+    label,
+    checkboxProps,
+    labelProps,
+}: RHFCheckboxProps<T>) {
+    const { control } = useRHFFormContext<T>();
 
     return (
-        <Controller
+        <RHFController
             name={name}
             control={control}
             render={({ field }) => (
                 <FormControlLabel
+                    {...labelProps}
+                    label={label}
                     control={
                         <Checkbox
-                            checked={!!field.value}
-                            onChange={(e) => field.onChange(e.target.checked)}
+                            {...checkboxProps}
+                            name={field.name}
+                            checked={Boolean(field.value)}
+                            onChange={(event) => field.onChange(event.target.checked)}
+                            onBlur={field.onBlur}
+                            inputRef={field.ref}
                         />
                     }
-                    label={label}
                 />
             )}
         />

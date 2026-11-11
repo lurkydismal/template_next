@@ -1,22 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AccountCircle } from "@mui/icons-material";
-import {
-    Box,
-    FormControl,
-    FormLabel,
-    TextField,
-    FormControlLabel,
-    Checkbox,
-    Button,
-} from "@mui/material";
-import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
-import { Controller } from "react-hook-form";
+import { Box, Button, FormControl, FormLabel } from "@mui/material";
+import { z } from "zod";
 
+import { RHFCheckbox, RHFFormProvider, RHFTextField, useRHFAction } from "@/components/rhf";
 import { login, register } from "@/lib/safe/auth";
 import { loginUserSchema, registerUserSchema } from "@/utils/validate/schemas";
 
+type LoginFormValues = z.infer<typeof loginUserSchema>;
+type RegisterFormValues = z.infer<typeof registerUserSchema>;
+
 function SignInForm() {
-    const { form, action, handleSubmitWithAction, resetFormAndAction } = useHookFormAction(
+    const { form, action, handleSubmitWithAction, resetFormAndAction } = useRHFAction(
         login,
         zodResolver(loginUserSchema),
         {
@@ -30,101 +25,69 @@ function SignInForm() {
             },
         },
     );
-    const { control } = form;
 
     return (
-        <Box
-            component="form"
-            noValidate
-            onSubmit={handleSubmitWithAction}
-            sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 2,
-                width: "100%",
-            }}
-        >
-            <Controller
-                name="email"
-                control={control}
-                render={({ field, fieldState }) => (
-                    <FormControl>
-                        <FormLabel htmlFor="email">Email</FormLabel>
-
-                        <TextField
-                            {...field}
-                            autoComplete="email"
-                            autoFocus
-                            color={Boolean(fieldState.error) ? "error" : "primary"}
-                            error={Boolean(fieldState.error)}
-                            fullWidth
-                            helperText={fieldState.error?.message}
-                            name="email"
-                            placeholder="tralalero@localhost.noreply"
-                            required
-                            type="email"
-                            variant="outlined"
-                        />
-                    </FormControl>
-                )}
-            />
-
-            <Controller
-                name="password"
-                control={control}
-                render={({ field, fieldState }) => (
-                    <FormControl>
-                        <FormLabel htmlFor="password">Password</FormLabel>
-
-                        <TextField
-                            {...field}
-                            autoComplete="new-password"
-                            color={Boolean(fieldState.error) ? "error" : "primary"}
-                            error={Boolean(fieldState.error)}
-                            fullWidth
-                            helperText={fieldState.error?.message}
-                            name="password"
-                            placeholder="••••••"
-                            required
-                            type="password"
-                            variant="outlined"
-                        />
-                    </FormControl>
-                )}
-            />
-
-            <Controller
-                name="remember"
-                control={control}
-                render={({ field }) => (
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={Boolean(field.value)}
-                                onChange={(e) => field.onChange(e.target.checked)}
-                                color="primary"
-                            />
-                        }
-                        label="Remember me"
-                    />
-                )}
-            />
-
-            <Button
-                endIcon={<AccountCircle />}
-                fullWidth
-                loading={action.isPending}
-                type="submit"
-                variant="outlined"
+        <RHFFormProvider {...form}>
+            <Box
+                component="form"
+                noValidate
+                onSubmit={handleSubmitWithAction}
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                    width: "100%",
+                }}
             >
-                Sign in
-            </Button>
-        </Box>
+                <FormControl>
+                    <FormLabel htmlFor="email">Email</FormLabel>
+                    <RHFTextField<LoginFormValues>
+                        name="email"
+                        autoComplete="email"
+                        autoFocus
+                        fullWidth
+                        placeholder="tralalero@localhost.noreply"
+                        required
+                        type="email"
+                        variant="outlined"
+                    />
+                </FormControl>
+
+                <FormControl>
+                    <FormLabel htmlFor="password">Password</FormLabel>
+                    <RHFTextField<LoginFormValues>
+                        name="password"
+                        autoComplete="new-password"
+                        fullWidth
+                        placeholder="••••••"
+                        required
+                        type="password"
+                        variant="outlined"
+                    />
+                </FormControl>
+
+                <RHFCheckbox<LoginFormValues>
+                    name="remember"
+                    label="Remember me"
+                    checkboxProps={{ color: "primary" }}
+                />
+
+                <Button
+                    endIcon={<AccountCircle />}
+                    fullWidth
+                    loading={action.isPending}
+                    type="submit"
+                    variant="outlined"
+                >
+                    Sign in
+                </Button>
+            </Box>
+        </RHFFormProvider>
     );
 }
 
 function SignUpForm() {
-    const { form, action, handleSubmitWithAction, resetFormAndAction } = useHookFormAction(
+    const { form, action, handleSubmitWithAction, resetFormAndAction } = useRHFAction(
         register,
         zodResolver(registerUserSchema),
         {
@@ -138,112 +101,76 @@ function SignUpForm() {
             },
         },
     );
-    const { control } = form;
 
     return (
-        <Box
-            component="form"
-            noValidate
-            onSubmit={handleSubmitWithAction}
-            sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 2,
-                width: "100%",
-            }}
-        >
-            <Controller
-                name="name"
-                control={control}
-                render={({ field, fieldState }) => (
-                    <FormControl>
-                        <FormLabel htmlFor="name">Name</FormLabel>
-
-                        <TextField
-                            {...field}
-                            autoComplete="name"
-                            autoFocus
-                            color={Boolean(fieldState.error) ? "error" : "primary"}
-                            error={Boolean(fieldState.error)}
-                            fullWidth
-                            helperText={fieldState.error?.message}
-                            name="name"
-                            placeholder="tralalero"
-                            required
-                            type="text"
-                            variant="outlined"
-                        />
-                    </FormControl>
-                )}
-            />
-
-            <Controller
-                name="email"
-                control={control}
-                render={({ field, fieldState }) => (
-                    <FormControl>
-                        <FormLabel htmlFor="email">Email</FormLabel>
-
-                        <TextField
-                            {...field}
-                            autoComplete="email"
-                            autoFocus
-                            color={Boolean(fieldState.error) ? "error" : "primary"}
-                            error={Boolean(fieldState.error)}
-                            fullWidth
-                            helperText={fieldState.error?.message}
-                            name="email"
-                            placeholder="tralalero@localhost.noreply"
-                            required
-                            type="text"
-                            variant="outlined"
-                        />
-                    </FormControl>
-                )}
-            />
-
-            <Controller
-                name="password"
-                control={control}
-                render={({ field, fieldState }) => (
-                    <FormControl>
-                        <FormLabel htmlFor="password">Password</FormLabel>
-
-                        <TextField
-                            {...field}
-                            autoComplete="new-password"
-                            color={Boolean(fieldState.error) ? "error" : "primary"}
-                            error={Boolean(fieldState.error)}
-                            fullWidth
-                            helperText={fieldState.error?.message}
-                            name="password"
-                            placeholder="••••••"
-                            required
-                            type="password"
-                            variant="outlined"
-                        />
-                    </FormControl>
-                )}
-            />
-
-            <Button
-                endIcon={<AccountCircle />}
-                fullWidth
-                loading={action.isPending}
-                type="submit"
-                variant="outlined"
+        <RHFFormProvider {...form}>
+            <Box
+                component="form"
+                noValidate
+                onSubmit={handleSubmitWithAction}
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                    width: "100%",
+                }}
             >
-                Sign up
-            </Button>
-        </Box>
+                <FormControl>
+                    <FormLabel htmlFor="name">Name</FormLabel>
+                    <RHFTextField<RegisterFormValues>
+                        name="name"
+                        autoComplete="name"
+                        autoFocus
+                        fullWidth
+                        placeholder="tralalero"
+                        required
+                        type="text"
+                        variant="outlined"
+                    />
+                </FormControl>
+
+                <FormControl>
+                    <FormLabel htmlFor="email">Email</FormLabel>
+                    <RHFTextField<RegisterFormValues>
+                        name="email"
+                        autoComplete="email"
+                        autoFocus
+                        fullWidth
+                        placeholder="tralalero@localhost.noreply"
+                        required
+                        type="text"
+                        variant="outlined"
+                    />
+                </FormControl>
+
+                <FormControl>
+                    <FormLabel htmlFor="password">Password</FormLabel>
+                    <RHFTextField<RegisterFormValues>
+                        name="password"
+                        autoComplete="new-password"
+                        fullWidth
+                        placeholder="••••••"
+                        required
+                        type="password"
+                        variant="outlined"
+                    />
+                </FormControl>
+
+                <Button
+                    endIcon={<AccountCircle />}
+                    fullWidth
+                    loading={action.isPending}
+                    type="submit"
+                    variant="outlined"
+                >
+                    Sign up
+                </Button>
+            </Box>
+        </RHFFormProvider>
     );
 }
 
-/**
- * Renders the auth form component.
- */
+/** Renders the authentication form for the selected mode. */
 export default function AuthForm({ mode }: { mode: "signup" | "signin" }) {
-    const isSignIn = mode === "signin";
-
-    return isSignIn ? <SignInForm /> : <SignUpForm />;
+    return mode === "signin" ? <SignInForm /> : <SignUpForm />;
 }

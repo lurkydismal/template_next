@@ -24,7 +24,7 @@ import Draggable from "react-draggable";
 
 import log from "@/utils/stdlog";
 
-import RowDialogContent from "./Content";
+import RowDialogContent from "./rhf/RowDialogForm";
 import { CreateRowAction, FieldConfig, UpdateRowAction } from "./types";
 
 export type { FieldConfig, RadioGroupOption } from "./types";

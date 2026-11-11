@@ -49,12 +49,9 @@ export default function AppTheme(props: AppThemeProps) {
     // Create MUI theme with custom primitives, dark/light mode, and localization
     const theme = createTheme(
         {
-            ...(prefersReducedMotion && {
-                transitions: {
-                    // So `transition: none;` gets applied everywhere
-                    create: () => "none",
-                },
-            }),
+            motion: {
+                reducedMotion: "system",
+            },
             palette: {
                 mode: prefersDarkMode ? "dark" : "light",
             },

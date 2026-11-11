@@ -10,3 +10,24 @@
  * - Ensure Tailwind is properly configured via `tailwind.config.js` for customizations.
  */
 @import "tailwindcss";
+
+/*
+ * Animate the dialog paper itself whenever the Modal mounts it. This keeps the
+ * visible motion independent from the Modal transition's opacity lifecycle.
+ */
+@keyframes row-dialog-paper-enter {
+    from {
+        opacity: 0;
+        transform: translate3d(28px, 0, 0) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+.row-dialog-paper-enter {
+    animation: row-dialog-paper-enter 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: center;
+}

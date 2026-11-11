@@ -5,21 +5,11 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
+    Fade,
     Paper,
     PaperProps,
-    Slide,
 } from "@mui/material";
-import { TransitionProps } from "@mui/material/transitions";
-import {
-    Dispatch,
-    forwardRef,
-    memo,
-    SetStateAction,
-    useCallback,
-    useEffect,
-    useRef,
-    useState,
-} from "react";
+import { Dispatch, memo, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import Draggable from "react-draggable";
 
 import { useSnackbar } from "@/providers/snackbar";
@@ -32,6 +22,11 @@ import { CreateRowAction, FieldConfig, UpdateRowAction } from "./types";
 
 export type { FieldConfig } from "./types";
 
+const dialogTransitionDuration = {
+    enter: 560,
+    exit: 240,
+} as const;
+
 const promptButtonSx = {
     transition: "all 0.2s ease",
 
@@ -39,17 +34,6 @@ const promptButtonSx = {
         transform: "translateY(-2px)",
     },
 };
-
-const createSlideTransition = (direction: "up" | "down" | "left" | "right") =>
-    forwardRef(function Transition(
-        props: TransitionProps & { children: React.ReactElement },
-        ref: React.Ref<unknown>,
-    ) {
-        return <Slide direction={direction} ref={ref} {...props} />;
-    });
-
-const TransitionRight = createSlideTransition("right");
-const TransitionUp = createSlideTransition("up");
 
 const PaperComponent = memo(function PaperComponent(props: PaperProps) {
     const nodeRef = useRef<HTMLDivElement>(null);
@@ -196,14 +180,20 @@ function RowDialog<R extends Record<string, unknown>, RI extends Record<string, 
             <Dialog
                 open={dialogOpen}
                 slots={{
-                    transition: TransitionRight,
+                    transition: Fade,
                 }}
                 onClose={onClose}
                 maxWidth="md"
                 fullWidth
-                keepMounted
+                transitionDuration={dialogTransitionDuration}
                 slotProps={{
+                    paper: {
+                        className: "row-dialog-paper-enter",
+                    },
                     transition: {
+                        appear: true,
+                        timeout: dialogTransitionDuration,
+                        disablePrefersReducedMotion: true,
                         /**
                          * Clears dialog state after the row dialog transition exits.
                          */
@@ -231,13 +221,24 @@ function RowDialog<R extends Record<string, unknown>, RI extends Record<string, 
             <Dialog
                 open={forceCloseDialogOpen}
                 slots={{
-                    transition: TransitionUp,
+                    transition: Fade,
                 }}
                 PaperComponent={PaperComponent}
                 aria-labelledby="draggable-dialog-title"
                 onClose={handleCancelForceClose}
                 maxWidth="xs"
                 fullWidth
+                transitionDuration={dialogTransitionDuration}
+                slotProps={{
+                    paper: {
+                        className: "row-dialog-paper-enter",
+                    },
+                    transition: {
+                        appear: true,
+                        timeout: dialogTransitionDuration,
+                        disablePrefersReducedMotion: true,
+                    },
+                }}
             >
                 <DialogTitle style={{ cursor: "move" }} id="draggable-dialog-title">
                     Leave dialog?

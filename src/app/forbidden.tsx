@@ -1,5 +1,7 @@
 import NextLink from "next/link";
 
+import { userMessages } from "@/utils/messages";
+
 /**
  * Renders the lock icon component.
  */
@@ -40,10 +42,10 @@ export default function Forbidden() {
 
                 <div>
                     <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                        Access denied
+                        {userMessages.status.forbiddenTitle}
                     </h1>
                     <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                        You don’t have permission to view this page.
+                        {userMessages.status.forbiddenDescription}
                     </p>
                 </div>
 
@@ -51,7 +53,7 @@ export default function Forbidden() {
                     href="/"
                     className="cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-900"
                 >
-                    Landing Page
+                    {userMessages.actions.landingPage}
                 </NextLink>
             </main>
         </div>

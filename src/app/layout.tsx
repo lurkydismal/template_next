@@ -25,10 +25,7 @@ import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import { Inter as Font } from "next/font/google";
 
 import "./globals.css";
-import { Suspense } from "react";
-
 import MuiLayout from "@/components/MuiLayout";
-import SnackbarProvider from "@/providers/snackbar";
 import log from "@/utils/stdlog";
 import { isDev, appName, appVersion } from "@/utils/stdvar";
 
@@ -73,12 +70,7 @@ export default function RootLayout({
                 <InitColorSchemeScript attribute="data" />
 
                 <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-                    <MuiLayout>
-                        {/* Suspense boundary for async content */}
-                        <Suspense>
-                            <SnackbarProvider>{children}</SnackbarProvider>
-                        </Suspense>
-                    </MuiLayout>
+                    <MuiLayout>{children}</MuiLayout>
                 </AppRouterCacheProvider>
             </body>
         </html>

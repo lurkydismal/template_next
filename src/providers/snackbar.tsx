@@ -11,16 +11,16 @@ import {
 import { IconButton } from "@mui/material";
 import {
     SnackbarProvider,
-    VariantType,
+    type VariantType,
     type OptionsObject,
     enqueueSnackbar,
     closeSnackbar,
 } from "notistack";
 import { createContext, useCallback, useContext, useMemo } from "react";
 
+import { getErrorMessage } from "@/utils/errors";
 import log from "@/utils/stdlog";
-import { LogFn } from "@/utils/stdlog/types";
-import { isProd, maxSnackbarCount } from "@/utils/stdvar";
+import { maxSnackbarCount } from "@/utils/stdvar";
 
 type SnackbarOptions = Pick<OptionsObject, "persist" | "onClose">;
 
@@ -31,21 +31,6 @@ const SnackbarContext = createContext<{
     showWarning: (warn: unknown, options?: SnackbarOptions) => void;
     showInfo: (message: string, options?: SnackbarOptions) => void;
 } | null>(null);
-
-/**
- * Converts an unknown error value into a user-facing message.
- */
-function errorToMessage(err: unknown): string {
-    if (err instanceof Error) {
-        return err.message || "Operation failed";
-    }
-
-    if (typeof err === "string") {
-        return err;
-    }
-
-    return "Operation failed";
-}
 
 /**
  * Returns the snackbar hook state and actions.
@@ -73,31 +58,16 @@ export default function CustomSnackbarProvider({
      */
     const _showMessage = useCallback(
         (err: unknown, variant: VariantType, options?: SnackbarOptions) => {
-            const message = errorToMessage(err);
+            const message = getErrorMessage(err);
 
-            let logVariant: LogFn;
-
-            switch (variant) {
-                case "error":
-                    if (isProd) {
-                        logVariant = log.error;
-                    } else {
-                        logVariant = log.info;
-                    }
-                    break;
-
-                case "warning":
-                    logVariant = log.warn;
-                    break;
-
-                case "success":
-                case "info":
-                case "default":
-                default:
-                    logVariant = log.info;
+            if (variant === "error") {
+                log.error("User-facing operation failed", err);
+            } else if (variant === "warning") {
+                log.warn(message);
+            } else {
+                log.info(message);
             }
 
-            logVariant(message);
             enqueueSnackbar(message, { variant, ...options });
         },
         [],
@@ -159,29 +129,27 @@ export default function CustomSnackbarProvider({
     );
 
     return (
-        <SnackbarContext.Provider value={contextValue}>
-            {children}
-
-            <SnackbarProvider
-                maxSnack={maxSnackbarCount}
-                iconVariant={{
-                    default: <DefaultIcon sx={{ mr: 1.5 }} />,
-                    success: <SuccessIcon sx={{ mr: 1.5 }} />,
-                    error: <ErrorIcon sx={{ mr: 1.5 }} />,
-                    warning: <WarningIcon sx={{ mr: 1.5 }} />,
-                    info: <InfoIcon sx={{ mr: 1.5 }} />,
-                }}
-                preventDuplicate
-                anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "right",
-                }}
-                action={(snackbarId) => (
-                    <IconButton onClick={() => closeSnackbar(snackbarId)}>
-                        <CloseIcon />
-                    </IconButton>
-                )}
-            />
-        </SnackbarContext.Provider>
+        <SnackbarProvider
+            maxSnack={maxSnackbarCount}
+            iconVariant={{
+                default: <DefaultIcon sx={{ mr: 1.5 }} />,
+                success: <SuccessIcon sx={{ mr: 1.5 }} />,
+                error: <ErrorIcon sx={{ mr: 1.5 }} />,
+                warning: <WarningIcon sx={{ mr: 1.5 }} />,
+                info: <InfoIcon sx={{ mr: 1.5 }} />,
+            }}
+            preventDuplicate
+            anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+            }}
+            action={(snackbarId) => (
+                <IconButton onClick={() => closeSnackbar(snackbarId)}>
+                    <CloseIcon />
+                </IconButton>
+            )}
+        >
+            <SnackbarContext.Provider value={contextValue}>{children}</SnackbarContext.Provider>
+        </SnackbarProvider>
     );
 }

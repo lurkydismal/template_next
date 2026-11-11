@@ -1,0 +1,53 @@
+/** Shared user-facing messages. Keep technical details in server logs, not in UI copy. */
+export const userMessages = {
+    errors: {
+        unexpected: "Something went wrong. Please try again.",
+        title: "Something went wrong",
+        page: "An unexpected error occurred while loading this page.",
+        notificationsLoad: "Unable to load notifications. Please try again.",
+        notificationsUpdate: "Unable to update notifications. Please try again.",
+        notificationsCreate: "Unable to create the notification. Please try again.",
+        rowsLoad: "Unable to load table data. Please try again.",
+        fieldOptionsLoad: "Unable to load some form options. Please refresh and try again.",
+        fieldUpdate: "Unable to update related fields. Please try again.",
+        rowCreate: "Unable to create the row. Please try again.",
+        rowUpdate: "Unable to save your changes. Please try again.",
+        rowSave: "Unable to save this row. Please try again.",
+        diagramRender: "Unable to render this diagram. Check its syntax and try again.",
+    },
+    auth: {
+        invalidCredentials: "Email or password is incorrect.",
+        accountExists: "An account with this email already exists. Sign in instead.",
+        signInFailed: "Unable to sign in. Please check your details and try again.",
+        signUpFailed: "Unable to create your account. Please check your details and try again.",
+    },
+    actions: {
+        retry: "Try again",
+        home: "Go to home",
+        signIn: "Sign in",
+        landingPage: "Landing page",
+    },
+    notifications: {
+        newAvailable: "New notifications available.",
+    },
+    status: {
+        notFoundTitle: "Page not found",
+        notFoundDescription: "The page you are looking for does not exist or has moved.",
+        unauthorizedTitle: "Not signed in",
+        unauthorizedDescription: "You need to sign in to access this page.",
+        forbiddenTitle: "Access denied",
+        forbiddenDescription: "You do not have permission to view this page.",
+    },
+    validation: {
+        invalidJson: "Invalid JSON payload.",
+        notificationMessageRequired: "Notification message is required.",
+        notificationIdsRequired: "Select at least one notification.",
+        notificationTypeInvalid: "Invalid notification type.",
+        invalidNotificationData: "Invalid notification data.",
+        invalidDate: "Invalid date.",
+        invalidEmail: "Enter a valid email address.",
+        nameRequired: "Name is required.",
+        passwordRequired: "Password is required.",
+        passwordTooShort: "Password must be at least 8 characters.",
+    },
+} as const;

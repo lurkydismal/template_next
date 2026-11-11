@@ -11,10 +11,13 @@ import { Badge, Tooltip } from "@mui/material";
 import { ToolbarButton } from "@mui/x-data-grid";
 import { useCallback, useEffect, useState } from "react";
 
+import type { NotificationsRow } from "@/db/types";
+
 import CustomDivider from "@/components/TableDataGrid/CustomDivider";
-import { NotificationsRow } from "@/db/types";
 import { useDashboardEventStream } from "@/lib/dashboard/client-events";
 import { useSnackbar } from "@/providers/snackbar";
+import { getErrorMessage, UserFacingError } from "@/utils/errors";
+import { userMessages } from "@/utils/messages";
 import { isDev, maxSnackbarCount } from "@/utils/stdvar";
 import uuid from "@/utils/uuid";
 
@@ -52,27 +55,37 @@ async function readNotifications(): Promise<{
     rows: StoredNotification[];
     unreadCount: number;
 }> {
-    const response = await fetch("/api/notifications", { cache: "no-store" });
-    if (!response.ok) {
-        throw new Error(`Failed to read notifications (${response.status})`);
+    try {
+        const response = await fetch("/api/notifications", { cache: "no-store" });
+        if (!response.ok) {
+            throw new UserFacingError(userMessages.errors.notificationsLoad);
+        }
+        return (await response.json()) as {
+            rows: StoredNotification[];
+            unreadCount: number;
+        };
+    } catch (error) {
+        if (error instanceof UserFacingError) throw error;
+        throw new UserFacingError(userMessages.errors.notificationsLoad, { cause: error });
     }
-    return response.json() as Promise<{
-        rows: StoredNotification[];
-        unreadCount: number;
-    }>;
 }
 
 /**
  * Marks notification IDs as read in the database.
  */
 async function markNotifications(ids: number[], isRead: boolean): Promise<void> {
-    const response = await fetch("/api/notifications", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids, isRead }),
-    });
-    if (!response.ok) {
-        throw new Error(`Failed to update notifications (${response.status})`);
+    try {
+        const response = await fetch("/api/notifications", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids, isRead }),
+        });
+        if (!response.ok) {
+            throw new UserFacingError(userMessages.errors.notificationsUpdate);
+        }
+    } catch (error) {
+        if (error instanceof UserFacingError) throw error;
+        throw new UserFacingError(userMessages.errors.notificationsUpdate, { cause: error });
     }
 }
 
@@ -83,13 +96,18 @@ async function createNotification(
     type: StoredNotification["type"],
     message: string,
 ): Promise<void> {
-    const response = await fetch("/api/notifications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, message }),
-    });
-    if (!response.ok) {
-        throw new Error(`Failed to create notification (${response.status})`);
+    try {
+        const response = await fetch("/api/notifications", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type, message }),
+        });
+        if (!response.ok) {
+            throw new UserFacingError(userMessages.errors.notificationsCreate);
+        }
+    } catch (error) {
+        if (error instanceof UserFacingError) throw error;
+        throw new UserFacingError(userMessages.errors.notificationsCreate, { cause: error });
     }
 }
 
@@ -200,7 +218,7 @@ export default function ExtraToolbarButtons<RI extends Record<string, unknown>>(
 
             void syncNotifications()
                 .then(() => {
-                    showInfo("New notifications available");
+                    showInfo(userMessages.notifications.newAvailable);
                 })
                 .catch(showError);
         },
@@ -267,7 +285,7 @@ export default function ExtraToolbarButtons<RI extends Record<string, unknown>>(
                             createRowAction.action();
                         } else if (emptyRow) {
                             createRowAction.action(emptyRow).catch((err) => {
-                                showError(`Failed to create row: ${err.message}`);
+                                showError(getErrorMessage(err, userMessages.errors.rowCreate));
                             });
                         }
                     }}

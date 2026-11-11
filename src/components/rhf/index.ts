@@ -1,3 +1,4 @@
+export { RHFActionError } from "./RHFActionError";
 export { RHFController } from "./RHFController";
 export { RHFFormProvider, useRHFForm, useRHFFormContext } from "./RHFForm";
 export { useRHFFieldError } from "./useRHFFieldError";

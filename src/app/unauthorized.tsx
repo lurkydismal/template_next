@@ -1,5 +1,7 @@
 import NextLink from "next/link";
 
+import { userMessages } from "@/utils/messages";
+
 /**
  * Renders the error icon component.
  */
@@ -37,10 +39,10 @@ export default function UnauthorizedPage() {
 
                 <div>
                     <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                        Not signed in
+                        {userMessages.status.unauthorizedTitle}
                     </h1>
                     <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                        You need to log in to access this page.
+                        {userMessages.status.unauthorizedDescription}
                     </p>
                 </div>
 
@@ -48,7 +50,7 @@ export default function UnauthorizedPage() {
                     href="/auth/login"
                     className="cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-900"
                 >
-                    Sign in
+                    {userMessages.actions.signIn}
                 </NextLink>
             </main>
         </div>

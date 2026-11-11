@@ -5,6 +5,7 @@ import z from "zod";
 import { user } from "@/db/schema";
 import { DbTarget, TABLES } from "@/lib/types";
 import dayjs from "@/utils/dayjs";
+import { userMessages } from "@/utils/messages";
 
 export const emptyToNull = <T extends z.ZodType>(schema: T) =>
     z.preprocess((val) => (val === "" ? null : val), schema.nullable());
@@ -15,7 +16,7 @@ export const dateInputSchema = z
         if (!dayjs(v).isValid()) {
             ctx.addIssue({
                 code: "custom",
-                message: "Invalid date",
+                message: userMessages.validation.invalidDate,
             });
         }
     })
@@ -46,14 +47,20 @@ export const userSelectPublicSchema = userSelectSchema
 
 export const mutationInputSchema = z.record(z.string(), z.unknown());
 
+const authEmailSchema = z
+    .string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.email(userMessages.validation.invalidEmail));
+
 export const registerUserSchema = z.object({
-    name: z.string(),
-    email: z.email(),
-    password: z.string(),
+    name: z.string().trim().min(1, userMessages.validation.nameRequired),
+    email: authEmailSchema,
+    password: z.string().min(8, userMessages.validation.passwordTooShort),
 });
 export const loginUserSchema = z.object({
-    email: z.email(),
-    password: z.string(),
+    email: authEmailSchema,
+    password: z.string().min(1, userMessages.validation.passwordRequired),
     remember: z.boolean().optional(),
 });
 

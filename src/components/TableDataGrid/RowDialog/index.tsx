@@ -22,6 +22,9 @@ import {
 } from "react";
 import Draggable from "react-draggable";
 
+import { useSnackbar } from "@/providers/snackbar";
+import { UserFacingError } from "@/utils/errors";
+import { userMessages } from "@/utils/messages";
 import log from "@/utils/stdlog";
 
 import RowDialogContent from "./rhf/RowDialogForm";
@@ -87,6 +90,7 @@ function RowDialog<R extends Record<string, unknown>, RI extends Record<string, 
     fields: FieldConfig<R, RI>[];
     idKey?: keyof R;
 }) {
+    const { showError } = useSnackbar();
     const submitFnRef = useRef<(() => Promise<boolean>) | null>(null);
     const discardDraftFnRef = useRef<(() => void) | null>(null);
     const validationFailureTimestampsRef = useRef<number[]>([]);
@@ -162,8 +166,9 @@ function RowDialog<R extends Record<string, unknown>, RI extends Record<string, 
         } catch (error) {
             closeSubmissionInProgressRef.current = false;
             log.error("Failed to close row dialog", error);
+            showError(new UserFacingError(userMessages.errors.rowSave, { cause: error }));
         }
-    }, [clearValidationFailureCounter, handleClose, shouldShowForceCloseDialog]);
+    }, [clearValidationFailureCounter, handleClose, shouldShowForceCloseDialog, showError]);
 
     const handleDialogExited = useCallback(() => {
         setSelectedRow(null);

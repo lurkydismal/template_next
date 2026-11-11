@@ -3,6 +3,8 @@ import { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState } fro
 import { useForm } from "react-hook-form";
 
 import { useSnackbar } from "@/providers/snackbar";
+import { UserFacingError } from "@/utils/errors";
+import { userMessages } from "@/utils/messages";
 
 import { CreateRowAction, FieldConfig, UpdateRowAction } from "../types";
 import { rowHasChanges, rowHasId } from "./changeDetection";
@@ -103,7 +105,7 @@ function RowDialogContent<R extends Record<string, unknown>, RI extends Record<s
                     return changedValues;
                 }
             } catch (error) {
-                showError(error);
+                showError(new UserFacingError(userMessages.errors.fieldUpdate, { cause: error }));
             }
 
             return {};
@@ -128,25 +130,31 @@ function RowDialogContent<R extends Record<string, unknown>, RI extends Record<s
             setValuesAndForm(changedValues);
 
             void (async () => {
-                const siblingUpdates = await runFieldValueChange(field, value, nextValues);
-                const mergedNextValues = { ...nextValues, ...siblingUpdates };
-                const interconnectedUpdates = await resolveInterconnectedFieldUpdates(
-                    fields,
-                    row,
-                    mergedNextValues,
-                    key,
-                );
+                try {
+                    const siblingUpdates = await runFieldValueChange(field, value, nextValues);
+                    const mergedNextValues = { ...nextValues, ...siblingUpdates };
+                    const interconnectedUpdates = await resolveInterconnectedFieldUpdates(
+                        fields,
+                        row,
+                        mergedNextValues,
+                        key,
+                    );
 
-                if (requestEpoch !== interconnectedRequestEpochRef.current) {
-                    return;
-                }
+                    if (requestEpoch !== interconnectedRequestEpochRef.current) {
+                        return;
+                    }
 
-                if (Object.keys(interconnectedUpdates).length > 0) {
-                    setValuesAndForm(interconnectedUpdates);
+                    if (Object.keys(interconnectedUpdates).length > 0) {
+                        setValuesAndForm(interconnectedUpdates);
+                    }
+                } catch (error) {
+                    showError(
+                        new UserFacingError(userMessages.errors.fieldUpdate, { cause: error }),
+                    );
                 }
             })();
         },
-        [fields, row, runFieldValueChange, setValuesAndForm],
+        [fields, row, runFieldValueChange, setValuesAndForm, showError],
     );
 
     const updateRow = useCallback(
@@ -156,7 +164,7 @@ function RowDialogContent<R extends Record<string, unknown>, RI extends Record<s
                 await onUpdated?.();
                 return true;
             } catch (error) {
-                showError(error);
+                showError(new UserFacingError(userMessages.errors.rowUpdate, { cause: error }));
                 return false;
             }
         },
@@ -170,7 +178,7 @@ function RowDialogContent<R extends Record<string, unknown>, RI extends Record<s
                 await onUpdated?.();
                 return true;
             } catch (error) {
-                showError(error);
+                showError(new UserFacingError(userMessages.errors.rowCreate, { cause: error }));
                 return false;
             }
         },

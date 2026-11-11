@@ -3,6 +3,8 @@ import { useTheme } from "@mui/material/styles";
 import mermaid from "mermaid";
 import { useEffect, useRef } from "react";
 
+import { userMessages } from "@/utils/messages";
+import log from "@/utils/stdlog";
 import uuid from "@/utils/uuid";
 
 // React component that renders a Mermaid chart
@@ -34,11 +36,12 @@ export default function Mermaid({ chart }: { chart: string }) {
                 // On successful render, insert the SVG into the container
                 container.current!.innerHTML = result.svg;
             })
-            .catch((err) => {
-                // On error, display the error message in red inside a <pre> tag
-                container.current!.innerHTML = `<pre style="color:red;">${
-                    err instanceof Error ? err.message : String(err)
-                }</pre>`;
+            .catch((error: unknown) => {
+                log.error("Mermaid chart rendering failed", error);
+                const message = document.createElement("pre");
+                message.style.color = "var(--mui-palette-error-main, #d32f2f)";
+                message.textContent = userMessages.errors.diagramRender;
+                container.current?.replaceChildren(message);
             });
     }, [chart, theme]);
 

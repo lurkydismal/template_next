@@ -1,9 +1,17 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AccountCircle } from "@mui/icons-material";
 import { Box, Button, FormControl, FormLabel } from "@mui/material";
 import { z } from "zod";
 
-import { RHFCheckbox, RHFFormProvider, RHFTextField, useRHFAction } from "@/components/rhf";
+import {
+    RHFActionError,
+    RHFCheckbox,
+    RHFFormProvider,
+    RHFTextField,
+    useRHFAction,
+} from "@/components/rhf";
 import { login, register } from "@/lib/safe/auth";
 import { loginUserSchema, registerUserSchema } from "@/utils/validate/schemas";
 
@@ -39,9 +47,12 @@ function SignInForm() {
                     width: "100%",
                 }}
             >
+                <RHFActionError error={action.result.serverError} />
+
                 <FormControl>
-                    <FormLabel htmlFor="email">Email</FormLabel>
+                    <FormLabel htmlFor="signin-email">Email</FormLabel>
                     <RHFTextField<LoginFormValues>
+                        id="signin-email"
                         name="email"
                         autoComplete="email"
                         autoFocus
@@ -54,10 +65,11 @@ function SignInForm() {
                 </FormControl>
 
                 <FormControl>
-                    <FormLabel htmlFor="password">Password</FormLabel>
+                    <FormLabel htmlFor="signin-password">Password</FormLabel>
                     <RHFTextField<LoginFormValues>
+                        id="signin-password"
                         name="password"
-                        autoComplete="new-password"
+                        autoComplete="current-password"
                         fullWidth
                         placeholder="••••••"
                         required
@@ -115,9 +127,12 @@ function SignUpForm() {
                     width: "100%",
                 }}
             >
+                <RHFActionError error={action.result.serverError} />
+
                 <FormControl>
-                    <FormLabel htmlFor="name">Name</FormLabel>
+                    <FormLabel htmlFor="signup-name">Name</FormLabel>
                     <RHFTextField<RegisterFormValues>
+                        id="signup-name"
                         name="name"
                         autoComplete="name"
                         autoFocus
@@ -130,22 +145,23 @@ function SignUpForm() {
                 </FormControl>
 
                 <FormControl>
-                    <FormLabel htmlFor="email">Email</FormLabel>
+                    <FormLabel htmlFor="signup-email">Email</FormLabel>
                     <RHFTextField<RegisterFormValues>
+                        id="signup-email"
                         name="email"
                         autoComplete="email"
-                        autoFocus
                         fullWidth
                         placeholder="tralalero@localhost.noreply"
                         required
-                        type="text"
+                        type="email"
                         variant="outlined"
                     />
                 </FormControl>
 
                 <FormControl>
-                    <FormLabel htmlFor="password">Password</FormLabel>
+                    <FormLabel htmlFor="signup-password">Password</FormLabel>
                     <RHFTextField<RegisterFormValues>
+                        id="signup-password"
                         name="password"
                         autoComplete="new-password"
                         fullWidth

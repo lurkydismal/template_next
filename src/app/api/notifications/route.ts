@@ -1,9 +1,12 @@
 import { and, asc, count, eq, inArray, sql } from "drizzle-orm";
 
+import type { NotificationsRow } from "@/db/types";
+
 import db from "@/db";
 import { notifications } from "@/db/schema";
-import { NotificationsRow } from "@/db/types";
 import { emitNotificationEvent } from "@/lib/dashboard/common/change-events";
+import { userMessages } from "@/utils/messages";
+import log from "@/utils/stdlog";
 
 type NotificationType = NotificationsRow["type"];
 
@@ -21,48 +24,78 @@ export async function GET(): Promise<Response> {
         return { rows, unreadResult };
     };
 
-    const { rows, unreadResult } = await getUnreadNotifications();
-
-    return Response.json({ rows, unreadCount: unreadResult[0]?.total ?? 0 });
+    try {
+        const { rows, unreadResult } = await getUnreadNotifications();
+        return Response.json({ rows, unreadCount: unreadResult[0]?.total ?? 0 });
+    } catch (error) {
+        log.error("Failed to read notifications", error);
+        return Response.json({ error: userMessages.errors.notificationsLoad }, { status: 500 });
+    }
 }
 
 /**
  * Persists one notification and emits it through the shared SSE bus.
  */
 export async function POST(request: Request): Promise<Response> {
-    const invalidResponse = Response.json({ error: "Invalid JSON payload" }, { status: 400 });
+    const invalidResponse = Response.json(
+        { error: userMessages.validation.invalidJson },
+        { status: 400 },
+    );
 
-    let payload: { type?: NotificationType; message?: string };
+    let payload: unknown;
     try {
-        payload = (await request.json()) as {
-            type?: NotificationType;
-            message?: string;
-        };
+        payload = await request.json();
     } catch {
         return invalidResponse;
     }
-    // FIX: Validate type
-    const type = payload.type ?? "default";
-    const message = (payload.message ?? "").trim();
 
-    if (!message) {
-        return Response.json({ error: "Message is required" }, { status: 400 });
+    if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
+        return Response.json(
+            { error: userMessages.validation.invalidNotificationData },
+            { status: 400 },
+        );
     }
 
-    const [created] = await db.insert(notifications).values({ type, message }).returning();
+    const data = payload as Record<string, unknown>;
+    const typeValue = data.type ?? "default";
+    const message = typeof data.message === "string" ? data.message.trim() : "";
+    const validTypes: NotificationType[] = ["default", "success", "error", "warning", "info"];
 
-    if (created) {
-        await emitNotificationEvent({
-            event: "notification",
-            notificationId: created.id,
-            type: created.type,
-            message: created.message,
-            occurredAt: new Date().toISOString(),
-        });
+    if (typeof typeValue !== "string" || !validTypes.includes(typeValue as NotificationType)) {
+        return Response.json(
+            { error: userMessages.validation.notificationTypeInvalid },
+            { status: 400 },
+        );
+    }
 
-        return Response.json(created, { status: 201 });
-    } else {
-        return invalidResponse;
+    const type = typeValue as NotificationType;
+
+    if (!message) {
+        return Response.json(
+            { error: userMessages.validation.notificationMessageRequired },
+            { status: 400 },
+        );
+    }
+
+    try {
+        const [created] = await db.insert(notifications).values({ type, message }).returning();
+
+        if (created) {
+            await emitNotificationEvent({
+                event: "notification",
+                notificationId: created.id,
+                type: created.type,
+                message: created.message,
+                occurredAt: new Date().toISOString(),
+            });
+
+            return Response.json(created, { status: 201 });
+        }
+
+        return Response.json({ error: userMessages.errors.notificationsCreate }, { status: 500 });
+    } catch (error) {
+        log.error("Failed to create notification", error);
+        return Response.json({ error: userMessages.errors.notificationsCreate }, { status: 500 });
     }
 }
 
@@ -70,32 +103,58 @@ export async function POST(request: Request): Promise<Response> {
  * Marks a set of notifications as read/unread to keep badge state in sync.
  */
 export async function PATCH(request: Request): Promise<Response> {
-    let payload: { ids?: number[]; isRead?: boolean };
+    let payload: unknown;
     try {
-        payload = (await request.json()) as {
-            ids?: number[];
-            isRead?: boolean;
-        };
+        payload = await request.json();
     } catch {
-        return Response.json({ error: "Invalid JSON payload" }, { status: 400 });
+        return Response.json({ error: userMessages.validation.invalidJson }, { status: 400 });
     }
-    const ids = payload.ids ?? [];
 
-    const normalizedIds = ids.filter(
-        (id): id is number => Number.isInteger(id) && Number.isFinite(id),
-    );
+    if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
+        return Response.json(
+            { error: userMessages.validation.invalidNotificationData },
+            { status: 400 },
+        );
+    }
+
+    const data = payload as Record<string, unknown>;
+    const ids = Array.isArray(data.ids) ? data.ids : [];
+    const normalizedIds = [
+        ...new Set(
+            ids.filter(
+                (id): id is number => typeof id === "number" && Number.isInteger(id) && id > 0,
+            ),
+        ),
+    ];
     if (!normalizedIds.length) {
-        return Response.json({ error: "ids are required" }, { status: 400 });
+        return Response.json(
+            { error: userMessages.validation.notificationIdsRequired },
+            { status: 400 },
+        );
     }
 
-    const isRead = payload.isRead ?? true;
-    await db
-        .update(notifications)
-        .set({
-            is_read: isRead,
-            read_at: isRead ? sql`now()` : null,
-        })
-        .where(and(inArray(notifications.id, normalizedIds), eq(notifications.is_read, !isRead)));
+    const isRead = data.isRead === undefined ? true : data.isRead;
+    if (typeof isRead !== "boolean") {
+        return Response.json(
+            { error: userMessages.validation.invalidNotificationData },
+            { status: 400 },
+        );
+    }
 
-    return Response.json({ ok: true });
+    try {
+        await db
+            .update(notifications)
+            .set({
+                is_read: isRead,
+                read_at: isRead ? sql`now()` : null,
+            })
+            .where(
+                and(inArray(notifications.id, normalizedIds), eq(notifications.is_read, !isRead)),
+            );
+
+        return Response.json({ ok: true });
+    } catch (error) {
+        log.error("Failed to update notifications", error);
+        return Response.json({ error: userMessages.errors.notificationsUpdate }, { status: 500 });
+    }
 }

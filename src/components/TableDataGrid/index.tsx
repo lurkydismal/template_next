@@ -2,11 +2,14 @@
 
 import type { GridRowsProp } from "@mui/x-data-grid";
 
-import { Box, CircularProgress } from "@mui/material";
+import { Alert, Box, Button, CircularProgress } from "@mui/material";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 import { useDashboardEventStream } from "@/lib/dashboard/client-events";
 import { useSnackbar } from "@/providers/snackbar";
+import { UserFacingError } from "@/utils/errors";
+import { userMessages } from "@/utils/messages";
+import log from "@/utils/stdlog";
 
 import type { FieldConfig } from "./RowDialog";
 
@@ -38,6 +41,7 @@ export default function TableDataGrid<
 }>) {
     const { showError } = useSnackbar();
     const [currentRows, setCurrentRows] = useState<Readonly<GridRowsProp> | null>(null);
+    const [loadError, setLoadError] = useState<string | null>(null);
     const [resolvedFields, setResolvedFields] = useState(fields);
     const [fieldsResolving, setFieldsResolving] = useState(false);
 
@@ -69,8 +73,14 @@ export default function TableDataGrid<
                                 ...field,
                                 autocompleteOptions: await field.loadOptions(),
                             };
-                        } catch {
-                            // Preserve field without resolved options on individual failure.
+                        } catch (error) {
+                            if (active) {
+                                showError(
+                                    new UserFacingError(userMessages.errors.fieldOptionsLoad, {
+                                        cause: error,
+                                    }),
+                                );
+                            }
                             return field;
                         }
                     }),
@@ -78,7 +88,11 @@ export default function TableDataGrid<
 
                 if (active) setResolvedFields(nextFields);
             } catch (error) {
-                if (active) showError(error);
+                if (active) {
+                    showError(
+                        new UserFacingError(userMessages.errors.fieldOptionsLoad, { cause: error }),
+                    );
+                }
             } finally {
                 if (active) setFieldsResolving(false);
             }
@@ -92,15 +106,19 @@ export default function TableDataGrid<
     }, [fields, showError]);
 
     /**
-     * Fetches the current table rows and reports failures through the snackbar.
+     * Fetches the current table rows and exposes failures in the grid's inline error state.
      */
     const getRows = useCallback(async () => {
         try {
-            setCurrentRows(await getRowsAction());
+            const rows = await getRowsAction();
+            setCurrentRows(rows);
+            setLoadError(null);
         } catch (error) {
-            showError(error);
+            const message = userMessages.errors.rowsLoad;
+            setLoadError(message);
+            log.error("Failed to load dashboard rows", error);
         }
-    }, [getRowsAction, showError]);
+    }, [getRowsAction]);
 
     const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -146,16 +164,28 @@ export default function TableDataGrid<
      */
     const createAndRefresh = useCallback(
         async (row: RI) => {
-            try {
-                await createRowAction(row);
-                await getRows();
-            } catch (error) {
-                showError(error);
-                throw error;
-            }
+            await createRowAction(row);
+            await getRows();
         },
-        [createRowAction, getRows, showError],
+        [createRowAction, getRows],
     );
+
+    if (currentRows === null && loadError) {
+        return (
+            <Box sx={{ p: 2, width: "100%" }}>
+                <Alert
+                    severity="error"
+                    action={
+                        <Button color="inherit" size="small" onClick={() => void getRows()}>
+                            Retry
+                        </Button>
+                    }
+                >
+                    {loadError}
+                </Alert>
+            </Box>
+        );
+    }
 
     if (currentRows === null || fieldsResolving) {
         return (
@@ -180,11 +210,25 @@ export default function TableDataGrid<
             updateRowAction={updateRowAction}
             onUpdated={getRows}
         >
-            <GridView<R, RI>
-                rows={currentRows}
-                fields={resolvedFields}
-                extraButtons={extraButtons}
-            />
+            <>
+                {loadError ? (
+                    <Alert
+                        severity="error"
+                        action={
+                            <Button color="inherit" size="small" onClick={() => void getRows()}>
+                                Retry
+                            </Button>
+                        }
+                    >
+                        {loadError}
+                    </Alert>
+                ) : null}
+                <GridView<R, RI>
+                    rows={currentRows}
+                    fields={resolvedFields}
+                    extraButtons={extraButtons}
+                />
+            </>
         </RowDialogHost>
     );
 }

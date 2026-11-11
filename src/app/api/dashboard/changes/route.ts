@@ -1,4 +1,5 @@
 import { subscribeToDashboardEvents } from "@/lib/dashboard/common/change-events";
+import log from "@/utils/stdlog";
 
 /**
  * Creates a server-sent events stream that emits dashboard mutation updates.
@@ -90,6 +91,7 @@ export async function GET(request: Request): Promise<Response> {
                     send(": keep-alive\n\n");
                 }, 20_000);
             } catch (error) {
+                log.error("Failed to establish dashboard event stream", error);
                 cleanup();
                 controller.error(error);
             }

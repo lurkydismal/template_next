@@ -1,56 +1,26 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
+node_modules/
+.next/
+out/
+build/
+dist/
+coverage/
+playwright-report/
+test-results/
+.vitest/
 *.tsbuildinfo
-next-env.d.ts
+*.log
+npm-debug.log*
 
-# Misc
-**/*~
-**/.*~
-db/db.sqlite
+.env
+.env.*
+!.env.example
+secrets/
+backups/
+*.dump
+*.sql.gz
+
 /fallow.md
 
-# Playwright
-node_modules/
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/playwright/.auth/
-.fallow/
+# Generated Drizzle snapshots and migration SQL are intentionally committed.
+# Do not ignore the drizzle/ directory.
+!.env.production.example

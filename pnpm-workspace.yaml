@@ -19,8 +19,8 @@ minimumReleaseAgeExclude:
     - "@vitest/spy@5.0.4 || 5.1.0"
     - vitest@5.0.4 || 5.1.0
     - zod@4.6.7
-    - react-hook-form@7.91.0
-    - "@hookform/resolvers@6.0.2"
+    - react-hook-form@7.91.0 || 7.92.0
+    - "@hookform/resolvers@6.0.2 || 7.0.6"
     - "@tailwindcss/node@4.3.4"
     - "@tailwindcss/oxide-android-arm64@4.3.4"
     - "@tailwindcss/oxide-darwin-arm64@4.3.4"
@@ -38,13 +38,13 @@ minimumReleaseAgeExclude:
     - "@tailwindcss/postcss@4.3.4"
     - argon2@0.45.2
     - tailwindcss@4.3.4
-    - "@better-auth/core@1.7.19"
-    - "@better-auth/drizzle-adapter@1.7.19"
-    - "@better-auth/kysely-adapter@1.7.19"
-    - "@better-auth/memory-adapter@1.7.19"
-    - "@better-auth/mongo-adapter@1.7.19"
-    - "@better-auth/prisma-adapter@1.7.19"
-    - "@better-auth/telemetry@1.7.19"
+    - "@better-auth/core@1.7.19 || 1.7.21"
+    - "@better-auth/drizzle-adapter@1.7.19 || 1.7.21"
+    - "@better-auth/kysely-adapter@1.7.19 || 1.7.21"
+    - "@better-auth/memory-adapter@1.7.19 || 1.7.21"
+    - "@better-auth/mongo-adapter@1.7.19 || 1.7.21"
+    - "@better-auth/prisma-adapter@1.7.19 || 1.7.21"
+    - "@better-auth/telemetry@1.7.19 || 1.7.21"
     - "@fallow-cli/darwin-arm64@3.42.0"
     - "@fallow-cli/darwin-x64@3.42.0"
     - "@fallow-cli/linux-arm64-gnu@3.42.0"
@@ -53,7 +53,7 @@ minimumReleaseAgeExclude:
     - "@fallow-cli/linux-x64-musl@3.42.0"
     - "@fallow-cli/win32-arm64-msvc@3.42.0"
     - "@fallow-cli/win32-x64-msvc@3.42.0"
-    - better-auth@1.7.19
+    - better-auth@1.7.19 || 1.7.21
     - fallow-type-aware@3.42.0
     - fallow@3.42.0
 permissions:

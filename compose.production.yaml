@@ -1,0 +1,170 @@
+name: template-next
+
+services:
+  database:
+    image: postgres:alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_ADMIN_USER:-postgres}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_admin_password
+      POSTGRES_DB: ${POSTGRES_DB:-template_next}
+      APP_DB_USER: ${APP_DB_USER:-template_next_app}
+      MIGRATION_DB_USER: ${MIGRATION_DB_USER:-template_next_migrator}
+    secrets:
+      - postgres_admin_password
+      - app_db_password
+      - migration_db_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./deploy/postgres/init/10-create-app-role.sh:/docker-entrypoint-initdb.d/10-create-app-role.sh:ro
+    healthcheck:
+      test:
+        ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    stop_grace_period: 1m
+    security_opt:
+      - no-new-privileges:true
+    logging: &default-logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    networks:
+      - backend
+
+  web:
+    image: ${APP_IMAGE:-template-next:local}
+    build:
+      context: .
+      target: runner
+      args:
+        NEXT_PUBLIC_GITHUB_LINK: ${NEXT_PUBLIC_GITHUB_LINK:-}
+    restart: unless-stopped
+    init: true
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: "3000"
+      POSTGRES_USER: ${APP_DB_USER:-template_next_app}
+      POSTGRES_PASSWORD_FILE: /run/secrets/app_db_password
+      POSTGRES_DB: ${POSTGRES_DB:-template_next}
+      DB_HOST: database
+      DB_PORT: "5432"
+      DB_POOL_MAX: ${DB_POOL_MAX:-10}
+      DB_CONNECTION_TIMEOUT_MS: ${DB_CONNECTION_TIMEOUT_MS:-5000}
+      DB_IDLE_TIMEOUT_MS: ${DB_IDLE_TIMEOUT_MS:-30000}
+      DB_STATEMENT_TIMEOUT_MS: ${DB_STATEMENT_TIMEOUT_MS:-30000}
+      BETTER_AUTH_URL: https://${APP_DOMAIN:?Set APP_DOMAIN in .env.production}
+      BETTER_AUTH_SECRET_FILE: /run/secrets/better_auth_secret
+      BETTER_AUTH_TRUSTED_ORIGINS: https://${APP_DOMAIN}
+      AUTH_DISABLE_SIGN_UP: ${AUTH_DISABLE_SIGN_UP:-true}
+    secrets:
+      - app_db_password
+      - better_auth_secret
+    expose:
+      - "3000"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m,uid=1001,gid=1001
+      - /app/.next/cache:rw,nosuid,size=256m,uid=1001,gid=1001
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/health/ready').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+    logging: *default-logging
+    networks:
+      - edge
+      - backend
+
+  caddy:
+    image: caddy:alpine
+    restart: unless-stopped
+    init: true
+    depends_on:
+      web:
+        condition: service_healthy
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?Set APP_DOMAIN in .env.production}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+    logging: *default-logging
+    networks:
+      - edge
+
+  migrate:
+    profiles: ["ops"]
+    image: ${MIGRATOR_IMAGE:-template-next-migrator:local}
+    build:
+      context: .
+      target: migrator
+    restart: "no"
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      POSTGRES_USER: ${MIGRATION_DB_USER:-template_next_migrator}
+      POSTGRES_PASSWORD_FILE: /run/secrets/migration_db_password
+      POSTGRES_DB: ${POSTGRES_DB:-template_next}
+      DB_HOST: database
+      DB_PORT: "5432"
+    secrets:
+      - migration_db_password
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m,uid=1000,gid=1000
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+
+secrets:
+  postgres_admin_password:
+    environment: POSTGRES_ADMIN_PASSWORD
+  app_db_password:
+    environment: APP_DB_PASSWORD
+  migration_db_password:
+    environment: MIGRATION_DB_PASSWORD
+  better_auth_secret:
+    environment: BETTER_AUTH_SECRET
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  edge:
+  backend:
+    internal: true

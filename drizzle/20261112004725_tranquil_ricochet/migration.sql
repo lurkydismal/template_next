@@ -24,6 +24,18 @@ CREATE TABLE "notifications" (
 	CONSTRAINT "notification_message_not_blank" CHECK (length(trim("message")) > 0)
 );
 --> statement-breakpoint
+CREATE TABLE "record_changes" (
+	"id" serial PRIMARY KEY,
+	"target" varchar(64) NOT NULL,
+	"record_key" jsonb NOT NULL,
+	"operation" varchar(6) NOT NULL,
+	"actor_id" text,
+	"changes" jsonb NOT NULL,
+	"created_at" timestamp(0) with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "record_changes_operation_valid" CHECK ("operation" in ('insert', 'update', 'delete')),
+	CONSTRAINT "record_changes_changes_array" CHECK (jsonb_typeof("changes") = 'array')
+);
+--> statement-breakpoint
 CREATE TABLE "session" (
 	"id" text PRIMARY KEY,
 	"expires_at" timestamp NOT NULL,
@@ -83,11 +95,15 @@ CREATE TABLE "verification" (
 CREATE INDEX "account_userId_idx" ON "account" ("user_id");--> statement-breakpoint
 CREATE INDEX "notifications_is_read_index" ON "notifications" ("is_read");--> statement-breakpoint
 CREATE INDEX "notifications_created_at_index" ON "notifications" ("created_at");--> statement-breakpoint
+CREATE INDEX "record_changes_record_idx" ON "record_changes" ("target","record_key","created_at");--> statement-breakpoint
+CREATE INDEX "record_changes_actor_idx" ON "record_changes" ("actor_id");--> statement-breakpoint
+CREATE INDEX "record_changes_created_at_idx" ON "record_changes" ("created_at");--> statement-breakpoint
 CREATE INDEX "session_userId_idx" ON "session" ("user_id");--> statement-breakpoint
 CREATE INDEX "tables_author_id_index" ON "tables" ("author_id");--> statement-breakpoint
 CREATE INDEX "tables_last_editor_id_index" ON "tables" ("last_editor_id");--> statement-breakpoint
 CREATE INDEX "verification_identifier_idx" ON "verification" ("identifier");--> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "record_changes" ADD CONSTRAINT "record_changes_actor_id_user_id_fkey" FOREIGN KEY ("actor_id") REFERENCES "user"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "tables" ADD CONSTRAINT "tables_author_id_user_id_fkey" FOREIGN KEY ("author_id") REFERENCES "user"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "tables" ADD CONSTRAINT "tables_last_editor_id_user_id_fkey" FOREIGN KEY ("last_editor_id") REFERENCES "user"("id") ON DELETE SET NULL;

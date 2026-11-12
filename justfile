@@ -68,39 +68,39 @@ pull-db-schema:
 
 # Pull images for all services, skipping services that have no build context.
 docker-pull:
-    docker compose  pull --ignore-buildable
+    docker compose -f compose.dev.yaml pull --ignore-buildable
 
 # Start all services.
 docker-up-all:
     just docker-up
 
 # Start one service in detached mode.
-docker-up image='postgres':
-    docker compose up -d '{{ image }}'
+docker-up image='database':
+    docker compose -f compose.dev.yaml up -d '{{ image }}'
 
 # Stop all running containers in the current Docker Compose project without removing containers, networks, or volumes.
 docker-stop:
-    docker compose stop
+    docker compose -f compose.dev.yaml stop
 
 # Stop and remove containers, networks, and default resources created by the current Docker Compose project.
 docker-down:
-    docker compose down
+    docker compose -f compose.dev.yaml down
 
 # Open an interactive shell inside a running service container.
-docker-interact image='postgres':
-    docker compose exec '{{ image }}' bash
+docker-interact image='database':
+    docker compose -f compose.dev.yaml exec '{{ image }}' bash
 
 # Stream logs from all services and follow output
 docker-logs:
-    docker compose logs -f
+    docker compose -f compose.dev.yaml logs -f
 
 # Attach to a running service container without signal proxying.
-docker-attach image='postgres':
-    -docker compose attach --sig-proxy=false '{{ image }}' sh
+docker-attach image='database':
+    -docker compose -f compose.dev.yaml attach --sig-proxy=false '{{ image }}' sh
 
 # Show a one-time snapshot of resource usage statistics for containers in the current Docker Compose project.
 docker-stats:
-    docker compose stats --no-stream
+    docker compose -f compose.dev.yaml stats --no-stream
 
 # Remove dangling Docker images that are no longer referenced by any tag.
 docker-remove-unused-images:
@@ -113,7 +113,7 @@ reverse-proxy-reload: caddy-reload
 
 # Reload Caddy configuration inside the running container.
 caddy-reload:
-    docker compose exec -w /etc/caddy caddy caddy reload
+    docker compose -f compose.dev.yaml exec -w /etc/caddy caddy caddy reload
 
 # Generate a cryptographically secure random alphanumeric token of length `N`. Uses `openssl rand` as the entropy source, encodes as Base64, removes padding and non-alphanumeric output, then retries until the result is exactly `N` characters using only `[A-Za-z0-9]`.
 generate-token length='32':

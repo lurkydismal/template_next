@@ -41,7 +41,6 @@ const fields: FieldConfig<TableRow, TableRowInsert>[] = [
         key: "multiline_field",
         label: "Multiline",
         type: "multiline",
-        name: "content", // name in FormData. Optional, defaults to key
         size: 12,
         required: true,
         placeholder: "Required multiline content",

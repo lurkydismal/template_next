@@ -39,7 +39,6 @@ type InterconnectedFieldConfig<R> = {
 type CommonFieldConfig<R, RI = unknown, K extends PropertyKey = keyof R | keyof RI | string> = {
     key: K; // property key in row/insert (string allowed for synthetic fields)
     label: string;
-    name?: string; // form field name (defaults to key)
     size?: number; // value passed to Grid xs/sm/etc (use 12, 6, 4)
     required?: boolean;
     readOnly?: boolean;

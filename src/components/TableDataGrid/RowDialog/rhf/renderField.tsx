@@ -209,7 +209,10 @@ function RowDialogField<R extends Record<string, unknown>, RI extends Record<str
     handleFieldValueChange,
 }: RenderFieldParams<R, RI>) {
     const key = String(field.key);
-    const name = field.name ?? key;
+    // react-hook-form state (default values, getValues, change handlers) is keyed by `key`.
+    // Registering the control under `field.name` would create a second, empty entry that
+    // fails `required` until the user edits the field. The submitted payload always uses `key`.
+    const name = key;
     const value = values[key];
     const readOnly = isFieldReadOnly(field);
     const error = useRHFFieldError(form.control, name);

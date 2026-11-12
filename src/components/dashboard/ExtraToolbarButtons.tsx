@@ -204,8 +204,17 @@ export default function ExtraToolbarButtons<RI extends Record<string, unknown>>(
 
         if (toShow.length > 0) {
             setVisibleUnreadIds((current) => [...current, ...toShow.map((item) => item.id)]);
+        } else {
+            showInfo(userMessages.notifications.noAvailable);
         }
-    }, [notifications, visibleUnreadIds, snackbar, handleNotificationDismiss]);
+    }, [
+        handleNotificationDismiss,
+        notifications,
+        showInfo,
+        snackbar,
+        userMessages.notifications.noAvailable,
+        visibleUnreadIds,
+    ]);
 
     useEffect(() => {
         // Load persisted state independently of the stream's initial connection.

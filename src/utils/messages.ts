@@ -31,6 +31,7 @@ export const userMessages = {
     },
     notifications: {
         newAvailable: "New notifications available.",
+        noAvailable: "No notifications available.",
     },
     status: {
         notFoundTitle: "Page not found",

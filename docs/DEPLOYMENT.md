@@ -26,7 +26,7 @@ The application and migrator run as unprivileged users. The web and migrator con
 - Inbound TCP ports 80 and 443 open in the host firewall and provider firewall. UDP 443 is optional but enables HTTP/3.
 - Enough disk space for the PostgreSQL volume, Docker images, and off-host backups.
 - A committed `package-lock.json` for repeatable production builds.
-- Outbound access from the image builder to the npm registry and Google Fonts: the app currently imports `next/font/google`, which downloads font assets at build time.
+- Outbound access from the image builder to the pnpm registry and Google Fonts: the app currently imports `next/font/google`, which downloads font assets at build time.
 
 Node.js 26 Active LTS is used for image build and runtime. The Docker image uses Next.js standalone output; Next.js documents standalone output as a self-contained Node server suitable for Docker. <https://nextjs.org/docs/app/getting-started/deploying>
 
@@ -61,10 +61,10 @@ The production Compose file uses environment-backed Compose secrets. This is int
 The supplied project archive does not contain `package-lock.json`. Do not treat floating dependency resolution as a stable production release. From the project root, run on a machine with registry access:
 
 ```bash
-npm install --package-lock-only --ignore-scripts
+pnpm install --package-lock-only --ignore-scripts
 ```
 
-Review and commit `package-lock.json`. Production Docker builds use `npm ci` when the lockfile exists. The Dockerfile has a warning-producing `npm install` fallback so the source can still be built before the lockfile is added; do not use that fallback for a controlled production release.
+Review and commit `package-lock.json`. Production Docker builds use `pnpm ci` when the lockfile exists. The Dockerfile has a warning-producing `pnpm install` fallback so the source can still be built before the lockfile is added; do not use that fallback for a controlled production release.
 
 The Drizzle packages are pinned to the exact `1.0.0-rc.5` versions used by this project instead of the moving `rc` dist-tag. These are still release-candidate packages, not stable releases; plan and test a deliberate upgrade to a stable Drizzle release when the schema/API migration is supported. Current npm release information: <https://www.npmjs.com/package/drizzle-orm> and <https://www.npmjs.com/package/drizzle-kit>.
 
@@ -73,7 +73,7 @@ The Docker build stage sets non-secret placeholder database/auth values so Next.
 Validate the production environment file and Compose interpolation before proceeding:
 
 ```bash
-npm run deploy:check
+pnpm deploy:check
 ```
 
 The check rejects example placeholders, short/reused secrets, unsafe file permissions, missing lockfiles, invalid hostnames/role names, overlapping database roles, and invalid Compose configuration. It warns when public registration is enabled.
@@ -85,8 +85,8 @@ The source archive contains the current Drizzle schema but no generated migratio
 For local development, configure `.env` using `.env.example`, start a PostgreSQL instance, and then run:
 
 ```bash
-npm install
-npm run db:generate
+pnpm install
+pnpm db:generate
 ```
 
 Review the SQL under `drizzle/`, test it against an empty disposable PostgreSQL database, and commit the generated SQL and `drizzle/meta/` files. Do not hand-edit migration history or run `drizzle-kit push` against production.
@@ -94,7 +94,7 @@ Review the SQL under `drizzle/`, test it against an empty disposable PostgreSQL 
 For each later schema change:
 
 1. Update `src/db/schema.ts` (and related schema modules).
-2. Run `npm run db:generate`.
+2. Run `pnpm db:generate`.
 3. Review the generated SQL for data loss, locking, defaults, foreign keys, and index creation.
 4. Test the migration against an empty database and a production-like database copy. Validate the app runtime role can read/write the changed tables.
 5. Commit the schema change and migration together. Do not deploy a release whose `drizzle/` folder lacks the migration it needs.
@@ -319,3 +319,7 @@ For an incident, capture logs and service state, check host memory/disk and the 
 | Auth cookie is rejected          | Check the public URL is HTTPS, trusted origins match exactly, proxy headers are not rewritten incorrectly, and host clocks are synchronized.                                                                       |
 | Migration command fails          | Check DB health, migration-role grants, migration SQL/journal committed to `drizzle/`, `migrations.schema` set to `public`, and that the migrator image was rebuilt from the same release commit as the web image. |
 | Disk is filling                  | Check Docker images/logs, PostgreSQL volume, and backup retention; move backups off-host and prune only known-unused images.                                                                                       |
+
+## Test strategy before release
+
+Run `pnpm test:unit`, `pnpm test:integration`, and `pnpm test` for the Vitest suites. For a browser smoke test, provision a disposable database with the committed migrations, seed a test user, install Chromium with `just install-e2e-tests-deps`, then set `E2E_USER_EMAIL` and `E2E_USER_PASSWORD` and run `pnpm test:e2e`. Never run these suites against production data. The E2E suite exercises anonymous route denial, required-field validation, table create/update actions, and cross-tab live refresh. See `tests/e2e/README.md` for setup.

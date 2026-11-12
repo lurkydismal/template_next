@@ -8,11 +8,11 @@ import { createInsertSchema, createUpdateSchema } from "drizzle-orm/zod";
 import type { ActionResult, DbTarget } from "@/lib/types";
 
 import db from "@/db";
+import { getCurrentSession, requireAuthenticatedUser } from "@/lib/auth/session";
 import { updateDbCacheTags } from "@/lib/cache";
 import { emitDashboardChange } from "@/lib/dashboard/common/change-events";
-import { getSession } from "@/lib/safe/auth";
+import { parseForm } from "@/lib/dashboard/common/form-parser";
 import { parseRawTarget } from "@/lib/types";
-import { getUserId, requestUserId } from "@/lib/user";
 import { toCamelCase } from "@/utils/stdfunc";
 import log from "@/utils/stdlog";
 import { mutationInputSchema } from "@/utils/validate/schemas";
@@ -32,9 +32,18 @@ type ResolvedColumn = {
 
 type ColumnResolution = { ok: true; columns: ResolvedColumn[] } | { ok: false; error: string };
 
+const SERVER_MANAGED_FIELDS = new Set(["author_id", "last_editor_id", "created_at", "updated_at"]);
+
 function toDbMutation(parsedRow: MutationRow, actorId: string, isUpdate: boolean): MutationRow {
+    // Audit metadata and generated IDs are controlled by the server, never by form data.
+    const mutableFields = Object.fromEntries(
+        Object.entries(parsedRow).filter(
+            ([key]) => !SERVER_MANAGED_FIELDS.has(key) && (isUpdate || key !== "id"),
+        ),
+    );
+
     return {
-        ...parsedRow,
+        ...mutableFields,
         ...(isUpdate ? {} : { author_id: actorId }),
         last_editor_id: actorId,
     };
@@ -133,17 +142,8 @@ function removeIdColumnsFromMutation(row: MutationRow, idColumns: ResolvedColumn
 }
 
 async function getActorId(): Promise<string> {
-    const sessionUser = (await getSession()).data?.user;
-    if (!sessionUser?.name) {
-        throw new Error("Missing authenticated user");
-    }
-
-    const actorId = await getUserId(requestUserId(sessionUser.name));
-    if (!actorId) {
-        throw new Error("Missing authenticated user");
-    }
-
-    return actorId;
+    const session = await getCurrentSession();
+    return requireAuthenticatedUser(session).id;
 }
 
 async function insertMutation(table: ReturnType<typeof parseRawTarget>, row: MutationRow) {
@@ -182,10 +182,10 @@ async function updateMutation(
 async function buildMutationRow(
     table: ReturnType<typeof parseRawTarget>,
     input: MutationRow,
+    actorId: string,
     isUpdate: boolean,
 ): Promise<{ parsedInput: MutationRow; row: MutationRow }> {
     const parsedInput = (await mutationInputSchema.parseAsync(input)) as MutationRow;
-    const actorId = await getActorId();
     const schema = isUpdate ? createUpdateSchema(table) : createInsertSchema(table);
     const row = await schema.parseAsync(toDbMutation(parsedInput, actorId, isUpdate));
     return { parsedInput, row: row as MutationRow };
@@ -223,12 +223,21 @@ async function invalidateDashboard(rawTarget: DbTarget): Promise<void> {
 /** Saves a validated insert or update and emits the dashboard invalidation event. */
 export async function save(
     rawTarget: DbTarget,
-    input: MutationRow,
+    input: MutationRow | FormData,
     opts: SaveOptions = {},
 ): Promise<ActionResult> {
+    // Authorize before resolving user-controlled targets or parsing payloads.
+    const actorId = await getActorId();
     const table = parseRawTarget(rawTarget);
     const isUpdate = opts.isUpdate === true;
-    const { parsedInput, row } = await buildMutationRow(table, input, isUpdate);
+
+    // Parse browser FormData only after authorization; create actions pass typed objects.
+    if (input instanceof FormData && !isUpdate) {
+        throw new Error("FormData is only supported for row updates");
+    }
+
+    const mutationInput = input instanceof FormData ? parseForm(input, rawTarget) : input;
+    const { parsedInput, row } = await buildMutationRow(table, mutationInput, actorId, isUpdate);
     const result = await persistMutation(table, parsedInput, row, opts, isUpdate);
 
     if (!result.ok) return result;

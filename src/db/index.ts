@@ -1,46 +1,42 @@
-/**
- * Database configuration for PostgreSQL using Drizzle ORM.
- *
- * - Loads environment variables from .env.
- * - Configures Drizzle with snake_case mapping.
- * - Sets up a custom logger that routes Drizzle logs to a browser-style logger.
- * - Exports the configured database instance for use across the application.
- */
-import "dotenv/config";
+/** PostgreSQL connection pool and Drizzle database instance. */
+import "server-only";
 import { DefaultLogger, LogWriter } from "drizzle-orm/logger";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 
+import { getPositiveIntegerEnv, getServerEnv } from "@/utils/server-env";
 import log from "@/utils/stdlog";
 
 import { relations } from "./relations";
 
-// Custom implementation of Drizzle's LogWriter interface
-// All log messages from Drizzle will be routed through this writer
-class MyLogWriter implements LogWriter {
-    /**
-     * Forwards database driver notices to log.debug().
-     */
+class DatabaseLogWriter implements LogWriter {
     write(message: string) {
         log.debug(message);
     }
 }
 
-// Instantiate the default Drizzle logger using the custom writer
-const logger = new DefaultLogger({ writer: new MyLogWriter() });
-
-// Create a Drizzle database instance configured for PostgreSQL
-// Connection info is read from environment variables
-// `casing: "snake_case"` ensures database fields are mapped in snake_case
-const db = drizzle({
-    connection: {
-        user: process.env["POSTGRES_USER"]!,
-        password: process.env["POSTGRES_PASSWORD"]!,
-        database: process.env["POSTGRES_DB"]!,
-        host: process.env["DB_HOST"]!,
-        port: Number(process.env["DB_PORT"]!),
-    },
-    logger,
-    relations: relations,
+const pool = new Pool({
+    user: getServerEnv("POSTGRES_USER"),
+    password: getServerEnv("POSTGRES_PASSWORD"),
+    database: getServerEnv("POSTGRES_DB"),
+    host: getServerEnv("DB_HOST"),
+    port: getPositiveIntegerEnv("DB_PORT", 5432),
+    max: getPositiveIntegerEnv("DB_POOL_MAX", 10),
+    connectionTimeoutMillis: getPositiveIntegerEnv("DB_CONNECTION_TIMEOUT_MS", 5_000),
+    idleTimeoutMillis: getPositiveIntegerEnv("DB_IDLE_TIMEOUT_MS", 30_000),
+    statement_timeout: getPositiveIntegerEnv("DB_STATEMENT_TIMEOUT_MS", 30_000),
+    application_name: "template-next",
+    keepAlive: true,
 });
 
+pool.on("error", (error) => {
+    log.error("Unexpected PostgreSQL connection-pool error", error);
+});
+
+const db = drizzle(pool, {
+    logger: new DefaultLogger({ writer: new DatabaseLogWriter() }),
+    relations,
+});
+
+export { pool };
 export default db;

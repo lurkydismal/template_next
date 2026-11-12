@@ -44,9 +44,9 @@ export default function AppTheme(props: AppThemeProps) {
     // Destructure the selected locales
     const { mui, dg, dp } = getLocales(lang);
 
-    const prefersReducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
-
-    // Create MUI theme with custom primitives, dark/light mode, and localization
+    // Let MUI handle the OS reduced-motion preference through its v9 motion API.
+    // This keeps component transition lifecycles intact instead of globally
+    // replacing the transition generator with `transition: none`.
     const theme = createTheme(
         {
             motion: {

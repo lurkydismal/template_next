@@ -1,3 +1,4 @@
+import { getRequestSession } from "@/lib/auth/session";
 import { subscribeToDashboardEvents } from "@/lib/dashboard/common/change-events";
 import log from "@/utils/stdlog";
 
@@ -5,6 +6,11 @@ import log from "@/utils/stdlog";
  * Creates a server-sent events stream that emits dashboard mutation updates.
  */
 export async function GET(request: Request): Promise<Response> {
+    const session = await getRequestSession(request);
+    if (!session?.user?.id) {
+        return Response.json({ error: "Authentication is required" }, { status: 401 });
+    }
+
     let closed = false;
     let unsubscribe: (() => void) | null = null;
     let removeAbortListener: (() => void) | null = null;

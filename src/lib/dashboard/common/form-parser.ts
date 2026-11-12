@@ -183,6 +183,8 @@ function getUniqueFormEntries(formData: FormData): [string, FormDataEntryValue][
 
 function hasInvalidPrimaryKey(value: unknown): boolean {
     return (
+        value === null ||
+        value === undefined ||
         (typeof value === "number" && (!Number.isSafeInteger(value) || value <= 0)) ||
         (typeof value === "bigint" && value <= 0n)
     );

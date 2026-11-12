@@ -33,7 +33,8 @@ pool.on("error", (error) => {
     log.error("Unexpected PostgreSQL connection-pool error", error);
 });
 
-const db = drizzle(pool, {
+const db = drizzle({
+    client: pool,
     logger: new DefaultLogger({ writer: new DatabaseLogWriter() }),
     relations,
 });

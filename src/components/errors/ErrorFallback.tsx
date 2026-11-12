@@ -30,9 +30,16 @@ export default function ErrorFallback({
                     py: 6,
                 }}
             >
-                <Stack spacing={3} alignItems="center" textAlign="center" width="100%">
+                <Stack
+                    spacing={3}
+                    sx={{ alignItems: "center", textAlign: "center", width: "100%" }}
+                >
                     <Box>
-                        <Typography component="h1" variant="h4" fontWeight={700}>
+                        <Typography
+                            variant="h4"
+                            variantMapping={{ h4: "h1" }}
+                            sx={{ fontWeight: 700 }}
+                        >
                             {userMessages.errors.title}
                         </Typography>
                         <Typography color="text.secondary" sx={{ mt: 1 }}>
@@ -50,7 +57,11 @@ export default function ErrorFallback({
                         </Typography>
                     ) : null}
 
-                    <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap">
+                    <Stack
+                        direction="row"
+                        spacing={1}
+                        sx={{ justifyContent: "center", flexWrap: "wrap" }}
+                    >
                         <Button onClick={reset} startIcon={<Refresh />} variant="contained">
                             {userMessages.actions.retry}
                         </Button>

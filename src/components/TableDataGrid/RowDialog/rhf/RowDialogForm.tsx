@@ -44,8 +44,8 @@ function RowDialogContent<R extends Record<string, unknown>, RI extends Record<s
         mode: "onSubmit",
     });
     const { values, setValuesAndForm, runFieldValueChange, handleFieldValueChange } =
-        useRowDialogFieldValues({ row, fields, initialValues, form });
-    const submit = useRowDialogSubmission({
+        useRowDialogFieldValues<R, RI>({ row, fields, initialValues, form });
+    const submit = useRowDialogSubmission<R, RI>({
         row,
         fields,
         idKey,
@@ -55,7 +55,7 @@ function RowDialogContent<R extends Record<string, unknown>, RI extends Record<s
         updateRowAction,
         onUpdated,
     });
-    const submitWithDraftCleanup = useRowDialogDraft({
+    const submitWithDraftCleanup = useRowDialogDraft<R, RI>({
         row,
         fields,
         dashboardKey,

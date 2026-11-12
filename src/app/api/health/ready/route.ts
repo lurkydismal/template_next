@@ -1,13 +1,15 @@
 import { sql } from "drizzle-orm";
+import { connection } from "next/server";
 
 import db from "@/db";
 import log from "@/utils/stdlog";
 
 /** Readiness probe. Returns 503 while the application cannot reach PostgreSQL. */
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 export async function GET() {
+    // Prevent build-time prerendering.
+    // Keep outside try/catch so Next.js can propagate its prerender signal.
+    await connection();
+
     try {
         // Query a table created by the initial schema migration, not only the
         // connection itself. This keeps a fresh-but-unmigrated database unready.

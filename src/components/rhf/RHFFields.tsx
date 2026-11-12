@@ -73,7 +73,7 @@ export function RHFCheckbox<T extends RHFFieldValues>({
                             checked={Boolean(field.value)}
                             onChange={(event) => field.onChange(event.target.checked)}
                             onBlur={field.onBlur}
-                            inputRef={field.ref}
+                            slotProps={{ input: { ref: field.ref } }}
                         />
                     }
                 />

@@ -44,8 +44,8 @@ function RowDialogContent<R extends Record<string, unknown>, RI extends Record<s
         mode: "onSubmit",
     });
     const { values, setValuesAndForm, runFieldValueChange, handleFieldValueChange } =
-        useRowDialogFieldValues<R, RI>({ row, fields, initialValues, form });
-    const submit = useRowDialogSubmission<R, RI>({
+        useRowDialogFieldValues({ row, fields, initialValues, form });
+    const submit = useRowDialogSubmission({
         row,
         fields,
         idKey,

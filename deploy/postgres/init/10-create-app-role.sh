@@ -18,7 +18,10 @@ psql \
 \set migration_password `cat /run/secrets/migration_db_password`
 
 CREATE ROLE :"migration_user" LOGIN PASSWORD :'migration_password';
-GRANT CONNECT ON DATABASE :"db_name" TO :"migration_user";
+-- CREATE on the database is required because `drizzle-kit migrate` always runs
+-- `CREATE SCHEMA IF NOT EXISTS public`; PostgreSQL checks this privilege before it notices
+-- that the schema already exists. The role still cannot create roles or touch other databases.
+GRANT CONNECT, CREATE ON DATABASE :"db_name" TO :"migration_user";
 GRANT USAGE, CREATE ON SCHEMA public TO :"migration_user";
 ALTER ROLE :"migration_user" SET search_path = public;
 

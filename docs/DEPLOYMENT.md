@@ -1,6 +1,10 @@
 # Production deployment and operations
 
-This runbook documents the supported single-host deployment. It uses Docker Compose, Caddy, and PostgreSQL. Caddy is the only public-facing service; the Next.js container is not published directly and PostgreSQL is isolated on an internal Docker network.
+This runbook documents the supported single-host deployment: Docker Compose, Caddy and PostgreSQL. Caddy is the only public-facing service; the Next.js container is not published and PostgreSQL lives on an internal Docker network.
+
+**Shortcut:** every step below has a `just` recipe (`just --list`). A complete release is `just deploy-release`.
+
+> **Verification status.** The application, migrations, role model, environment validator, smoke test and health endpoints were exercised against a real PostgreSQL 16 server and a production `next build`/`next start`. The Docker images, the Compose file and the Caddy configuration were **not** built or started in the environment where this runbook was written (no Docker available). Treat the first deployment as a rehearsal on a staging host.
 
 ## 1. Deployment architecture
 
@@ -8,7 +12,7 @@ This runbook documents the supported single-host deployment. It uses Docker Comp
 Internet
    │ HTTPS :443 / HTTP :80
    ▼
-Caddy ──────────────── TLS certificates and HTTPS redirects
+Caddy ──────────────── TLS certificates, HTTPS redirects, security headers, body-size limit
    │ private edge network
    ▼
 Next.js standalone server :3000
@@ -17,211 +21,152 @@ Next.js standalone server :3000
 PostgreSQL :5432 ───── persistent Docker volume
 ```
 
-The application and migrator run as unprivileged users. The web and migrator containers have read-only root filesystems, narrowly scoped temporary mounts, dropped Linux capabilities, and `no-new-privileges`. PostgreSQL is not published to the host. A bootstrap administrator creates two non-superuser roles: a migration owner that can create/alter schema objects, and a runtime role limited to application DML (SELECT/INSERT/UPDATE/DELETE and sequence access).
+The web and migrator containers run as unprivileged users with read-only root filesystems, narrow temporary mounts, dropped Linux capabilities and `no-new-privileges`. PostgreSQL is never published to the host. A bootstrap administrator creates two non-superuser roles:
+
+- **Migration role** owns schema objects and may create/alter them. Only the one-shot migrator receives its password.
+- **Runtime role** is what the web container uses. It has `SELECT/INSERT/UPDATE/DELETE` and sequence access, and cannot change the schema or triggers.
 
 ## 2. Requirements
 
 - A Linux host with Docker Engine and Docker Compose v2.
-- A DNS A record for the deployment hostname pointing to the host. Add an AAAA record only when IPv6 is configured end to end.
-- Inbound TCP ports 80 and 443 open in the host firewall and provider firewall. UDP 443 is optional but enables HTTP/3.
-- Enough disk space for the PostgreSQL volume, Docker images, and off-host backups.
-- A committed `package-lock.json` for repeatable production builds.
-- Outbound access from the image builder to the pnpm registry and Google Fonts: the app currently imports `next/font/google`, which downloads font assets at build time.
+- A DNS A record for the hostname (AAAA only if IPv6 works end to end); inbound TCP 80 and 443 open (UDP 443 optional, for HTTP/3).
+- Disk for the PostgreSQL volume, images and off-host backups.
+- The committed `pnpm-lock.yaml` (the image builds with `pnpm install --frozen-lockfile`) and the committed migrations under `drizzle/`.
+- Outbound access from the image builder to the npm registry **and Google Fonts**: the app uses `next/font/google`, which downloads fonts at build time.
+- `curl` on the host for the smoke test.
 
-Node.js 26 Active LTS is used for image build and runtime. The Docker image uses Next.js standalone output; Next.js documents standalone output as a self-contained Node server suitable for Docker. <https://nextjs.org/docs/app/getting-started/deploying>
+Node.js 26 (`.nvmrc`) is used for build and runtime. If `pnpm install` in the Docker build is rejected by pnpm's release-age policy (`minimumReleaseAge`), the lockfile references a package that was published very recently: wait or review the change; do not disable the policy in the Dockerfile.
 
 ## 3. Prepare environment and secrets
 
-On the deployment host, create the deployment environment file:
-
 ```bash
-cp .env.production.example .env.production
-chmod 600 .env.production
+just deploy-init-env      # copies .env.production.example, generates four secrets, chmod 600
+$EDITOR .env.production   # set APP_DOMAIN
+just deploy-check
 ```
 
-Set `APP_DOMAIN` to the public hostname. Keep `POSTGRES_ADMIN_USER`, `POSTGRES_DB`, `APP_DB_USER`, and `MIGRATION_DB_USER` stable after the database volume has been initialized. The production environment check is run after the dependency lockfile is committed in the next section.
+`deploy-init-env` refuses to overwrite an existing file. Doing it by hand is equivalent: `cp .env.production.example .env.production && chmod 600 .env.production`, then put a different `openssl rand -hex 32` value in each of `POSTGRES_ADMIN_PASSWORD`, `APP_DB_PASSWORD`, `MIGRATION_DB_PASSWORD` and `BETTER_AUTH_SECRET`.
 
-Generate four different high-entropy secrets:
+`deploy-check` (`scripts/validate-production-env.sh`) parses the file **without executing it** and rejects: example placeholders, short or reused secrets, characters that are unsafe in secrets, group/other-readable permissions, a missing `pnpm-lock.yaml`, `conf/Caddyfile` or migrations, a stray `package-lock.json`, an invalid `DB_SSL`, non-numeric pool settings, `:latest` image tags, overlapping database roles and an invalid Compose configuration. It warns when public registration is enabled.
+
+Keep `.env.production` out of source control. Compose mounts the values into the containers as secrets below `/run/secrets`; the application reads `*_FILE` paths rather than receiving passwords as ordinary environment variables. This uses environment-backed Compose secrets for a single Linux host; it is not a Swarm stack file. For a managed orchestrator, use the platform's secret manager (the application accepts `NAME` or `NAME_FILE` for every secret).
+
+Keep `POSTGRES_ADMIN_USER`, `POSTGRES_DB`, `APP_DB_USER` and `MIGRATION_DB_USER` stable once the database volume exists.
+
+## 4. Dependencies and migrations
+
+Production builds are controlled by two committed artefacts:
+
+- `pnpm-lock.yaml`: the Docker build uses `--frozen-lockfile`, so it fails when `package.json` and the lockfile disagree.
+- `drizzle/<timestamp>_<name>/migration.sql`: applied in order by the migrator.
+
+The migration history is:
+
+1. `…_tranquil_ricochet`: tables generated from `src/db/schema.ts` (the generated name is arbitrary; keep it, renaming applied migrations breaks history).
+2. `…_audit_and_updated_at_triggers`: hand-written SQL that Drizzle cannot generate. It adds the `tables.updated_at` trigger, the field-level audit trigger, and the append-only protection of `record_changes` (see [audit-history.md](audit-history.md)). **Without this migration the deployment has no audit trail**, which is why `/api/health/ready` reports "not ready" when the audit trigger is missing.
+
+For each later schema change: edit `src/db/schema.ts`, run `just generate-migration` (use `pnpm db:generate --custom` for hand-written SQL), review the SQL for data loss/locking/defaults/foreign keys, test against an empty database and a production-like copy, and commit the schema change and migration together. Never run `drizzle-kit push` against production or hand-edit applied migrations. Drizzle's `migrate` applies the SQL files and records them in its migration log: <https://orm.drizzle.team/docs/drizzle-kit-migrate>.
+
+The Drizzle packages are pinned to `1.0.0-rc.5`. They are release candidates; plan a deliberate upgrade to a stable release.
+
+## 5. First deployment
 
 ```bash
-openssl rand -hex 32  # PostgreSQL bootstrap account password
-openssl rand -hex 32  # application runtime database password
-openssl rand -hex 32  # migration database password
-openssl rand -hex 32  # Better Auth secret
+just deploy-build     # web + migrator images
+just deploy-db        # start PostgreSQL and wait until healthy
+just deploy-migrate   # one-shot migrator, migration role
+just deploy-up        # web + Caddy
+just deploy-smoke     # post-deployment checks
 ```
 
-Put each generated value in the corresponding field in `.env.production`. Do not reuse these values. Better Auth requires a secret of at least 32 characters and recommends a high-entropy generated value. <https://better-auth.com/docs/installation>
+Each recipe wraps `docker compose --env-file .env.production -f compose.production.yaml …`. If you prefer images built by CI, set immutable `APP_IMAGE` / `MIGRATOR_IMAGE` tags in `.env.production`, `docker compose … pull web migrate`, and deploy with `up -d --no-build`. Never deploy mutable `latest` tags (the validator rejects them).
 
-Keep `.env.production` out of source control and restrict host access. Compose exposes these values to the selected containers as mounted secrets; the application reads `*_FILE` paths rather than receiving database/auth passwords as regular environment variables. Compose secrets are granted per service and mounted below `/run/secrets`. <https://docs.docker.com/compose/how-tos/use-secrets/>
+On the first start PostgreSQL runs `deploy/postgres/init/10-create-app-role.sh`, which creates the two roles and these grants:
 
-The production Compose file uses environment-backed Compose secrets. This is intended for Docker Compose on a single Linux host; it is not a Swarm stack file. For a managed orchestrator, replace this secret source with the platform's secret manager.
+- Migration role: `CONNECT` and **`CREATE` on the database**, plus `CREATE` on schema `public`. Database-level `CREATE` is required because `drizzle-kit migrate` always executes `CREATE SCHEMA IF NOT EXISTS public`, and PostgreSQL checks that privilege before it notices the schema exists. The role still cannot create roles or touch other databases.
+- Runtime role: `USAGE` on `public` and default `SELECT/INSERT/UPDATE/DELETE` plus sequence privileges on objects the migration role creates.
 
-## 4. Create a reproducible dependency lockfile
-
-The supplied project archive does not contain `package-lock.json`. Do not treat floating dependency resolution as a stable production release. From the project root, run on a machine with registry access:
+Init scripts run only when the data directory is empty. **Upgrading an existing volume** created from an earlier version of this script needs one statement as the admin (otherwise migrations fail with `permission denied for database`):
 
 ```bash
-pnpm install --package-lock-only --ignore-scripts
+docker compose --env-file .env.production -f compose.production.yaml exec database \
+  sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "GRANT CREATE ON DATABASE \"$POSTGRES_DB\" TO \"$MIGRATION_DB_USER\""'
 ```
 
-Review and commit `package-lock.json`. Production Docker builds use `pnpm ci` when the lockfile exists. The Dockerfile has a warning-producing `pnpm install` fallback so the source can still be built before the lockfile is added; do not use that fallback for a controlled production release.
+Changing users or passwords in `.env.production` does not rewrite existing roles; rotate them deliberately with SQL and coordinated secret updates.
 
-The Drizzle packages are pinned to the exact `1.0.0-rc.5` versions used by this project instead of the moving `rc` dist-tag. These are still release-candidate packages, not stable releases; plan and test a deliberate upgrade to a stable Drizzle release when the schema/API migration is supported. Current npm release information: <https://www.npmjs.com/package/drizzle-orm> and <https://www.npmjs.com/package/drizzle-kit>.
+### TLS to PostgreSQL
 
-The Docker build stage sets non-secret placeholder database/auth values so Next.js can trace server modules without access to production credentials. They are not copied as runtime container environment settings; the final web container requires the real Compose-provided values and secret files.
+The bundled PostgreSQL has no TLS, and traffic stays on a private Docker network, so `DB_SSL` defaults to `disable`. This matters for the migrator too: `drizzle-kit` forces TLS for host/user/password credentials unless told otherwise, which fails against a server without TLS ("The server does not support SSL connections"). `drizzle.config.ts` therefore passes `ssl: false` unless `DB_SSL` is `require` or `verify-full`, which you need for a managed database.
 
-Validate the production environment file and Compose interpolation before proceeding:
+### Caddy
 
-```bash
-pnpm deploy:check
-```
+Caddy obtains and renews certificates automatically; keep `caddy_data` persistent (deleting it discards certificate state and can hit issuance rate limits). `conf/Caddyfile` adds security headers, limits request bodies to 2 MB, compresses ordinary responses, and serves `/api/dashboard/changes` (server-sent events) with `flush_interval -1` and **without** compression, so live updates are not buffered. After editing it run `just caddy-reload`.
 
-The check rejects example placeholders, short/reused secrets, unsafe file permissions, missing lockfiles, invalid hostnames/role names, overlapping database roles, and invalid Compose configuration. It warns when public registration is enabled.
+The Compose file mounts `./conf/Caddyfile`. (An earlier revision referenced `./Caddyfile`, which does not exist.)
 
-## 5. Generate and commit the initial database migration
+## 6. Authentication and access control
 
-The source archive contains the current Drizzle schema but no generated migration SQL or journal. A new database will not have the application tables until this step is completed. This is a release prerequisite, not an automated step in the production startup path.
+The application protects pages with a session check in `src/proxy.ts`, and every API route and server action with its own check (`guardRoute` / `requireSession`). Authorization is **session-only**: there are no roles, ownership rules or per-user permissions, so every account has the same access to the dashboard. Consequently:
 
-For local development, configure `.env` using `.env.example`, start a PostgreSQL instance, and then run:
+- `AUTH_DISABLE_SIGN_UP` defaults to `true` in production. Anonymous visitors are redirected to `/auth/login`, and `POST /api/auth/sign-up/email` answers `400 EMAIL_PASSWORD_SIGN_UP_DISABLED`.
+- Production refuses to start unless `BETTER_AUTH_SECRET` has at least 32 characters and `BETTER_AUTH_URL` is an `https://` origin (plain `http://localhost` is tolerated so `next start` can be tried locally). Cookies are `Secure` when the URL is https, and Better Auth's rate limiter is on (`AUTH_RATE_LIMIT=false` exists for automated tests only).
+- Email verification and password-reset delivery are not configured.
 
-```bash
-pnpm install
-pnpm db:generate
-```
+Bootstrapping the first user:
 
-Review the SQL under `drizzle/`, test it against an empty disposable PostgreSQL database, and commit the generated SQL and `drizzle/meta/` files. Do not hand-edit migration history or run `drizzle-kit push` against production.
+1. Restrict site access at the firewall or an upstream access proxy.
+2. Set `AUTH_DISABLE_SIGN_UP=false` and recreate only the web service: `docker compose --env-file .env.production -f compose.production.yaml up -d --force-recreate web`.
+3. Register the intended account(s).
+4. Set `AUTH_DISABLE_SIGN_UP=true`, recreate `web` again, then run `just deploy-smoke` (it asserts that sign-up is closed).
+5. Lift the temporary network restriction.
 
-For each later schema change:
+Do not leave registration open until role-based authorization and any account-verification workflow exist. `BETTER_AUTH_TRUSTED_ORIGINS` is restricted to the canonical origin; do not add wildcards or localhost in production. <https://better-auth.com/docs/reference/security>
 
-1. Update `src/db/schema.ts` (and related schema modules).
-2. Run `pnpm db:generate`.
-3. Review the generated SQL for data loss, locking, defaults, foreign keys, and index creation.
-4. Test the migration against an empty database and a production-like database copy. Validate the app runtime role can read/write the changed tables.
-5. Commit the schema change and migration together. Do not deploy a release whose `drizzle/` folder lacks the migration it needs.
+**What the dashboard layer enforces** (all covered by tests):
 
-Drizzle's `migrate` command applies generated SQL files and records successful migrations in its migration log. <https://orm.drizzle.team/docs/drizzle-kit-migrate>
+- the generic table actions accept only an allowlisted table (`tables`); Better Auth tables, notifications and the audit log cannot be reached through them;
+- the actor recorded as author/last editor is always the session user's id, never a client value; client-supplied `author_id`, `last_editor_id`, `created_at` and `updated_at` are discarded;
+- `updated_at` is maintained by the database and only moves when a row really changes.
 
-## 6. First deployment
+## 7. Environment variable reference
 
-Run all commands from the repository root. The Compose file is explicit, so use the same flags consistently:
+| Variable                                                                                                     |       Required | Purpose                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------ | -------------: | ------------------------------------------------------------------------------------------------------- |
+| `APP_DOMAIN`                                                                                                 |  Yes (Compose) | Public hostname used by Caddy and Better Auth.                                                          |
+| `POSTGRES_ADMIN_USER`                                                                                        |            Yes | PostgreSQL bootstrap user; normally `postgres`.                                                         |
+| `POSTGRES_ADMIN_PASSWORD`                                                                                    |   Yes (secret) | Bootstrap password; mounted only into PostgreSQL.                                                       |
+| `POSTGRES_DB`                                                                                                |            Yes | Database name.                                                                                          |
+| `APP_DB_USER` / `APP_DB_PASSWORD`                                                                            |            Yes | Runtime role (DML only) and its secret.                                                                 |
+| `MIGRATION_DB_USER` / `MIGRATION_DB_PASSWORD`                                                                |            Yes | Schema-owner role and its secret; mounted only into the migrator and DB bootstrap.                      |
+| `BETTER_AUTH_SECRET`                                                                                         |   Yes (secret) | Signing/encryption secret, at least 32 characters.                                                      |
+| `AUTH_DISABLE_SIGN_UP`                                                                                       |             No | `true`/`false`; default `true` in production, `false` otherwise.                                        |
+| `AUTH_RATE_LIMIT`                                                                                            |             No | `true`/`false`; default `true` in production. Disable only for automated tests.                         |
+| `DB_SSL`                                                                                                     |             No | `disable` (default) / `require` / `verify-full`. Applies to the app and the migrator.                   |
+| `DB_POOL_MAX`                                                                                                |             No | Connections per web container; default `10`.                                                            |
+| `DB_CONNECTION_TIMEOUT_MS`                                                                                   |             No | Default `5000`.                                                                                         |
+| `DB_IDLE_TIMEOUT_MS`                                                                                         |             No | Default `30000`.                                                                                        |
+| `DB_STATEMENT_TIMEOUT_MS`                                                                                    |             No | Default `30000`.                                                                                        |
+| `APP_IMAGE`, `MIGRATOR_IMAGE`                                                                                |             No | Immutable image references when images come from a registry.                                            |
+| `NEXT_PUBLIC_GITHUB_LINK`                                                                                    |             No | Public link compiled into the browser bundle at build time; rebuild to change.                          |
+| `DB_HOST`, `DB_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `BETTER_AUTH_URL`, `BETTER_AUTH_TRUSTED_ORIGINS` | Set by Compose | What the application reads; `POSTGRES_PASSWORD` and `BETTER_AUTH_SECRET` also accept a `_FILE` variant. |
 
-```bash
-export COMPOSE_FILE=compose.production.yaml
-export COMPOSE_ENV_FILES=.env.production
-```
+Invalid values fail fast at startup (a malformed number, boolean or `DB_SSL` stops the process rather than falling back silently). Inside the web container `POSTGRES_USER`/`POSTGRES_PASSWORD_FILE` are the runtime role; inside the migrator they are the migration role. `NEXT_PUBLIC_*` values are public browser configuration, not secrets, and are inlined at build time.
 
-If your Compose version does not support `COMPOSE_ENV_FILES`, pass `--env-file .env.production -f compose.production.yaml` to each command instead.
+## 8. Routine updates
 
-Build the web and migration images locally:
-
-```bash
-docker compose --env-file .env.production -f compose.production.yaml build web migrate
-```
-
-For images built by CI and stored in a registry instead, set immutable `APP_IMAGE` and `MIGRATOR_IMAGE` tags in `.env.production` and pull them with `docker compose ... pull web migrate` rather than building on the host. Do not deploy mutable `latest` tags.
-
-Start PostgreSQL and wait until it is healthy:
-
-```bash
-docker compose --env-file .env.production -f compose.production.yaml up -d database
-docker compose --env-file .env.production -f compose.production.yaml ps
-```
-
-The first initialization runs `deploy/postgres/init/10-create-app-role.sh`. It creates two non-superuser roles:
-
-- `MIGRATION_DB_USER` owns schema objects and can create/alter objects in `public`. Only the one-shot migrator receives its password.
-- `APP_DB_USER` is the web runtime identity. It receives `USAGE` on `public` and default `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and sequence privileges on objects created by the migration role. It cannot create or alter schema objects.
-
-The migration ledger is configured in `public`, where the migration role has the required permissions. PostgreSQL init scripts run only when the data directory is empty. Changing users or passwords in `.env.production` does not rewrite existing database roles; role creation and password rotation must be handled deliberately with SQL and coordinated secret updates.
-
-Apply migrations using the dedicated one-shot migrator image:
+Deploy a reviewed release commit or immutable image tag, never an unreviewed working tree.
 
 ```bash
-docker compose --env-file .env.production -f compose.production.yaml --profile ops run --rm migrate
-```
-
-Start the application and Caddy:
-
-```bash
-docker compose --env-file .env.production -f compose.production.yaml up -d web caddy
-```
-
-Check health and recent logs:
-
-```bash
-docker compose --env-file .env.production -f compose.production.yaml ps
-docker compose --env-file .env.production -f compose.production.yaml logs --tail=100 web database caddy
-curl --fail https://"$(grep '^APP_DOMAIN=' .env.production | cut -d= -f2-)"/api/health/live
-curl --fail https://"$(grep '^APP_DOMAIN=' .env.production | cut -d= -f2-)"/api/health/ready
-```
-
-Caddy obtains and renews public certificates automatically. Keep `caddy_data` persistent; deleting it discards certificate/account state and may trigger issuance rate limits.
-
-## 7. Authentication setup and access control
-
-Production sign-up is disabled by default (`AUTH_DISABLE_SIGN_UP=true`). The current application does **not** implement email verification, password-reset email delivery, user roles, or per-user dashboard permissions. The protected route checks only whether a session exists. Consequently, any account that can register can access the same protected dashboard surface.
-
-For a first user, choose a controlled bootstrap procedure:
-
-1. Restrict access to the site at the firewall or upstream access proxy.
-2. Temporarily set `AUTH_DISABLE_SIGN_UP=false` and recreate only the `web` service:
-   `docker compose --env-file .env.production -f compose.production.yaml up -d --force-recreate web`
-3. Create the intended account.
-4. Set `AUTH_DISABLE_SIGN_UP=true` and recreate `web` again with the same command.
-5. Remove the temporary network restriction only after checking that registration is disabled and the account is usable.
-
-Do not leave public registration enabled until role-based authorization and any required account-verification workflow are implemented. Do not assume an unverified email address belongs to the registrant.
-
-`BETTER_AUTH_URL` is configured to the canonical HTTPS origin. `BETTER_AUTH_TRUSTED_ORIGINS` is restricted to that origin. Better Auth validates trusted origins to reduce CSRF and open-redirect risks; do not add localhost or wildcard origins to production without a specific requirement. <https://better-auth.com/docs/reference/security>
-
-## 8. Environment variable reference
-
-| Variable                   |      Required | Purpose                                                                                 |
-| -------------------------- | ------------: | --------------------------------------------------------------------------------------- |
-| `APP_DOMAIN`               | Yes (Compose) | Public hostname used by Caddy and Better Auth URL.                                      |
-| `POSTGRES_ADMIN_USER`      |           Yes | PostgreSQL bootstrap/superuser name; normally `postgres`.                               |
-| `POSTGRES_ADMIN_PASSWORD`  |  Yes (secret) | Bootstrap account password; mounted only into PostgreSQL.                               |
-| `POSTGRES_DB`              |           Yes | Database name; normally `template_next`.                                                |
-| `APP_DB_USER`              |           Yes | Runtime role; normally `template_next_app`. It has DML/sequence privileges only.        |
-| `APP_DB_PASSWORD`          |  Yes (secret) | Password for the web runtime role.                                                      |
-| `MIGRATION_DB_USER`        |           Yes | Schema-owner/migration role; normally `template_next_migrator`.                         |
-| `MIGRATION_DB_PASSWORD`    |  Yes (secret) | Password mounted only into the one-shot migrator and DB bootstrap.                      |
-| `BETTER_AUTH_SECRET`       |  Yes (secret) | Better Auth signing/encryption secret; minimum 32 characters.                           |
-| `AUTH_DISABLE_SIGN_UP`     |            No | Defaults to `true` in production and `false` otherwise.                                 |
-| `DB_POOL_MAX`              |            No | Maximum PostgreSQL connections per web container; default `10`.                         |
-| `DB_CONNECTION_TIMEOUT_MS` |            No | Pool connection timeout; default `5000`.                                                |
-| `DB_IDLE_TIMEOUT_MS`       |            No | Idle connection lifetime; default `30000`.                                              |
-| `DB_STATEMENT_TIMEOUT_MS`  |            No | PostgreSQL statement timeout; default `30000`.                                          |
-| `NEXT_PUBLIC_GITHUB_LINK`  |            No | Public link compiled into the browser bundle at image build time. Rebuild to change it. |
-
-Inside the web container, `POSTGRES_USER`/`POSTGRES_PASSWORD_FILE` refer to `APP_DB_USER`/`APP_DB_PASSWORD`. Inside the migrator they refer to `MIGRATION_DB_USER`/`MIGRATION_DB_PASSWORD`. Both receive only the secret they need. `POSTGRES_ADMIN_PASSWORD` is mounted only into PostgreSQL. The app supports the `_FILE` suffix for server secrets. For a non-Compose deployment, supply the corresponding direct variables or secret-file paths yourself.
-
-`NEXT_PUBLIC_*` values are public browser configuration, not secrets. Next.js inlines those values during build; changing them only in the running container does not update the client bundle.
-
-## 9. Routine updates
-
-Use a reviewed release commit or immutable image tag. Do not deploy directly from an unreviewed working tree.
-
-```bash
-# Fetch/review the release and ensure package-lock.json is committed.
 git pull --ff-only
-
-# Build the new runtime and migration images.
-docker compose --env-file .env.production -f compose.production.yaml build web migrate
-
-# Take and validate a database backup before schema changes.
-./scripts/backup-postgres.sh
-
-# Apply the migration before starting code that requires the new schema.
-docker compose --env-file .env.production -f compose.production.yaml --profile ops run --rm migrate
-
-docker compose --env-file .env.production -f compose.production.yaml up -d web caddy
-docker compose --env-file .env.production -f compose.production.yaml ps
+just deploy-release     # check → build → db → backup → migrate → up → smoke
 ```
 
-Migrations should be forward-compatible with the currently running release where possible (expand/contract): add nullable columns/tables first, deploy code that reads/writes them, backfill, then remove obsolete columns in a later release. Avoid long blocking DDL during peak traffic.
+Individual steps stay available (`deploy-check`, `deploy-build`, `deploy-backup`, `deploy-migrate`, `deploy-up`, `deploy-smoke`); the release recipe stops at the first failure, so a failed backup or migration never reaches `deploy-up`.
 
-## 10. Rollback strategy
+Make migrations forward-compatible with the running release where possible (expand/contract): add nullable columns/tables first, deploy code that uses them, backfill, remove obsolete columns in a later release, and avoid long blocking DDL at peak traffic.
+
+## 9. Rollback strategy
 
 Keep the previous known-good application and migrator image references for each release. If a release fails before a migration runs, redeploy the previous image and verify health. If a migration has already run, do **not** assume the old application image is compatible with the new schema and do not automatically run reverse SQL. Prefer a tested forward-fix migration. For destructive or unrecoverable data changes, restore the last verified backup into a separate database, validate it, and then perform a planned cutover.
 
@@ -234,7 +179,7 @@ docker compose --env-file .env.production -f compose.production.yaml up -d --no-
 
 Keep `.env.production` at mode `0600`. This rolls back application code only; it does not reverse a database migration.
 
-## 11. Backups and recovery
+## 10. Backups and recovery
 
 The PostgreSQL data directory is stored in the named `postgres_data` volume. A Docker volume is persistence, not a backup.
 
@@ -284,42 +229,49 @@ SQL
 
 After validation, schedule a maintenance window and perform a planned cutover. The grants above are needed because PostgreSQL default privileges are scoped to a database. Do not run `docker compose down -v` during normal deployment; `-v` deletes the persistent database and Caddy volumes.
 
-## 12. Health checks, logs, and incidents
+## 11. Health checks, logs and incidents
 
-- `GET /api/health/live`: process liveness only; it does not query PostgreSQL.
-- `GET /api/health/ready`: checks PostgreSQL and the migrated Better Auth `user` table; returns HTTP 503 if the database is unavailable or the initial schema has not been applied. It returns no connection string or exception detail.
-- `docker compose ps`: service state and health.
-- `docker compose logs --since=15m web database caddy`: application, database, and proxy logs. Compose rotates JSON logs to bounded local files.
+- `GET /api/health/live` — process liveness; does not query PostgreSQL.
+- `GET /api/health/ready` — runs one bounded (3 s) query that checks PostgreSQL, the Better Auth `user` table, the `tables` table and the audit trigger. Returns `503 {"status":"unavailable"}` without any connection detail when the database is down or migrations are missing. The web container's Docker health check uses this endpoint.
+- `just deploy-ps`, `just deploy-logs [service]` — service state and logs (Compose rotates JSON logs to bounded local files).
+- `just deploy-smoke` — anonymous end-to-end checks: probes, 401s on protected APIs, redirect to login, sign-up closed, security headers.
 
-For an incident, capture logs and service state, check host memory/disk and the PostgreSQL volume, check database connectivity/readiness, and verify the last known good backup before making destructive changes. Restart a failing service only after recording the error. Do not expose database ports for remote troubleshooting; use an SSH tunnel or a private management network.
+For an incident, capture logs and service state, check host memory/disk and the PostgreSQL volume, check readiness, and verify the last backup before anything destructive. Do not expose database ports for troubleshooting; use an SSH tunnel or a private management network.
 
-## 13. Operational safeguards and known gaps
+Server-sent events (`/api/dashboard/changes`) keep one HTTP connection per open dashboard tab. The event bus is **in-process**: with a single web container (the supported topology) every client sees every change. If you ever run several web replicas, a change made on one replica is not pushed to clients connected to another; add a shared bus (for example PostgreSQL `LISTEN/NOTIFY`) first.
 
-- **TLS:** expose only ports 80/443; retain Caddy's `/data` and `/config` volumes. Confirm certificate issuance and renewal after DNS/firewall changes.
-- **Database isolation:** PostgreSQL is not host-published and is reachable only on the internal backend network. The web runtime and migrator use different non-superuser roles; the runtime role has DML/sequence access but no schema creation privileges.
-- **Secrets:** keep `.env.production` mode `0600`; do not commit it or place secrets in Docker build args, images, logs, or client-side `NEXT_PUBLIC_*` variables. Rotate credentials as a coordinated change. Changing `BETTER_AUTH_SECRET` can invalidate signed/encrypted auth state and existing cached session cookies; plan a re-login window.
-- **Database schema:** production changes use reviewed, committed Drizzle migrations. Do not use `drizzle-kit push` for production changes.
-- **Backups:** schedule `scripts/backup-postgres.sh`, encrypt archives (for example with `age`), copy them off-host, monitor freshness, and routinely test restores. The repository provides a validated one-shot backup script but does not install a scheduler or an off-host storage integration.
-- **Registration/authorization:** public sign-up is disabled by default. This app currently has no per-user roles or ownership restrictions; add authorization before allowing multiple trust levels.
-- **Email:** email verification and password-reset delivery are not configured. Do not claim accounts are verified.
-- **Rate limiting:** this project does not configure an additional global API rate limiter or upstream WAF in this Compose stack. Keep sign-up disabled in production; confirm the deployed Better Auth rate-limit configuration and add edge rate limits for `/api/auth/*` and other sensitive endpoints before exposing additional public flows.
-- **Image updates:** `node:26-bookworm-slim`, `postgres:17-alpine`, and `caddy:2-alpine` track their major lines. For strict supply-chain reproducibility, pin image digests in the release process and update them deliberately after testing security fixes.
-- **Capacity:** `DB_POOL_MAX` is per web container. Multiply it by the maximum web replicas and migration/administrative connections when sizing PostgreSQL `max_connections`.
-- **Monitoring:** Compose health checks report state but do not send alerts and do not automatically restart a container solely because it becomes unhealthy. Add an external uptime/alerting check for `/api/health/ready`, container health, disk usage, certificate expiry, and backup age.
-- **Host security:** keep the OS and Docker patched, restrict SSH, enable unattended security updates where appropriate, and monitor CPU, memory, disk, container restarts, and backup age.
+## 12. Operational safeguards and known gaps
 
-## 14. Troubleshooting
+- **TLS:** expose only 80/443; retain Caddy's `/data` and `/config` volumes; confirm issuance and renewal after DNS/firewall changes.
+- **Database isolation:** not host-published; separate non-superuser runtime and migration roles; the runtime role cannot change schema, triggers or grants. The audit table rejects `UPDATE`/`DELETE` for every role (the one exception: clearing `actor_id` when an account is deleted).
+- **Fail-fast configuration:** missing or malformed secrets, a short auth secret or a non-https production URL stop the process at startup instead of running insecurely.
+- **Secrets:** `.env.production` mode `0600`, never committed, never in build args, images, logs or `NEXT_PUBLIC_*`. Rotate as a coordinated change; changing `BETTER_AUTH_SECRET` invalidates sessions.
+- **Schema changes:** reviewed, committed migrations only.
+- **Backups:** schedule `scripts/backup-postgres.sh`, encrypt, copy off-host, monitor age, test restores. The repository provides the one-shot script, not a scheduler, retention policy or off-host integration.
+- **Authorization:** session-only (see section 6). Add roles/ownership before allowing multiple trust levels.
+- **Email:** verification and password reset are not configured.
+- **Rate limiting:** Better Auth's built-in limiter is on in production (in-memory, per container). Caddy has no built-in rate limiter; add edge limits or a WAF for `/api/auth/*` and any new public flow.
+- **Content-Security-Policy:** not set; the MUI/Emotion styling needs inline styles, so a policy has to be designed and tested deliberately.
+- **Images:** `node:26-bookworm-slim`, `postgres:17-alpine` and `caddy:2-alpine` track major lines. Pin digests in your release process for strict reproducibility. Do not change PostgreSQL's major version in place on an existing volume.
+- **Capacity:** `DB_POOL_MAX` is per web container; multiply by replicas and add migration/admin connections when sizing `max_connections`.
+- **Monitoring:** Compose health checks do not alert or restart on their own. Add external checks for `/api/health/ready`, container health, disk, certificate expiry and backup age.
+- **Host security:** patch the OS and Docker, restrict SSH, and remember that Docker-group membership is effectively root.
+- **Known repository issue:** `next build` runs a TypeScript check, and six errors in UI components (MUI v9 typings: `Stack`/`Typography` system props, `Checkbox inputRef`, and a `FieldConfig` generic variance) predate the changes in this document and make `pnpm build` — and therefore the Docker build — fail until they are fixed. `pnpm typecheck` lists them.
 
-| Symptom                          | Checks                                                                                                                                                                                                             |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Web stays unhealthy              | `docker compose logs web database`; verify `DB_HOST=database`, app DB role/password, and that migrations were applied.                                                                                             |
-| PostgreSQL init role missing     | Check whether the named volume already existed; init scripts run only for an empty data directory. Create/repair the role manually as the database admin.                                                          |
-| Better Auth fails at startup     | Verify `BETTER_AUTH_SECRET` has at least 32 characters, secret is mounted, `BETTER_AUTH_URL` is the canonical HTTPS origin, and DNS/Proxy preserve the public host.                                                |
-| Caddy cannot issue a certificate | Verify public DNS, inbound 80/443, no conflicting listener, and persistent writable `caddy_data`/`caddy_config` volumes.                                                                                           |
-| Auth cookie is rejected          | Check the public URL is HTTPS, trusted origins match exactly, proxy headers are not rewritten incorrectly, and host clocks are synchronized.                                                                       |
-| Migration command fails          | Check DB health, migration-role grants, migration SQL/journal committed to `drizzle/`, `migrations.schema` set to `public`, and that the migrator image was rebuilt from the same release commit as the web image. |
-| Disk is filling                  | Check Docker images/logs, PostgreSQL volume, and backup retention; move backups off-host and prune only known-unused images.                                                                                       |
+## 13. Troubleshooting
 
-## Test strategy before release
-
-Run `pnpm test:unit`, `pnpm test:integration`, and `pnpm test` for the Vitest suites. For a browser smoke test, provision a disposable database with the committed migrations, seed a test user, install Chromium with `just install-e2e-tests-deps`, then set `E2E_USER_EMAIL` and `E2E_USER_PASSWORD` and run `pnpm test:e2e`. Never run these suites against production data. The E2E suite exercises anonymous route denial, required-field validation, table create/update actions, and cross-tab live refresh. See `tests/e2e/README.md` for setup.
+| Symptom                              | Checks                                                                                                                                                                |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Image build fails at `pnpm build`    | Run `pnpm typecheck`; see the known repository issue above. Fonts need outbound access to `fonts.googleapis.com`.                                                     |
+| `pnpm install` rejected in the build | pnpm's `minimumReleaseAge` policy flagged a very recent package in the lockfile. Wait, or review it; do not disable the policy in the image.                          |
+| Web stays unhealthy                  | `just deploy-logs web`; `curl` the ready endpoint from inside the network; verify `DB_HOST=database`, runtime role/password, and that migrations ran.                 |
+| Ready returns 503                    | Logs show `reason: database` (unreachable/credentials) or `reason: schema` (migrations or audit trigger missing: run `just deploy-migrate`).                          |
+| Web exits immediately                | A startup check failed: `BETTER_AUTH_SECRET` under 32 characters, `BETTER_AUTH_URL` not https, or a malformed `DB_*`/`AUTH_*` value. The log names the variable.      |
+| `permission denied for database`     | The migration role lacks `CREATE` on the database (volume created before this fix): run the `GRANT CREATE ON DATABASE` statement in section 5.                        |
+| "server does not support SSL"        | The migrator is forcing TLS: make sure `drizzle.config.ts` is the committed version and `DB_SSL` is unset/`disable` for the bundled database.                         |
+| PostgreSQL init role missing         | The volume already existed; init scripts run only for an empty data directory. Create/repair roles manually as the admin.                                             |
+| Caddy cannot issue a certificate     | Verify public DNS, inbound 80/443, no conflicting listener, and persistent `caddy_data`/`caddy_config`.                                                               |
+| Live updates stall behind the proxy  | Check that `/api/dashboard/changes` is served by the `flush_interval -1` block in `conf/Caddyfile`, and that no other proxy in front buffers `text/event-stream`.     |
+| Auth cookie rejected                 | Public URL must be https, trusted origins must match exactly, proxy headers must not be rewritten, host clocks synchronized.                                          |
+| Migration fails                      | Check DB health, migration-role grants, that the migrator image was rebuilt from the same commit as the web image, and that `drizzle/` contains the needed migration. |
+| Disk filling                         | Check Docker images/logs, the PostgreSQL volume and backup retention; move backups off-host and prune only known-unused images.                                       |

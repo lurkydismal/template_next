@@ -8,7 +8,6 @@ import z from "zod";
 
 import db from "@/db";
 import { user } from "@/db/schema";
-import { getCurrentSession, requireAuthenticatedUser } from "@/lib/auth/session";
 import { cacheDbRequest } from "@/lib/cache";
 import { ActionResult, DbTarget, parseRawTarget } from "@/lib/types";
 import { toCamelCase } from "@/utils/stdfunc";
@@ -18,14 +17,6 @@ import log from "@/utils/stdlog";
  * Gets rows.
  */
 export async function getRows(
-    rawTarget: DbTarget,
-    idColumnName: string,
-): Promise<ActionResult<readonly GridValidRowModel[]>> {
-    requireAuthenticatedUser(await getCurrentSession());
-    return getRowsCached(rawTarget, idColumnName);
-}
-
-async function getRowsCached(
     rawTarget: DbTarget,
     idColumnName: string,
 ): Promise<ActionResult<readonly GridValidRowModel[]>> {

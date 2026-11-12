@@ -1,33 +1,21 @@
-import { sql } from "drizzle-orm";
 import { connection } from "next/server";
 
-import db from "@/db";
+import { pool } from "@/db";
+import { checkReadiness } from "@/lib/health";
 import log from "@/utils/stdlog";
 
-/** Readiness probe. Returns 503 while the application cannot reach PostgreSQL. */
-export async function GET() {
-    // Prevent build-time prerendering.
-    // Keep outside try/catch so Next.js can propagate its prerender signal.
-    await connection();
+/**
+ * Readiness: PostgreSQL is reachable and the schema is migrated.
+ * Responds 503 without any connection detail when not ready.
+ */
+export async function GET(): Promise<Response> {
+    await connection(); // never prerender at build time
 
-    try {
-        // Query a table created by the initial schema migration, not only the
-        // connection itself. This keeps a fresh-but-unmigrated database unready.
-        await db.execute(sql`select 1 from "user" limit 0`);
+    const result = await checkReadiness(pool);
+    const headers = { "Cache-Control": "no-store" };
 
-        return Response.json(
-            { status: "ok", dependencies: { database: "ok" } },
-            { headers: { "Cache-Control": "no-store, max-age=0" } },
-        );
-    } catch (error) {
-        log.error("Application readiness check failed", error);
+    if (result.ok) return Response.json({ status: "ok" }, { headers });
 
-        return Response.json(
-            { status: "unavailable" },
-            {
-                status: 503,
-                headers: { "Cache-Control": "no-store, max-age=0" },
-            },
-        );
-    }
+    log.warn("Readiness check failed", { reason: result.reason });
+    return Response.json({ status: "unavailable" }, { status: 503, headers });
 }

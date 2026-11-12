@@ -45,7 +45,7 @@ export function RHFTextField<T extends RHFFieldValues>({ name, ...props }: RHFTe
 type RHFCheckboxProps<T extends RHFFieldValues> = {
     name: RHFFieldPath<T>;
     label: ReactNode;
-    checkboxProps?: Omit<CheckboxProps, "checked" | "defaultChecked" | "onChange" | "inputRef">;
+    checkboxProps?: Omit<CheckboxProps, "checked" | "defaultChecked" | "onChange">;
     labelProps?: Omit<FormControlLabelProps, "control" | "label">;
 };
 
@@ -73,7 +73,13 @@ export function RHFCheckbox<T extends RHFFieldValues>({
                             checked={Boolean(field.value)}
                             onChange={(event) => field.onChange(event.target.checked)}
                             onBlur={field.onBlur}
-                            slotProps={{ input: { ref: field.ref } }}
+                            slotProps={{
+                                ...checkboxProps?.slotProps,
+                                input: {
+                                    ...(checkboxProps?.slotProps?.input as object | undefined),
+                                    ref: field.ref,
+                                },
+                            }}
                         />
                     }
                 />

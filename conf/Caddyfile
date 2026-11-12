@@ -1,6 +1,4 @@
 {$APP_DOMAIN} {
-    encode zstd gzip
-
     header {
         X-Content-Type-Options "nosniff"
         X-Frame-Options "DENY"
@@ -10,5 +8,20 @@
         -Server
     }
 
-    reverse_proxy web:3000
+    # Form posts and JSON payloads in this app are small.
+    request_body {
+        max_size 2MB
+    }
+
+    # Server-sent events: never compress or buffer, or live updates stall behind the proxy.
+    handle /api/dashboard/changes {
+        reverse_proxy web:3000 {
+            flush_interval -1
+        }
+    }
+
+    handle {
+        encode zstd gzip
+        reverse_proxy web:3000
+    }
 }

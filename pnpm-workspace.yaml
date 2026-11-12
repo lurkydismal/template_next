@@ -1,63 +1,13 @@
-packages:
-    - .
 allowBuilds:
-    argon2: false
     esbuild: false
-    unrs-resolver: false
 minimumReleaseAgeExclude:
-    - "@next/env@16.3.7 || 16.4.3 || 16.4.4 || 16.4.6"
-    - "@next/swc-darwin-arm64@16.3.7 || 16.4.3 || 16.4.4 || 16.4.6"
-    - "@next/swc-darwin-x64@16.3.7 || 16.4.3 || 16.4.4 || 16.4.6"
-    - "@next/swc-linux-arm64-gnu@16.3.7 || 16.4.3 || 16.4.4 || 16.4.6"
-    - "@next/swc-linux-arm64-musl@16.3.7 || 16.4.3 || 16.4.4 || 16.4.6"
-    - "@next/swc-linux-x64-gnu@16.3.7 || 16.4.3 || 16.4.4 || 16.4.6"
-    - "@next/swc-linux-x64-musl@16.3.7 || 16.4.3 || 16.4.4 || 16.4.6"
-    - "@next/swc-win32-arm64-msvc@16.3.7 || 16.4.3 || 16.4.4 || 16.4.6"
-    - "@next/swc-win32-x64-msvc@16.3.7 || 16.4.3 || 16.4.4 || 16.4.6"
-    - next@16.3.7 || 16.4.3 || 16.4.4 || 16.4.6
-    - "@vitest/mocker@5.0.4 || 5.1.0"
-    - "@vitest/spy@5.0.4 || 5.1.0"
-    - vitest@5.0.4 || 5.1.0
-    - zod@4.6.7
-    - react-hook-form@7.91.0 || 7.92.0
-    - "@hookform/resolvers@6.0.2 || 7.0.6"
-    - "@tailwindcss/node@4.3.4"
-    - "@tailwindcss/oxide-android-arm64@4.3.4"
-    - "@tailwindcss/oxide-darwin-arm64@4.3.4"
-    - "@tailwindcss/oxide-darwin-x64@4.3.4"
-    - "@tailwindcss/oxide-freebsd-x64@4.3.4"
-    - "@tailwindcss/oxide-linux-arm-gnueabihf@4.3.4"
-    - "@tailwindcss/oxide-linux-arm64-gnu@4.3.4"
-    - "@tailwindcss/oxide-linux-arm64-musl@4.3.4"
-    - "@tailwindcss/oxide-linux-x64-gnu@4.3.4"
-    - "@tailwindcss/oxide-linux-x64-musl@4.3.4"
-    - "@tailwindcss/oxide-wasm32-wasi@4.3.4"
-    - "@tailwindcss/oxide-win32-arm64-msvc@4.3.4"
-    - "@tailwindcss/oxide-win32-x64-msvc@4.3.4"
-    - "@tailwindcss/oxide@4.3.4"
-    - "@tailwindcss/postcss@4.3.4"
-    - argon2@0.45.2
-    - tailwindcss@4.3.4
-    - "@better-auth/core@1.7.19 || 1.7.21"
-    - "@better-auth/drizzle-adapter@1.7.19 || 1.7.21"
-    - "@better-auth/kysely-adapter@1.7.19 || 1.7.21"
-    - "@better-auth/memory-adapter@1.7.19 || 1.7.21"
-    - "@better-auth/mongo-adapter@1.7.19 || 1.7.21"
-    - "@better-auth/prisma-adapter@1.7.19 || 1.7.21"
-    - "@better-auth/telemetry@1.7.19 || 1.7.21"
-    - "@fallow-cli/darwin-arm64@3.42.0"
-    - "@fallow-cli/darwin-x64@3.42.0"
-    - "@fallow-cli/linux-arm64-gnu@3.42.0"
-    - "@fallow-cli/linux-arm64-musl@3.42.0"
-    - "@fallow-cli/linux-x64-gnu@3.42.0"
-    - "@fallow-cli/linux-x64-musl@3.42.0"
-    - "@fallow-cli/win32-arm64-msvc@3.42.0"
-    - "@fallow-cli/win32-x64-msvc@3.42.0"
-    - better-auth@1.7.19 || 1.7.21
-    - fallow-type-aware@3.42.0
-    - fallow@3.42.0
-permissions:
-    drizzle-kit:
-        skills: false
-    fallow:
-        skills: false
+    - "@better-auth/core@1.7.21"
+    - "@better-auth/drizzle-adapter@1.7.21"
+    - "@better-auth/kysely-adapter@1.7.21"
+    - "@better-auth/memory-adapter@1.7.21"
+    - "@better-auth/mongo-adapter@1.7.21"
+    - "@better-auth/prisma-adapter@1.7.21"
+    - "@better-auth/telemetry@1.7.21"
+    - "@hookform/resolvers@7.0.6"
+    - better-auth@1.7.21
+    - react-hook-form@7.92.0

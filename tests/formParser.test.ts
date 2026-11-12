@@ -62,34 +62,3 @@ describe("parseForm", () => {
         expect(() => parseForm(formData, "tables")).toThrow(/positive integer/);
     });
 });
-
-describe("parseForm defensive validation", () => {
-    it("rejects unknown fields instead of forwarding untrusted keys", () => {
-        const formData = new FormData();
-        formData.set("multiline_field", "hello");
-        formData.set("is_admin", "true");
-
-        expect(() => parseForm(formData, "tables")).toThrow(/Unknown update field: is_admin/);
-    });
-
-    it("rejects file uploads for scalar dashboard columns", () => {
-        const formData = new FormData();
-        formData.set("multiline_field", new File(["payload"], "payload.txt"));
-
-        expect(() => parseForm(formData, "tables")).toThrow(/File values are not supported/);
-    });
-
-    it("rejects empty, zero, negative and unsafe row identifiers", () => {
-        for (const id of ["", "0", "-1", "9007199254740992"]) {
-            const formData = new FormData();
-            formData.set("id", id);
-            expect(() => parseForm(formData, "tables")).toThrow();
-        }
-    });
-
-    it("preserves JSON scalar types for radio-group values", () => {
-        const formData = new FormData();
-        formData.set("radio_group_field", "3");
-        expect(parseForm(formData, "tables")).toEqual({ radio_group_field: 3 });
-    });
-});

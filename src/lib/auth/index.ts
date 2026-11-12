@@ -4,37 +4,13 @@ import { nextCookies } from "better-auth/next-js";
 
 import db from "@/db";
 import * as schema from "@/db/schema";
-import { getBooleanEnv, getServerEnv } from "@/utils/server-env";
 
-const baseUrl = new URL(getServerEnv("BETTER_AUTH_URL"));
-const isProduction = process.env.NODE_ENV === "production";
-const isProductionBuild = process.env.NEXT_PHASE === "phase-production-build";
-
-if (baseUrl.protocol !== "https:" && baseUrl.protocol !== "http:") {
-    throw new Error("BETTER_AUTH_URL must use http:// or https://");
-}
-
-if (isProduction && !isProductionBuild && baseUrl.protocol !== "https:") {
-    throw new Error("BETTER_AUTH_URL must use HTTPS in production");
-}
-
-const secret = getServerEnv("BETTER_AUTH_SECRET");
-
-if (secret.length < 32) {
-    throw new Error("BETTER_AUTH_SECRET must contain at least 32 characters");
-}
-
-const configuredOrigins = getServerEnv("BETTER_AUTH_TRUSTED_ORIGINS", baseUrl.origin)
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-const trustedOrigins = configuredOrigins.length > 0 ? configuredOrigins : [baseUrl.origin];
+import { authConfig } from "./config";
 
 const auth = betterAuth({
-    appName: "Template Next",
-    baseURL: baseUrl.origin,
-    secret,
-    trustedOrigins,
+    secret: authConfig.secret,
+    baseURL: authConfig.baseURL,
+    trustedOrigins: authConfig.trustedOrigins,
     database: drizzleAdapter(db, {
         provider: "pg",
         schema: {
@@ -46,7 +22,8 @@ const auth = betterAuth({
     }),
     emailAndPassword: {
         enabled: true,
-        disableSignUp: getBooleanEnv("AUTH_DISABLE_SIGN_UP", isProduction),
+        disableSignUp: authConfig.signUpDisabled,
+        // No mail transport is configured, so verification cannot be enforced yet.
         requireEmailVerification: false,
     },
     session: {
@@ -56,9 +33,15 @@ const auth = betterAuth({
         },
     },
     advanced: {
-        useSecureCookies: isProduction || baseUrl.protocol === "https:",
+        useSecureCookies: authConfig.useSecureCookies,
     },
-    plugins: [nextCookies()],
+    rateLimit: {
+        // Better Auth applies stricter built-in limits to sign-in/sign-up paths.
+        enabled: authConfig.rateLimitEnabled,
+    },
+    plugins: [
+        nextCookies(), // must be the last plugin in the array
+    ],
 });
 
 export default auth;

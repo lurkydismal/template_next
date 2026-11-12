@@ -4,7 +4,7 @@ import type { NotificationsRow } from "@/db/types";
 
 import db from "@/db";
 import { notifications } from "@/db/schema";
-import { getRequestSession } from "@/lib/auth/session";
+import { guardRoute } from "@/lib/dal/require-session";
 import { emitNotificationEvent } from "@/lib/dashboard/common/change-events";
 import { userMessages } from "@/utils/messages";
 import log from "@/utils/stdlog";
@@ -66,10 +66,9 @@ function parseNotificationIds(value: unknown): number[] {
 }
 
 /** Reads notifications and unread count for toolbar center state. */
-export async function GET(request: Request): Promise<Response> {
-    if (!(await getRequestSession(request))?.user?.id) {
-        return errorResponse("Authentication is required", 401);
-    }
+export async function GET(_request?: Request): Promise<Response> {
+    const guard = await guardRoute();
+    if (guard instanceof Response) return guard;
 
     try {
         const [rows, unreadResult] = await Promise.all([
@@ -89,9 +88,8 @@ export async function GET(request: Request): Promise<Response> {
 
 /** Persists one notification and emits it through the shared SSE bus. */
 export async function POST(request: Request): Promise<Response> {
-    if (!(await getRequestSession(request))?.user?.id) {
-        return errorResponse("Authentication is required", 401);
-    }
+    const guard = await guardRoute();
+    if (guard instanceof Response) return guard;
 
     const parsed = await readJsonRecord(request);
     if (!parsed.ok) return parsed.response;
@@ -123,9 +121,8 @@ export async function POST(request: Request): Promise<Response> {
 
 /** Marks a set of notifications as read/unread to keep badge state in sync. */
 export async function PATCH(request: Request): Promise<Response> {
-    if (!(await getRequestSession(request))?.user?.id) {
-        return errorResponse("Authentication is required", 401);
-    }
+    const guard = await guardRoute();
+    if (guard instanceof Response) return guard;
 
     const parsed = await readJsonRecord(request);
     if (!parsed.ok) return parsed.response;

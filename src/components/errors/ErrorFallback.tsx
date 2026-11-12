@@ -35,11 +35,7 @@ export default function ErrorFallback({
                     sx={{ alignItems: "center", textAlign: "center", width: "100%" }}
                 >
                     <Box>
-                        <Typography
-                            variant="h4"
-                            variantMapping={{ h4: "h1" }}
-                            sx={{ fontWeight: 700 }}
-                        >
+                        <Typography component="h1" variant="h4" sx={{ fontWeight: 700 }}>
                             {userMessages.errors.title}
                         </Typography>
                         <Typography color="text.secondary" sx={{ mt: 1 }}>

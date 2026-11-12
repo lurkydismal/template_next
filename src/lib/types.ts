@@ -4,10 +4,10 @@ import { z } from "zod";
 
 import * as schema from "@/db/schema";
 
-// The audit log is internal infrastructure and must not be exposed as a generic CRUD target.
-export const TABLES = Object.fromEntries(
-    Object.entries(schema).filter(([name]) => name !== "recordChanges"),
-) as Omit<typeof schema, "recordChanges">;
+// Only tables listed here can be read or mutated through the generic dashboard layer.
+// Better Auth tables (user, session, account, verification), notifications and the audit
+// log are deliberately excluded: they have dedicated, separately authorized code paths.
+export const TABLES = { tables: schema.tables } as const;
 
 type TableName = keyof typeof TABLES;
 

@@ -13,8 +13,11 @@ type ResolvedColumn = {
     column: AnyColumn;
 };
 type ColumnRuntimeMetadata = {
+    /** drizzle-orm 1.0 reports compound names such as "bigint int64" or "object date". */
     readonly dataType?: string;
     readonly columnType?: string;
+    /** Greater than zero for `.array()` columns, whose dataType is that of the element. */
+    readonly dimensions?: number;
 };
 
 const INTEGER_COLUMN_TYPES: ReadonlySet<string> = new Set([
@@ -115,27 +118,34 @@ export function parseColumnFormValue(value: FormDataEntryValue, column: AnyColum
     if (value === "") return null;
 
     const metadata = column as unknown as ColumnRuntimeMetadata;
-    const dataType = metadata.dataType;
+    const dataType = metadata.dataType ?? "";
+    // "bigint int64" -> "bigint", "object date" -> "object", "number int32" -> "number".
+    const baseType = dataType.split(" ")[0];
     const columnType = metadata.columnType ?? "";
     const sqlType = column.getSQLType().trim().toLowerCase().replace(/\s+/g, " ");
     const normalizedValue = value.trim();
     const isInteger = INTEGER_COLUMN_TYPES.has(columnType) || INTEGER_SQL_TYPES.has(sqlType);
-    const isJson = dataType === "json" || sqlType === "json" || sqlType === "jsonb";
+    const isJson =
+        dataType === "json" ||
+        dataType.endsWith(" json") ||
+        sqlType === "json" ||
+        sqlType === "jsonb";
 
+    // Array columns carry the element's dataType, so check them before any scalar parsing.
+    if ((metadata.dimensions ?? 0) > 0) return parseArrayValue(normalizedValue, column);
     if (isJson) return parseJsonValue(normalizedValue, column, "valid JSON");
-    if (dataType === "number" || isInteger) {
+    if (baseType === "number" || isInteger) {
         return parseNumericValue(normalizedValue, column, isInteger);
     }
 
-    switch (dataType) {
+    switch (baseType) {
         case "bigint":
             return parseBigIntValue(normalizedValue, column);
         case "boolean":
             return parseBooleanValue(normalizedValue, column);
-        case "date":
-            return parseDateValue(normalizedValue, column);
-        case "array":
-            return parseArrayValue(normalizedValue, column);
+        case "object":
+            // Only dates are `object` columns that are not JSON.
+            return dataType === "object date" ? parseDateValue(normalizedValue, column) : value;
         default:
             return value;
     }
@@ -183,8 +193,6 @@ function getUniqueFormEntries(formData: FormData): [string, FormDataEntryValue][
 
 function hasInvalidPrimaryKey(value: unknown): boolean {
     return (
-        value === null ||
-        value === undefined ||
         (typeof value === "number" && (!Number.isSafeInteger(value) || value <= 0)) ||
         (typeof value === "bigint" && value <= 0n)
     );

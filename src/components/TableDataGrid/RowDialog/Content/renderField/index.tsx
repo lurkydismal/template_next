@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material";
-import { ComponentType, createElement, memo, useCallback, useMemo } from "react";
+import { type ComponentType, memo, useCallback, useMemo } from "react";
 import { FieldError, useFormState } from "react-hook-form";
 
 import AutocompleteFieldInput from "../../AutocompleteFieldInput";
@@ -24,6 +24,7 @@ import { RenderFieldParams } from "./types";
  */
 function RowDialogField<R extends Record<string, unknown>, RI extends Record<string, unknown>>({
     field,
+    idx,
     row,
     values,
     form,
@@ -220,8 +221,7 @@ const MemoizedRowDialogField = memo(RowDialogField, areFieldPropsEqual) as typeo
 export function renderField<R extends Record<string, unknown>, RI extends Record<string, unknown>>(
     params: RenderFieldParams<R, RI>,
 ) {
-    return createElement(
-        MemoizedRowDialogField as unknown as ComponentType<RenderFieldParams<R, RI>>,
-        params,
-    );
+    // memo() erases the generics; restore them so R/RI are not collapsed to R.
+    const Field = MemoizedRowDialogField as unknown as ComponentType<RenderFieldParams<R, RI>>;
+    return <Field {...params} />;
 }

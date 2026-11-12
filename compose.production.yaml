@@ -15,7 +15,7 @@ services:
             - app_db_password
             - migration_db_password
         volumes:
-            - postgres_data:/var/lib/postgresql/data
+            - postgres_data:/var/lib/postgresql
             - ./deploy/postgres/init/10-create-app-role.sh:/docker-entrypoint-initdb.d/10-create-app-role.sh:ro
         healthcheck:
             test: ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
@@ -55,6 +55,7 @@ services:
             POSTGRES_DB: ${POSTGRES_DB:-template_next}
             DB_HOST: database
             DB_PORT: "5432"
+            DB_SSL: ${DB_SSL:-disable}
             DB_POOL_MAX: ${DB_POOL_MAX:-10}
             DB_CONNECTION_TIMEOUT_MS: ${DB_CONNECTION_TIMEOUT_MS:-5000}
             DB_IDLE_TIMEOUT_MS: ${DB_IDLE_TIMEOUT_MS:-30000}
@@ -63,12 +64,14 @@ services:
             BETTER_AUTH_SECRET_FILE: /run/secrets/better_auth_secret
             BETTER_AUTH_TRUSTED_ORIGINS: https://${APP_DOMAIN}
             AUTH_DISABLE_SIGN_UP: ${AUTH_DISABLE_SIGN_UP:-true}
+            NEXT_TELEMETRY_DISABLED: "1"
         secrets:
             - app_db_password
             - better_auth_secret
         expose:
             - "3000"
         read_only: true
+        pids_limit: 512
         tmpfs:
             - /tmp:rw,noexec,nosuid,size=64m,uid=1001,gid=1001
             - /app/.next/cache:rw,nosuid,size=256m,uid=1001,gid=1001
@@ -106,7 +109,7 @@ services:
             - "443:443"
             - "443:443/udp"
         volumes:
-            - ./Caddyfile:/etc/caddy/Caddyfile:ro
+            - ./conf/Caddyfile:/etc/caddy/Caddyfile:ro
             - caddy_data:/data
             - caddy_config:/config
         read_only: true

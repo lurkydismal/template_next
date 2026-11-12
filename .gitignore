@@ -1,26 +1,17 @@
-node_modules/
-.next/
-out/
-build/
-dist/
-coverage/
-playwright-report/
-test-results/
-.vitest/
-*.tsbuildinfo
-*.log
-npm-debug.log*
+node_modules
+.next
+out
+coverage
+playwright-report
+test-results
+tests/e2e/.auth
+backups
+fallow.md
+tsconfig.tsbuildinfo
+next-env.d.ts
 
+# Secrets: never commit real environment files.
 .env
 .env.*
 !.env.example
-secrets/
-backups/
-*.dump
-*.sql.gz
-
-/fallow.md
-
-# Generated Drizzle snapshots and migration SQL are intentionally committed.
-# Do not ignore the drizzle/ directory.
 !.env.production.example

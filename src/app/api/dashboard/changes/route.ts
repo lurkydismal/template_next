@@ -1,4 +1,4 @@
-import { getRequestSession } from "@/lib/auth/session";
+import { guardRoute } from "@/lib/dal/require-session";
 import { subscribeToDashboardEvents } from "@/lib/dashboard/common/change-events";
 import log from "@/utils/stdlog";
 
@@ -6,10 +6,8 @@ import log from "@/utils/stdlog";
  * Creates a server-sent events stream that emits dashboard mutation updates.
  */
 export async function GET(request: Request): Promise<Response> {
-    const session = await getRequestSession(request);
-    if (!session?.user?.id) {
-        return Response.json({ error: "Authentication is required" }, { status: 401 });
-    }
+    const guard = await guardRoute();
+    if (guard instanceof Response) return guard;
 
     let closed = false;
     let unsubscribe: (() => void) | null = null;

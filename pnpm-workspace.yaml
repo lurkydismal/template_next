@@ -11,6 +11,7 @@ minimumReleaseAgeExclude:
     - "@hookform/resolvers@7.0.6"
     - better-auth@1.7.21 || 1.7.22
     - react-hook-form@7.92.0
+    - jsdom@31.0.1
 permissions:
     drizzle-kit:
         skills: false

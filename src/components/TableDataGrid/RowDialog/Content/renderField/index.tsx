@@ -32,7 +32,7 @@ function RowDialogField<R extends Record<string, unknown>, RI extends Record<str
     handleFieldValueChange,
 }: RenderFieldParams<R, RI>) {
     const key = String(field.key);
-    const name = field.name ?? key;
+    const name = key;
     const value = values[key];
     const readOnly = isFieldReadOnly(field);
     const { errors } = useFormState({

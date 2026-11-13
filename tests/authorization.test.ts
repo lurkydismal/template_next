@@ -17,12 +17,7 @@ vi.mock("@/lib/dashboard/common/get", () => ({ getRows: mocks.getRows }));
 vi.mock("@/lib/dashboard/common/create", () => ({ createAction: mocks.createAction }));
 vi.mock("@/lib/dashboard/common/update", () => ({ updateAction: mocks.updateAction }));
 
-import {
-    getOptionalSession,
-    guardRoute,
-    requireSession,
-    UnauthenticatedError,
-} from "../src/lib/dal/require-session";
+import { guardRoute, requireSession, UnauthorizedError } from "../src/lib/dal/require-session";
 import {
     createTargetRowAction,
     getTargetRowsAction,
@@ -35,16 +30,30 @@ beforeEach(() => {
     mocks.headers.mockResolvedValue(new Headers({ cookie: "a=b" }));
 });
 
+const asRequest = () =>
+    new Request("https://app.example.test/api/x", { headers: { cookie: "a=b" } });
+
 describe("session guards", () => {
-    it("passes the request headers to Better Auth", async () => {
-        mocks.getSession.mockResolvedValue(null);
-        await getOptionalSession();
+    it("requireSession passes the request headers to Better Auth", async () => {
+        mocks.getSession.mockResolvedValue(sessionFor());
+        await requireSession();
         expect(mocks.getSession).toHaveBeenCalledWith({ headers: expect.any(Headers) });
     });
 
-    it("requireSession throws UnauthenticatedError without a session", async () => {
+    it("requireSession throws UnauthorizedError without a session", async () => {
         mocks.getSession.mockResolvedValue(null);
-        await expect(requireSession()).rejects.toBeInstanceOf(UnauthenticatedError);
+        await expect(requireSession()).rejects.toBeInstanceOf(UnauthorizedError);
+        await expect(requireSession()).rejects.toThrow("Authentication is required");
+    });
+
+    it.each([
+        ["a session without a user", {}],
+        ["a user without an id", { user: { name: "x" } }],
+        ["a blank user id", { user: { id: "   " } }],
+        ["a non-string user id", { user: { id: 7 } }],
+    ])("requireSession fails closed for %s", async (_name, session) => {
+        mocks.getSession.mockResolvedValue(session);
+        await expect(requireSession()).rejects.toBeInstanceOf(UnauthorizedError);
     });
 
     it("requireSession returns the session when present", async () => {
@@ -53,21 +62,41 @@ describe("session guards", () => {
         await expect(requireSession()).resolves.toBe(session);
     });
 
+    it("guardRoute reads the session from the request, not from Next's request scope", async () => {
+        mocks.getSession.mockResolvedValue(sessionFor());
+        const request = asRequest();
+
+        await guardRoute(request);
+
+        expect(mocks.getSession).toHaveBeenCalledWith({ headers: request.headers });
+        expect(mocks.headers).not.toHaveBeenCalled();
+    });
+
     it("guardRoute returns an opaque, uncacheable 401 when unauthenticated", async () => {
         mocks.getSession.mockResolvedValue(null);
-        const response = await guardRoute();
+        const response = await guardRoute(asRequest());
 
         expect(response).toBeInstanceOf(Response);
         const res = response as Response;
         expect(res.status).toBe(401);
         expect(res.headers.get("cache-control")).toBe("no-store");
-        expect(await res.json()).toEqual({ error: "You need to sign in to do that." });
+        expect(await res.json()).toEqual({ error: "Authentication is required" });
+    });
+
+    it("guardRoute rejects a malformed session", async () => {
+        mocks.getSession.mockResolvedValue({ user: { id: "" } });
+        expect(((await guardRoute(asRequest())) as Response).status).toBe(401);
+    });
+
+    it("guardRoute fails closed (rejects) when the auth backend itself errors", async () => {
+        mocks.getSession.mockRejectedValue(new Error("db down"));
+        await expect(guardRoute(asRequest())).rejects.toThrow("db down");
     });
 
     it("guardRoute returns the session when authenticated", async () => {
         const session = sessionFor();
         mocks.getSession.mockResolvedValue(session);
-        await expect(guardRoute()).resolves.toBe(session);
+        await expect(guardRoute(asRequest())).resolves.toBe(session);
     });
 });
 
@@ -75,22 +104,20 @@ describe("dashboard server actions require a session", () => {
     beforeEach(() => mocks.getSession.mockResolvedValue(null));
 
     it("getTargetRowsAction does not read rows for anonymous callers", async () => {
-        await expect(getTargetRowsAction("tables", "id")).rejects.toBeInstanceOf(
-            UnauthenticatedError,
-        );
+        await expect(getTargetRowsAction("tables", "id")).rejects.toBeInstanceOf(UnauthorizedError);
         expect(mocks.getRows).not.toHaveBeenCalled();
     });
 
     it("createTargetRowAction does not create rows for anonymous callers", async () => {
         await expect(
             createTargetRowAction("tables", { multiline_field: "x" }),
-        ).rejects.toBeInstanceOf(UnauthenticatedError);
+        ).rejects.toBeInstanceOf(UnauthorizedError);
         expect(mocks.createAction).not.toHaveBeenCalled();
     });
 
     it("updateTargetRowAction does not update rows for anonymous callers", async () => {
         await expect(updateTargetRowAction("tables", "id", new FormData())).rejects.toBeInstanceOf(
-            UnauthenticatedError,
+            UnauthorizedError,
         );
         expect(mocks.updateAction).not.toHaveBeenCalled();
     });

@@ -3,13 +3,11 @@
 import { isAPIError } from "better-auth/api";
 import { eq } from "drizzle-orm";
 import { returnServerError, returnValidationErrors } from "next-safe-action";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import db from "@/db";
 import { user } from "@/db/schema";
 import auth from "@/lib/auth";
-import { authClient } from "@/lib/auth/client";
 import { userMessages } from "@/utils/messages";
 import { loginUserSchema, registerUserSchema } from "@/utils/validate/schemas";
 
@@ -97,10 +95,4 @@ export const login = actionClient.inputSchema(loginUserSchema).action(async ({ p
     }
 
     redirect("/");
-});
-
-export const getSession = authClient.action(async () => {
-    return await auth.api.getSession({
-        headers: await headers(),
-    });
 });

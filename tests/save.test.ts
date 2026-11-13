@@ -48,6 +48,13 @@ describe("save — create", () => {
         );
     });
 
+    it("never lets the client choose a generated primary key", async () => {
+        await save("tables", { id: 900, multiline_field: "hello" });
+
+        const values = insertChain.values.mock.calls[0]![0] as Record<string, unknown>;
+        expect(values).not.toHaveProperty("id");
+    });
+
     it("discards client-forged authorship and timestamps", async () => {
         await save("tables", {
             multiline_field: "hello",
@@ -168,6 +175,14 @@ describe("save — authorization and targets", () => {
         expect(mocks.db.insert).not.toHaveBeenCalled();
         expect(mocks.db.update).not.toHaveBeenCalled();
         expect(mocks.emitDashboardChange).not.toHaveBeenCalled();
+    });
+
+    it("authenticates before resolving the target or parsing the payload", async () => {
+        mocks.requireSession.mockRejectedValue(new Error("Authentication is required"));
+
+        await expect(save("not-a-target" as never, null as never)).rejects.toThrow(
+            "Authentication is required",
+        );
     });
 
     it.each(["user", "session", "account", "verification", "notifications", "recordChanges"])(

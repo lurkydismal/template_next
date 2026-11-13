@@ -66,8 +66,8 @@ function parseNotificationIds(value: unknown): number[] {
 }
 
 /** Reads notifications and unread count for toolbar center state. */
-export async function GET(_request?: Request): Promise<Response> {
-    const guard = await guardRoute();
+export async function GET(request: Request): Promise<Response> {
+    const guard = await guardRoute(request);
     if (guard instanceof Response) return guard;
 
     try {
@@ -88,7 +88,7 @@ export async function GET(_request?: Request): Promise<Response> {
 
 /** Persists one notification and emits it through the shared SSE bus. */
 export async function POST(request: Request): Promise<Response> {
-    const guard = await guardRoute();
+    const guard = await guardRoute(request);
     if (guard instanceof Response) return guard;
 
     const parsed = await readJsonRecord(request);
@@ -121,7 +121,7 @@ export async function POST(request: Request): Promise<Response> {
 
 /** Marks a set of notifications as read/unread to keep badge state in sync. */
 export async function PATCH(request: Request): Promise<Response> {
-    const guard = await guardRoute();
+    const guard = await guardRoute(request);
     if (guard instanceof Response) return guard;
 
     const parsed = await readJsonRecord(request);

@@ -9,14 +9,26 @@ import z from "zod";
 import db from "@/db";
 import { user } from "@/db/schema";
 import { cacheDbRequest } from "@/lib/cache";
+import { requireSession } from "@/lib/dal/require-session";
 import { ActionResult, DbTarget, parseRawTarget } from "@/lib/types";
 import { toCamelCase } from "@/utils/stdfunc";
 import log from "@/utils/stdlog";
 
 /**
- * Gets rows.
+ * Gets rows for an authenticated user.
+ *
+ * Authentication happens here, outside the `"use cache"` boundary: cached functions cannot
+ * read request headers, and a cache hit must never be served to an anonymous caller.
  */
 export async function getRows(
+    rawTarget: DbTarget,
+    idColumnName: string,
+): Promise<ActionResult<readonly GridValidRowModel[]>> {
+    await requireSession();
+    return getCachedRows(rawTarget, idColumnName);
+}
+
+async function getCachedRows(
     rawTarget: DbTarget,
     idColumnName: string,
 ): Promise<ActionResult<readonly GridValidRowModel[]>> {

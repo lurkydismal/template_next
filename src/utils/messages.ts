@@ -2,7 +2,6 @@
 export const userMessages = {
     errors: {
         unexpected: "Something went wrong. Please try again.",
-        unauthenticated: "You need to sign in to do that.",
         title: "Something went wrong",
         page: "An unexpected error occurred while loading this page.",
         notificationsLoad: "Unable to load notifications. Please try again.",

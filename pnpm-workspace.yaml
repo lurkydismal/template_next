@@ -1,13 +1,18 @@
 allowBuilds:
     esbuild: false
 minimumReleaseAgeExclude:
-    - "@better-auth/core@1.7.21"
-    - "@better-auth/drizzle-adapter@1.7.21"
-    - "@better-auth/kysely-adapter@1.7.21"
-    - "@better-auth/memory-adapter@1.7.21"
-    - "@better-auth/mongo-adapter@1.7.21"
-    - "@better-auth/prisma-adapter@1.7.21"
-    - "@better-auth/telemetry@1.7.21"
+    - "@better-auth/core@1.7.21 || 1.7.22"
+    - "@better-auth/drizzle-adapter@1.7.21 || 1.7.22"
+    - "@better-auth/kysely-adapter@1.7.21 || 1.7.22"
+    - "@better-auth/memory-adapter@1.7.21 || 1.7.22"
+    - "@better-auth/mongo-adapter@1.7.21 || 1.7.22"
+    - "@better-auth/prisma-adapter@1.7.21 || 1.7.22"
+    - "@better-auth/telemetry@1.7.21 || 1.7.22"
     - "@hookform/resolvers@7.0.6"
-    - better-auth@1.7.21
+    - better-auth@1.7.21 || 1.7.22
     - react-hook-form@7.92.0
+permissions:
+    drizzle-kit:
+        skills: false
+    fallow:
+        skills: false

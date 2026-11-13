@@ -129,10 +129,28 @@ async function getActorId(): Promise<string> {
     return (await requireSession()).user.id;
 }
 
+/** Generated primary keys (serial/identity/default) are chosen by the database, never the client. */
+function removeGeneratedPrimaryKeys(
+    table: ReturnType<typeof parseRawTarget>,
+    row: MutationRow,
+): MutationRow {
+    const values = { ...row };
+    const columns = getColumns(table) as Record<string, AnyColumn | undefined>;
+
+    for (const [propertyName, column] of Object.entries(columns)) {
+        if (!column?.primary || !column.hasDefault) continue;
+        delete values[propertyName];
+        delete values[column.name];
+        delete values[toCamelCase(column.name)];
+    }
+
+    return values;
+}
+
 async function insertMutation(table: ReturnType<typeof parseRawTarget>, row: MutationRow) {
     await db
         .insert(table)
-        .values(row as never)
+        .values(removeGeneratedPrimaryKeys(table, row) as never)
         .execute();
 }
 
@@ -166,8 +184,8 @@ async function buildMutationRow(
     table: ReturnType<typeof parseRawTarget>,
     input: MutationRow,
     isUpdate: boolean,
+    actorId: string,
 ): Promise<{ parsedInput: MutationRow; row: MutationRow }> {
-    const actorId = await getActorId();
     const parsedInput = (await mutationInputSchema.parseAsync(input)) as MutationRow;
     const schema = isUpdate ? createUpdateSchema(table) : createInsertSchema(table);
     const row = await schema.parseAsync(toDbMutation(parsedInput, actorId, isUpdate));
@@ -209,9 +227,11 @@ export async function save(
     input: MutationRow,
     opts: SaveOptions = {},
 ): Promise<ActionResult> {
+    // Authenticate before resolving the target or touching untrusted input.
+    const actorId = await getActorId();
     const table = parseRawTarget(rawTarget);
     const isUpdate = opts.isUpdate === true;
-    const { parsedInput, row } = await buildMutationRow(table, input, isUpdate);
+    const { parsedInput, row } = await buildMutationRow(table, input, isUpdate, actorId);
     const result = await persistMutation(table, parsedInput, row, opts, isUpdate);
 
     if (!result.ok) return result;

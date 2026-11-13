@@ -39,7 +39,7 @@
         "@next-safe-action/adapter-better-auth": "^0.1.7",
         "@next-safe-action/adapter-react-hook-form": "^2.1.0",
         "autosuggest-highlight": "^3.3.4",
-        "better-auth": "^1.7.21",
+        "better-auth": "^1.7.22",
         "dayjs": "^1.11.23",
         "dotenv": "^18.0.10",
         "drizzle-orm": "1.0.0-rc.5",

@@ -1,46 +1,45 @@
 import "server-only";
-import { headers } from "next/headers";
+import { requireAuthenticatedUser, UnauthorizedError } from "@/lib/auth/authorization";
+import { getCurrentSession, getRequestSession } from "@/lib/auth/session";
 
-import auth from "@/lib/auth";
-import { userMessages } from "@/utils/messages";
+export { UnauthorizedError };
 
-export type SessionData = NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>;
+export type SessionData = NonNullable<Awaited<ReturnType<typeof getCurrentSession>>>;
 
-/** Thrown by server actions/data readers when no valid session exists. */
-export class UnauthenticatedError extends Error {
-    constructor() {
-        super("Unauthenticated");
-        this.name = "UnauthenticatedError";
-    }
-}
-
-/** Returns the current session or `null`. Safe for route handlers and server actions. */
-export async function getOptionalSession(): Promise<SessionData | null> {
-    return auth.api.getSession({ headers: await headers() });
-}
-
-/** Returns the current session or throws {@link UnauthenticatedError}. */
+/**
+ * Server Actions / Server Components: returns the session or throws
+ * {@link UnauthorizedError} ("Authentication is required") for a missing or malformed one.
+ */
 export async function requireSession(): Promise<SessionData> {
-    const session = await getOptionalSession();
-    if (!session) throw new UnauthenticatedError();
-    return session;
+    const session = await getCurrentSession();
+    requireAuthenticatedUser(session);
+    return session as SessionData;
 }
 
 /** 401 response for route handlers. Carries no detail about why authentication failed. */
-export function unauthenticatedResponse(): Response {
+function unauthenticatedResponse(): Response {
     return Response.json(
-        { error: userMessages.errors.unauthenticated },
+        { error: new UnauthorizedError().message },
         { status: 401, headers: { "Cache-Control": "no-store", "WWW-Authenticate": "Session" } },
     );
 }
 
 /**
- * Route-handler guard. Returns a 401 `Response` when unauthenticated, otherwise the session.
+ * Route-handler guard. Reads the session from the request itself (no dependence on Next's
+ * request scope) and returns a 401 `Response` when there is none, otherwise the session.
  *
- *     const guard = await guardRoute();
+ *     const guard = await guardRoute(request);
  *     if (guard instanceof Response) return guard;
  */
-export async function guardRoute(): Promise<SessionData | Response> {
-    const session = await getOptionalSession();
-    return session ?? unauthenticatedResponse();
+export async function guardRoute(request: Request): Promise<SessionData | Response> {
+    const session = await getRequestSession(request);
+
+    try {
+        requireAuthenticatedUser(session);
+    } catch {
+        // requireAuthenticatedUser only throws UnauthorizedError.
+        return unauthenticatedResponse();
+    }
+
+    return session as SessionData;
 }

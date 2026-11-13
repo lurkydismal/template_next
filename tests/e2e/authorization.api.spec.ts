@@ -21,7 +21,7 @@ test.describe("anonymous access", () => {
 
         for (const response of [get, post, patch]) {
             expect(response.status()).toBe(401);
-            expect(await response.json()).toEqual({ error: "You need to sign in to do that." });
+            expect(await response.json()).toEqual({ error: "Authentication is required" });
         }
     });
 

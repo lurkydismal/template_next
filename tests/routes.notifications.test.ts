@@ -27,8 +27,8 @@ const json = (method: string, body: unknown) =>
         body: typeof body === "string" ? body : JSON.stringify(body),
     });
 
-const unauthorized = () =>
-    Response.json({ error: "You need to sign in to do that." }, { status: 401 });
+const get = () => GET(new Request(URL_));
+const unauthorized = () => Response.json({ error: "Authentication is required" }, { status: 401 });
 
 beforeEach(() => {
     vi.clearAllMocks();
@@ -37,7 +37,7 @@ beforeEach(() => {
 
 describe("authentication", () => {
     it.each([
-        ["GET", () => GET()],
+        ["GET", () => get()],
         ["POST", () => POST(json("POST", { message: "x" }))],
         ["PATCH", () => PATCH(json("PATCH", { ids: [1] }))],
     ])(
@@ -63,7 +63,7 @@ describe("GET", () => {
             .mockReturnValueOnce(queryChain(rows))
             .mockReturnValueOnce(queryChain([{ total: 4 }]));
 
-        const response = await GET();
+        const response = await get();
 
         expect(response.status).toBe(200);
         expect(await response.json()).toEqual({ rows, unreadCount: 4 });
@@ -71,12 +71,12 @@ describe("GET", () => {
 
     it("defaults the unread count to 0 and hides database errors", async () => {
         mocks.db.select.mockReturnValueOnce(queryChain([])).mockReturnValueOnce(queryChain([]));
-        expect((await (await GET()).json()).unreadCount).toBe(0);
+        expect((await (await get()).json()).unreadCount).toBe(0);
 
         mocks.db.select.mockReturnValue(
             queryChain(new Error('relation "notifications" does not exist')),
         );
-        const failed = await GET();
+        const failed = await get();
         expect(failed.status).toBe(500);
         const body = JSON.stringify(await failed.json());
         expect(body).not.toContain("relation");

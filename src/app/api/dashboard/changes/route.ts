@@ -6,7 +6,7 @@ import log from "@/utils/stdlog";
  * Creates a server-sent events stream that emits dashboard mutation updates.
  */
 export async function GET(request: Request): Promise<Response> {
-    const guard = await guardRoute();
+    const guard = await guardRoute(request);
     if (guard instanceof Response) return guard;
 
     let closed = false;

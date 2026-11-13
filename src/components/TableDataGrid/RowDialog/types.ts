@@ -39,6 +39,8 @@ type InterconnectedFieldConfig<R> = {
 type CommonFieldConfig<R, RI = unknown, K extends PropertyKey = keyof R | keyof RI | string> = {
     key: K; // property key in row/insert (string allowed for synthetic fields)
     label: string;
+    /** @deprecated Ignored: form state and the submitted payload are keyed by `key`. */
+    name?: string;
     size?: number; // value passed to Grid xs/sm/etc (use 12, 6, 4)
     required?: boolean;
     readOnly?: boolean;

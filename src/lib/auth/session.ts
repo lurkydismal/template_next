@@ -1,7 +1,6 @@
 import { headers } from "next/headers";
 
 import auth from "@/lib/auth";
-export { requireAuthenticatedUser } from "@/lib/auth/authorization";
 
 /** Reads the current request session in a Server Component or Server Action. */
 export async function getCurrentSession() {

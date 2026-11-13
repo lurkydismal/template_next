@@ -1,6 +1,5 @@
 "use server";
 
-import { requireSession } from "@/lib/dal/require-session";
 import { createAction } from "@/lib/dashboard/common/create";
 import { getRows } from "@/lib/dashboard/common/get";
 import { updateAction } from "@/lib/dashboard/common/update";
@@ -10,8 +9,7 @@ import { DbTarget } from "@/lib/types";
  * Gets rows action.
  */
 export async function getTargetRowsAction(target: DbTarget, idColumnName: string) {
-    // getRows is cached ("use cache") and cannot read request headers, so authenticate here.
-    await requireSession();
+    // getRows authenticates (outside its cache boundary).
     const result = await getRows(target, idColumnName);
 
     if (result.ok) {
@@ -32,7 +30,7 @@ export async function createTargetRowAction<RI extends Record<string, unknown>>(
     target: DbTarget,
     row: RI,
 ) {
-    await requireSession();
+    // createAction authenticates.
     const result = await createAction(target, row);
 
     if (!result.ok) {
@@ -49,7 +47,7 @@ export async function updateTargetRowAction(
     idColumnName: string | string[],
     fd: FormData,
 ) {
-    await requireSession();
+    // updateAction authenticates.
     const result = await updateAction(target, idColumnName, fd);
 
     if (!result.ok) {

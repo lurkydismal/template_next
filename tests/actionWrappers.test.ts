@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ save: vi.fn(), requireSession: vi.fn() }));
-vi.mock("@/lib/dashboard/common/update_create", () => ({ save: mocks.save }));
+vi.mock("@/lib/dashboard/common/save-core", () => ({ saveAsActor: mocks.save }));
 vi.mock("@/lib/dal/require-session", () => ({ requireSession: mocks.requireSession }));
 
 import { createAction } from "../src/lib/dashboard/common/create";
@@ -14,9 +14,10 @@ beforeEach(() => {
 });
 
 describe("createAction", () => {
-    it("delegates to save() as an insert", async () => {
+    it("passes the session user to the save core as an insert", async () => {
         await createAction("tables", { multiline_field: "x" });
         expect(mocks.save).toHaveBeenCalledWith(
+            "u",
             "tables",
             { multiline_field: "x" },
             { isUpdate: false },
@@ -25,7 +26,7 @@ describe("createAction", () => {
 });
 
 describe("updateAction", () => {
-    it("parses FormData with column metadata before calling save() as an update", async () => {
+    it("parses FormData with column metadata before saving as an update", async () => {
         const fd = new FormData();
         fd.set("id", "5");
         fd.set("number_field", "42");
@@ -33,6 +34,7 @@ describe("updateAction", () => {
         await updateAction("tables", "id", fd);
 
         expect(mocks.save).toHaveBeenCalledWith(
+            "u",
             "tables",
             { id: 5, number_field: 42 },
             { isUpdate: true, idColumnName: "id" },

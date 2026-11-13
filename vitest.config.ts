@@ -33,7 +33,8 @@ export default defineConfig({
             // Security-critical modules must stay well covered by the fast (no-database) tests.
             thresholds: {
                 "src/lib/dal/require-session.ts": { lines: 95, branches: 90 },
-                "src/lib/dashboard/common/update_create.ts": { lines: 90, branches: 80 },
+                "src/lib/dashboard/common/save-core.ts": { lines: 90, branches: 80 },
+                "src/lib/dashboard/common/update_create.ts": { lines: 100 },
                 "src/lib/dashboard/common/mutation-columns.ts": { lines: 100, branches: 100 },
                 "src/lib/dashboard/common/function.ts": { lines: 95 },
                 "src/lib/auth/config.ts": { lines: 90, branches: 90 },

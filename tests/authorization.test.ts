@@ -100,29 +100,6 @@ describe("session guards", () => {
     });
 });
 
-describe("dashboard server actions require a session", () => {
-    beforeEach(() => mocks.getSession.mockResolvedValue(null));
-
-    it("getTargetRowsAction does not read rows for anonymous callers", async () => {
-        await expect(getTargetRowsAction("tables", "id")).rejects.toBeInstanceOf(UnauthorizedError);
-        expect(mocks.getRows).not.toHaveBeenCalled();
-    });
-
-    it("createTargetRowAction does not create rows for anonymous callers", async () => {
-        await expect(
-            createTargetRowAction("tables", { multiline_field: "x" }),
-        ).rejects.toBeInstanceOf(UnauthorizedError);
-        expect(mocks.createAction).not.toHaveBeenCalled();
-    });
-
-    it("updateTargetRowAction does not update rows for anonymous callers", async () => {
-        await expect(updateTargetRowAction("tables", "id", new FormData())).rejects.toBeInstanceOf(
-            UnauthorizedError,
-        );
-        expect(mocks.updateAction).not.toHaveBeenCalled();
-    });
-});
-
 describe("dashboard server actions for signed-in users", () => {
     beforeEach(() => mocks.getSession.mockResolvedValue(sessionFor()));
 

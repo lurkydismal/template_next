@@ -125,4 +125,49 @@ describe("table actions authorize first", () => {
         expect(values.created_at).toBeUndefined();
         expect(values.updated_at).toBeUndefined();
     });
+
+    describe("authenticates exactly once per call", () => {
+        const form = () => {
+            const fd = new FormData();
+            fd.set("id", "5");
+            fd.set("text_field", "changed");
+            return fd;
+        };
+
+        it("updateAction", async () => {
+            mocks.getSession.mockResolvedValue(sessionFor("actor-1"));
+            mocks.db.update.mockReturnValue(queryChain([{ id: 5 }]));
+            const { updateAction } = await import("../src/lib/dashboard/common/update");
+
+            await expect(updateAction("tables", "id", form())).resolves.toMatchObject({ ok: true });
+
+            expect(mocks.getSession).toHaveBeenCalledTimes(1);
+        });
+
+        it("createAction", async () => {
+            mocks.getSession.mockResolvedValue(sessionFor("actor-1"));
+            mocks.db.insert.mockReturnValue(queryChain(undefined));
+            const { createAction } = await import("../src/lib/dashboard/common/create");
+
+            await expect(createAction("tables", { multiline_field: "x" })).resolves.toMatchObject({
+                ok: true,
+            });
+
+            expect(mocks.getSession).toHaveBeenCalledTimes(1);
+        });
+
+        it("save and the table wrappers", async () => {
+            mocks.getSession.mockResolvedValue(sessionFor("actor-1"));
+            mocks.db.insert.mockReturnValue(queryChain(undefined));
+            mocks.db.update.mockReturnValue(queryChain([{ id: 5 }]));
+            const { save } = await import("../src/lib/dashboard/common/update_create");
+            const { updateTargetRowAction } = await import("../src/lib/dashboard/common/function");
+
+            await save("tables", { multiline_field: "x" });
+            expect(mocks.getSession).toHaveBeenCalledTimes(1);
+
+            await updateTargetRowAction("tables", "id", form());
+            expect(mocks.getSession).toHaveBeenCalledTimes(2);
+        });
+    });
 });
